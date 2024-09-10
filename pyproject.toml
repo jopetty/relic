@@ -1,0 +1,47 @@
+[project]
+name = "PROJECT_NAME"
+version = "0.0.1"
+description = "PROJECT_DESCRIPTION"
+readme = "README.md"
+requires-python = ">= 3.12"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Jackson Petty", email = "research@jacksonpetty.org" }
+]
+
+dependencies = [
+    "fire",
+    "seaborn",
+    "ipykernel",
+    "python-dotenv",
+    "pyrootutils",
+    "wandb",
+    "pandas",
+    "polars"
+]
+
+[project.optional-dependencies]
+dev = ["pre-commit"]
+torch = ["torch"]
+jax = [
+    "flax",
+    "jax"
+]
+hf = [
+    "accelerate",
+    "datasets",
+    "evaluate",
+    "transformers",
+    "tokenizers",
+]
+
+[tool.ruff]
+line-length = 88
+extend-include = ["*.ipynb"]
+extend-exclude = ["data/"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
