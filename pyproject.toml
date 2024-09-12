@@ -1,12 +1,13 @@
 [project]
 name = "formal-gym"
 version = "0.0.1"
-description = "PROJECT_DESCRIPTION"
+description = "A tool to generate formal grammars."
 readme = "README.md"
 requires-python = ">= 3.12"
 license = { file = "LICENSE" }
 authors = [
-    { name = "Jackson Petty", email = "research@jacksonpetty.org" }
+    { name = "Jackson Petty", email = "research@jacksonpetty.org" },
+    { name = "Michael Hu", email = "myh2014@nyu.edu" }
 ]
 
 dependencies = [
