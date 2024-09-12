@@ -1,4 +1,4 @@
-name: PROJECT_NAME
+name: formal-gym
 
 dependencies:
   - python=3.12

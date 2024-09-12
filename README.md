@@ -1,11 +1,11 @@
-# PROJECT_NAME
+# formal-gym
 
 A template for developing an ML experimentation framework.
 
 ## Setup
 
 The first think you should do is run the `post-install.sh` script to configure the name
-of the project; this script will change every instance of `PROJECT_NAME` to be
+of the project; this script will change every instance of `formal-gym` to be
 whatever you pass as an argument. In particular, this will change the name of the
 project in the `pyproject.toml` file and the name of the associated Conda environment.
 
