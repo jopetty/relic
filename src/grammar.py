@@ -1,4 +1,9 @@
-"""Context-free grammar."""
+"""Context-free grammar.
+
+@TODO: Add support for generating regular expressions.
+@TODO: Make random seed configurable.
+@TODO: Add proper docstrings.
+"""
 
 import pathlib
 import random
@@ -7,10 +12,16 @@ from typing import Iterator, List, Tuple, Union
 
 import exrex
 import nltk
+import numpy as np
+import pyrootutils
 
 Nonterminal = nltk.Nonterminal
 Symbol = Union[str, Nonterminal]
 ProbabalisticProduction = nltk.ProbabilisticProduction
+
+PROJECT_ROOT = path = pyrootutils.find_root(
+    search_from=__file__, indicator=".project-root"
+)
 
 
 class Grammar:
@@ -27,11 +38,48 @@ class Grammar:
         Regular = "regular"
 
     @classmethod
-    def from_grammar(cls, grammar: pathlib.Path):
+    def sample_cfg(
+        cls,
+        n_terminals: int,
+        n_nonterminals: int,
+        data_dir: str = PROJECT_ROOT / "data",
+        filename: str = "sample",
+        lp: float = 0.5,
+        bp: float = 0.5,
+    ):
+        """Samples a random CFG and saves it to a file.
+
+        See implementation at https://github.com/alexc17/syntheticpcfg/blob/master/syntheticpcfg/sample_grammar.py
+
+        @TODO: This will usually generate a bad CFG, in the sense that a lot of
+        productions are useless. Also, there's not real distributional control yet.
+        """
+
+        terminals = [f"t{i}" for i in range(n_terminals)]
+        nonterminals = ["S"] + [f"NT{i}" for i in range(n_nonterminals)]
+        productions = []
+        for a in nonterminals:
+            for b in terminals:
+                if np.random.random() < lp:
+                    productions.append(f"{a} -> '{b}'")
+        for a in nonterminals:
+            for b in nonterminals[1:]:
+                for c in nonterminals[1:]:
+                    if np.random.random() < bp:
+                        productions.append(f"{a} -> {b} {c}")
+
+        with open(data_dir / f"{filename}.cfg", "w") as f:
+            f.write("\n".join(productions))
+
+    @classmethod
+    def from_grammar(cls, grammar_file: pathlib.Path | str):
         grammar = cls()
 
+        if isinstance(grammar_file, str):
+            grammar_file = pathlib.Path(grammar_file)
+
         # Load grammar and set type
-        ext: str = grammar.suffix
+        ext: str = grammar_file.suffix
         if (ext == ".cfg") or (ext == ".pcfg"):
             grammar.type = cls.Type.CFG
         elif ext == ".regex":
@@ -39,7 +87,7 @@ class Grammar:
         else:
             raise ValueError(f"Unknown grammar type: {ext}")
 
-        with open(grammar, "r") as f:
+        with open(grammar_file, "r") as f:
             if ext == ".cfg":
                 grammar.grammar_obj = nltk.CFG.fromstring(f.read())
             elif ext == ".pcfg":

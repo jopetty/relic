@@ -20,7 +20,7 @@ PROJECT_ROOT = path = pyrootutils.find_root(
 
 
 def sample_expression(
-    grammar_file: Path | str = Path("data/untyped_lambda_calculus.cfg"),
+    grammar_file: Path | str = "data/untyped_lambda_calculus.cfg",
     n_samples: int = 5,
 ):
     if isinstance(grammar_file, str):
@@ -32,5 +32,14 @@ def sample_expression(
         print(f"{i+1}: {gen}")
 
 
+def sample_grammar():
+    grammar.Grammar.sample_cfg(
+        n_terminals=5,
+        n_nonterminals=5,
+        n_binary_rules=5,
+        n_lexical_rules=5,
+    )
+
+
 if __name__ == "__main__":
-    fire.Fire(sample_expression)
+    fire.Fire()
