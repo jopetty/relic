@@ -1,10 +1,10 @@
 import logging
-import pyrootutils
-import fire
-from utils.utils import get_logger
 from pathlib import Path
 
+import fire
 import grammar
+import pyrootutils
+from utils.utils import get_logger
 
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",

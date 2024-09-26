@@ -1,13 +1,12 @@
 """Context-free grammar."""
 
-from typing import Iterator, List, Union, Tuple
+import pathlib
 import random
 from enum import Enum
+from typing import Iterator, List, Tuple, Union
 
-import pathlib
-import nltk
 import exrex
-
+import nltk
 
 Nonterminal = nltk.Nonterminal
 Symbol = Union[str, Nonterminal]
@@ -29,28 +28,28 @@ class Grammar:
 
     @classmethod
     def from_grammar(cls, grammar: pathlib.Path):
-        cfg = cls()
+        grammar = cls()
 
         # Load grammar and set type
         ext: str = grammar.suffix
         if (ext == ".cfg") or (ext == ".pcfg"):
-            cfg.type = cls.Type.CFG
+            grammar.type = cls.Type.CFG
         elif ext == ".regex":
-            cfg.type = cls.Type.Regular
+            grammar.type = cls.Type.Regular
         else:
             raise ValueError(f"Unknown grammar type: {ext}")
 
         with open(grammar, "r") as f:
             if ext == ".cfg":
-                cfg.grammar_obj = nltk.CFG.fromstring(f.read())
+                grammar.grammar_obj = nltk.CFG.fromstring(f.read())
             elif ext == ".pcfg":
-                cfg.grammar_obj = nltk.PCFG.fromstring(f.read())
+                grammar.grammar_obj = nltk.PCFG.fromstring(f.read())
             elif ext == ".regex":
-                cfg.grammar_obj = f.read()
+                grammar.grammar_obj = f.read()
             else:
                 raise ValueError(f"Unknown grammar type: {ext}")
 
-        return cfg
+        return grammar
 
     def generate(self, n_samples: int, sep: str = "") -> Iterator[str]:
         if self.type == self.Type.CFG:
