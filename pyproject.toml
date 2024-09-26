@@ -23,18 +23,6 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pre-commit"]
-torch = ["torch"]
-jax = [
-    "flax",
-    "jax"
-]
-hf = [
-    "accelerate",
-    "datasets",
-    "evaluate",
-    "transformers",
-    "tokenizers",
-]
 
 [tool.ruff]
 line-length = 88
