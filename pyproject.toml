@@ -15,10 +15,12 @@ dependencies = [
     "fire>=0.6.0",
     "ipykernel>=6.29.5",
     "nltk>=3.9.1",
+    "openai>=1.52.0",
     "pandas>=2.2.3",
     "polars>=1.6.0",
     "pyrootutils>=1.0.4",
     "python-dotenv>=1.0.1",
+    "scikit-learn>=1.5.2",
     "seaborn>=0.13.2",
     "wandb>=0.18.1",
 ]
