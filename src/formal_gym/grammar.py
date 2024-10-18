@@ -8,15 +8,15 @@
 import pathlib
 import random
 from enum import Enum
-from typing import Iterator, List, Tuple, Union
+from typing import Iterator, List, Tuple
 
 import exrex
 import nltk
-import numpy as np
 import pyrootutils
 
+Terminal = str
 Nonterminal = nltk.Nonterminal
-Symbol = Union[str, Nonterminal]
+Symbol = Terminal | Nonterminal
 ProbabalisticProduction = nltk.ProbabilisticProduction
 
 PROJECT_ROOT = path = pyrootutils.find_root(
@@ -37,39 +37,11 @@ class Grammar:
         CFG = "cfg"
         Regular = "regular"
 
-    @classmethod
-    def sample_cfg(
-        cls,
-        n_terminals: int,
-        n_nonterminals: int,
-        data_dir: str = PROJECT_ROOT / "data",
-        filename: str = "sample",
-        lp: float = 0.5,
-        bp: float = 0.5,
-    ):
-        """Samples a random CFG and saves it to a file.
-
-        See implementation at https://github.com/alexc17/syntheticpcfg/blob/master/syntheticpcfg/sample_grammar.py
-
-        @TODO: This will usually generate a bad CFG, in the sense that a lot of
-        productions are useless. Also, there's not real distributional control yet.
-        """
-
-        terminals = [f"t{i}" for i in range(n_terminals)]
-        nonterminals = ["S"] + [f"NT{i}" for i in range(n_nonterminals)]
-        productions = []
-        for a in nonterminals:
-            for b in terminals:
-                if np.random.random() < lp:
-                    productions.append(f"{a} -> '{b}'")
-        for a in nonterminals:
-            for b in nonterminals[1:]:
-                for c in nonterminals[1:]:
-                    if np.random.random() < bp:
-                        productions.append(f"{a} -> {b} {c}")
-
-        with open(data_dir / f"{filename}.cfg", "w") as f:
-            f.write("\n".join(productions))
+    @property
+    def terminals(self) -> List[str]:
+        lexical_rules = [t for t in self.grammar_obj.productions() if t.is_lexical()]
+        terminals = [r.rhs()[0] for r in lexical_rules]
+        return terminals
 
     @classmethod
     def from_grammar(cls, grammar_file: pathlib.Path | str):
@@ -106,6 +78,60 @@ class Grammar:
         elif self.type == self.Type.Regular:
             for _ in range(n_samples):
                 yield exrex.getone(self.grammar_obj)
+
+    def generate_negative_sample(
+        self, s_max_length: int = 10, random_length: bool = True
+    ) -> str:
+        if self.type != self.Type.CFG:
+            raise ValueError("Negative examples are only supported for CFGs.")
+
+        parser = nltk.parse.ChartParser(self.grammar_obj)
+
+        if random_length:
+            str_len = random.randint(1, s_max_length)
+        else:
+            str_len = s_max_length
+        is_parsable = True
+        while is_parsable:
+            ex = [random.choice(self.terminals) for _ in range(str_len)]
+            parses = list(parser.parse(ex))
+            if len(parses) == 0:
+                is_parsable = False
+        return " ".join(ex)
+
+    def generate_negative_samples(
+        self, n_samples: int, s_max_length: int = 10
+    ) -> List[str]:
+        uniuqe_samples = set()
+        while len(uniuqe_samples) < n_samples:
+            uniuqe_samples.add(self.generate_negative_sample(s_max_length=s_max_length))
+
+        return list(uniuqe_samples)
+
+    def generate_negative_samples_matching_lengths(
+        self,
+        positive_sample_path: pathlib.Path | str,
+    ):
+        if isinstance(positive_sample_path, str):
+            positive_sample_path = pathlib.Path(positive_sample_path)
+
+        with open(positive_sample_path, "r") as f:
+            positive_samples = f.readlines()
+
+        lengths = [len(s.split(" ")) for s in positive_samples]
+        unique_negative_samples = set()
+
+        for length in lengths:
+            neg_sample = self.generate_negative_sample(
+                s_max_length=length, random_length=False
+            )
+            while neg_sample in unique_negative_samples:
+                neg_sample = self.generate_negative_sample(
+                    s_max_length=length, random_length=False
+                )
+            unique_negative_samples.add(neg_sample)
+
+        return list(unique_negative_samples)
 
     def _generate_derivation(self, nonterminal: Nonterminal, sep: str) -> str:
         sentence: List[str] = []

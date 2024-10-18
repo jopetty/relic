@@ -3,9 +3,9 @@
 import collections
 import datetime
 import pathlib
+import random
 from typing import Any, NamedTuple, Sequence
 
-import numpy as np
 import pyrootutils
 
 import formal_gym.grammar as fg_grammar
@@ -39,9 +39,12 @@ class Production(NamedTuple):
     def length(self):
         return len(self.rhs)
 
+    @property
+    def is_lexical(self):
+        return self.length == 1
+
 
 START_SYMBOL = Nonterminal("S")
-
 
 PROJECT_ROOT = path = pyrootutils.find_root(
     search_from=__file__, indicator=".project-root"
@@ -119,7 +122,7 @@ def compute_usable_prods(
     tp = []
     for prod in productions:
         if prod.lhs in trim_set:
-            if all([symbol in trim_set for symbol in prod.rhs]):
+            if prod.is_lexical or all([symbol in trim_set for symbol in prod.rhs]):
                 tp.append(prod)
     return tp
 
@@ -137,30 +140,18 @@ def compute_trim_set(
         productions=productions, coreachable_nts=coreachable, terminals=terminals
     )
 
-    if "S" in coreachable:
-        trim.add("S")
+    if START_SYMBOL in coreachable:
+        trim.add(START_SYMBOL)
     done = len(trim)
     while done > 0:
         done = 0
         for prod in good_productions:
-            a, rhs = prod.split(" -> ")
-            rhs = rhs.split(" ")
-            if a in trim:
-                for symbol in rhs:
+            if prod.lhs in trim:
+                for symbol in prod.rhs:
                     if (symbol in nonterminals) and (symbol not in trim):
                         done += 1
                         trim.add(symbol)
-    print(f"Coreachable: {coreachable}")
-    print(f"Trim: {trim}")
-    print(f"Good productions: {good_productions}")
     return trim
-
-
-def prod_to_string(prod: Production) -> str:
-    rhs_string = " ".join(
-        [s if isinstance(s, Nonterminal) else f"'{s}'" for s in prod.rhs]
-    )
-    return f"{prod.lhs} -> {rhs_string}"
 
 
 def save_and_load_grammar(
@@ -175,7 +166,19 @@ def save_and_load_grammar(
         filepath: Path to save the grammar.
     """
 
-    grammar_string = "\n".join([prod_to_string(p) for p in productions])
+    start_productions = [p for p in productions if p.lhs == START_SYMBOL]
+    nonterminal_productions = [
+        p for p in productions if (p.lhs != START_SYMBOL) and (not p.is_lexical)
+    ]
+    lexical_productions = [
+        p for p in productions if (p.lhs != START_SYMBOL) and p.is_lexical
+    ]
+
+    sorted_productions = (
+        start_productions + nonterminal_productions + lexical_productions
+    )
+
+    grammar_string = "\n".join([f"{p}" for p in sorted_productions])
     with open(filepath, "w") as f:
         f.write(grammar_string)
 
@@ -213,22 +216,21 @@ def sample_cfg_uniform(
     log.info(
         f"Sampling CFG with {n_terminals} terminals and {n_nonterminals} nonterminals"
     )
-    terminals = [Terminal(f"t{i}") for i in range(n_terminals)]
-    nonterminals = [Nonterminal("S")] + [
-        Nonterminal(f"NT{i}") for i in range(n_nonterminals)
-    ]
+    symbol_dict = get_symbols(n_terminals, n_nonterminals)
+    terminals = symbol_dict["terminals"]
+    nonterminals = symbol_dict["nonterminals"]
     productions = []
-    for a in nonterminals:
+    for a in nonterminals[1:]:
         for b in terminals:
-            if np.random.random() < lp:
-                productions.append(Production(lhs=a, rhs=[b]))
+            if random.random() < lp:
+                productions.append(Production(lhs=a, rhs=(b,)))
     for a in nonterminals:
         for b in nonterminals[1:]:
             for c in nonterminals[1:]:
-                if np.random.random() < bp:
-                    productions.append(Production(lhs=a, rhs=[b, c]))
+                if random.random() < bp:
+                    productions.append(Production(lhs=a, rhs=(b, c)))
     filename = f"{name}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.cfg"
-    filepath = data_dir / f"{filename}.cfg"
+    filepath = data_dir / filename
     sampled_grammar = save_and_load_grammar(productions, filepath)
     return sampled_grammar
 
@@ -252,18 +254,19 @@ def sample_cfg_full(
     log.info(
         f"Sampling CFG with {n_terminals} terminals and {n_nonterminals} nonterminals"
     )
-    terminals = [f"t{i}" for i in range(n_terminals)]
-    nonterminals = ["S"] + [f"NT{i}" for i in range(n_nonterminals)]
+    symbol_dict = get_symbols(n_terminals, n_nonterminals)
+    terminals = symbol_dict["terminals"]
+    nonterminals = symbol_dict["nonterminals"]
     productions = []
-    for a in nonterminals:
+    for a in nonterminals[1:]:
         for b in terminals:
-            productions.append(f"{a} -> '{b}'")
+            productions.append(Production(lhs=a, rhs=(b,)))
     for a in nonterminals:
         for b in nonterminals[1:]:
             for c in nonterminals[1:]:
-                productions.append(f"{a} -> {b} {c}")
+                productions.append(Production(lhs=a, rhs=(b, c)))
     filename = f"{name}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.cfg"
-    filepath = data_dir / f"{filename}.cfg"
+    filepath = data_dir / filename
     sampled_grammar = save_and_load_grammar(productions, filepath)
     return sampled_grammar
 
@@ -276,27 +279,45 @@ def sample_cfg_raw(
     data_dir: pathlib.Path = PROJECT_ROOT / "data",
     name: str = "sample_raw",
 ) -> dict[str, Any]:
-    terminals = [Terminal(f"t{i}") for i in range(n_terminals)]
-    nonterminals = [START_SYMBOL] + [
-        Nonterminal(f"NT{i}") for i in range(n_nonterminals)
-    ]
+    assert n_terminals > 0, "Number of terminals must be greater than 0"
+    assert n_nonterminals > 0, "Number of nonterminals must be greater than 0"
+    assert n_lexical_rules > 0, "Number of lexical rules must be greater than 0"
+    assert n_binary_rules > 0, "Number of binary rules must be greater than 0"
+
+    symbol_dict = get_symbols(n_terminals, n_nonterminals)
+    terminals = symbol_dict["terminals"]
+    nonterminals = symbol_dict["nonterminals"]
 
     lprods = set()
     bprods = set()
 
+    if n_lexical_rules > n_terminals * n_nonterminals:
+        log.warning(
+            f"{n_lexical_rules} lexical rules requested, but only",
+            f" {n_terminals * n_nonterminals} possible",
+        )
+        n_lexical_rules = n_terminals * n_nonterminals
+
     while len(lprods) < n_lexical_rules:
-        a = np.random.choice(nonterminals)
-        b = np.random.choice(terminals)
-        lprods.add(Production(lhs=a, rhs=(b)))
+        a = random.choice(nonterminals[1:])
+        b = random.choice(terminals)
+        lprods.add(Production(lhs=a, rhs=(b,)))
+
+    if n_binary_rules > n_nonterminals * (n_nonterminals - 1) * (n_nonterminals - 1):
+        log.warning(
+            f"{n_binary_rules} binary rules requested, but only ",
+            f"{n_nonterminals * (n_nonterminals - 1) * (n_nonterminals - 1)} possible",
+        )
+        n_binary_rules = n_nonterminals * (n_nonterminals - 1) * (n_nonterminals - 1)
 
     while len(bprods) < n_binary_rules:
-        a = np.random.choice(nonterminals)
-        b, c = np.random.choice(nonterminals[1:], size=2)
+        a = random.choice(nonterminals)
+        b, c = random.choices(nonterminals[1:], k=2)
         bprods.add(Production(lhs=a, rhs=(b, c)))
 
     productions = list(lprods) + list(bprods)
     filename = f"{name}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.cfg"
-    filepath = data_dir / f"{filename}"
+    filepath = data_dir / filename
 
     sampled_grammar = save_and_load_grammar(productions, filepath)
     return sampled_grammar | {
@@ -322,6 +343,8 @@ def sample_cfg_trim(
         data_dir=data_dir,
     )
 
+    print(raw_grammar["grammar"].grammar_obj)
+
     trim_set = compute_trim_set(
         productions=raw_grammar["productions"],
         nonterminals=raw_grammar["nonterminals"],
@@ -338,13 +361,11 @@ def sample_cfg_trim(
 
     terminals = set()
     for prod in prods:
-        _, rhs = prod.split(" -> ")
-        rhs = rhs.split(" ")
-        if len(rhs) == 1:
-            terminals.add(rhs[0])
+        if prod.is_lexical:
+            terminals.add(prod.rhs[0])
 
     filename = f"{name}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.cfg"
-    filepath = data_dir / f"{filename}.cfg"
+    filepath = data_dir / filename
 
     sampled_grammar = save_and_load_grammar(productions=prods, filepath=filepath)
     return sampled_grammar
