@@ -14,6 +14,7 @@ dependencies = [
     "exrex>=0.11.0",
     "fire>=0.6.0",
     "ipykernel>=6.29.5",
+    "nbstripout>=0.7.1",
     "nltk>=3.9.1",
     "openai>=1.52.0",
     "pandas>=2.2.3",
