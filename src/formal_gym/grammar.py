@@ -8,7 +8,7 @@
 import pathlib
 import random
 from enum import Enum
-from typing import Iterator, List, Tuple
+from typing import Iterator, List, Optional, Tuple
 
 import exrex
 import nltk
@@ -81,7 +81,7 @@ class Grammar:
 
     def generate_negative_sample(
         self, s_max_length: int = 10, random_length: bool = True
-    ) -> str:
+    ) -> Optional[str]:
         if self.type != self.Type.CFG:
             raise ValueError("Negative examples are only supported for CFGs.")
 
@@ -92,12 +92,19 @@ class Grammar:
         else:
             str_len = s_max_length
         is_parsable = True
-        while is_parsable:
+        max_trials = 20
+        while is_parsable and max_trials > 0:
+            max_trials -= 1
+            # print(max_trials)
             ex = [random.choice(self.terminals) for _ in range(str_len)]
             parses = list(parser.parse(ex))
             if len(parses) == 0:
                 is_parsable = False
-        return " ".join(ex)
+
+        if not is_parsable:
+            return " ".join(ex)
+        else:
+            return None
 
     def generate_negative_samples(
         self, n_samples: int, s_max_length: int = 10
@@ -122,10 +129,14 @@ class Grammar:
         unique_negative_samples = set()
 
         for length in lengths:
+            max_trials = 20
             neg_sample = self.generate_negative_sample(
                 s_max_length=length, random_length=False
             )
-            while neg_sample in unique_negative_samples:
+            if neg_sample is None:
+                continue
+            while neg_sample in unique_negative_samples and max_trials > 0:
+                max_trials -= 1
                 neg_sample = self.generate_negative_sample(
                     s_max_length=length, random_length=False
                 )

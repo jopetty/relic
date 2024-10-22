@@ -1,0 +1,38 @@
+import logging
+
+import fire
+import formal_gym.metagrammar as fg_metagrammar
+import formal_gym.utils.utils as fg_utils
+import pyrootutils
+
+logging.basicConfig(
+    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+    datefmt="%Y-%d-%m %H:%M:%S",
+    level=logging.INFO,
+)
+
+log = fg_utils.get_logger(__name__)
+
+PROJECT_ROOT = path = pyrootutils.find_root(
+    search_from=__file__, indicator=".project-root"
+)
+
+
+def grammar(
+    n_terminals=5,
+    n_nonterminals=6,
+    n_binary_rules=6,
+    n_lexical_rules=5,
+):
+    g = fg_metagrammar.sample_cfg_trim(
+        n_terminals=n_terminals,
+        n_nonterminals=n_nonterminals,
+        n_binary_rules=n_binary_rules,
+        n_lexical_rules=n_lexical_rules,
+    )["grammar"]
+
+    print(f"Sampled grammar:\n{g.grammar_obj}")
+
+
+if __name__ == "__main__":
+    fire.Fire()

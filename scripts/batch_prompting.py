@@ -101,7 +101,7 @@ def generate_batch_jsonl(
     grammar_file: pathlib.Path | str,
     data_path: pathlib.Path | str = PROJECT_ROOT / "data",
     n_samples: int = 300,
-    same_sample_files: bool = False,
+    save_sample_files: bool = False,
 ):
     if isinstance(grammar_file, str):
         grammar_file = pathlib.Path(grammar_file)
@@ -117,7 +117,7 @@ def generate_batch_jsonl(
 
     log.info(f"Generating {n_samples} positive samples from {grammar_file}")
     pos_samples = list(g.generate(n_samples=n_samples, sep=" "))
-    if same_sample_files:
+    if save_sample_files or not pos_sample_path.is_file():
         log.info(f"Writing positive examples to {pos_sample_path}")
         with open(pos_sample_path, "w") as f:
             for gen in pos_samples:
@@ -129,7 +129,7 @@ def generate_batch_jsonl(
             positive_sample_path=pos_sample_path,
         )
     )
-    if same_sample_files:
+    if save_sample_files or not neg_sample_path.is_file():
         log.info(f"Writing negative examples to {neg_sample_path}")
         with open(neg_sample_path, "w") as f:
             for gen in neg_samples:
@@ -154,7 +154,11 @@ def generate_batch_jsonl(
     sample_df["openai_batched_json"] = sample_df.apply(
         lambda row: ChatCompletionResponse(
             user_prompt=row["prompt"],
-            metadata={"sample_type": row["sample_type"], "sample": row["sample"]},
+            metadata={
+                "sample_type": row["sample_type"],
+                "sample": row["sample"],
+                "grammar_file": grammar_file_name,
+            },
         ).to_openai_batched_json(model="gpt-4o-mini", custom_id=f"request-{row.name}"),
         axis=1,
     )
