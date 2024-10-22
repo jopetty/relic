@@ -150,7 +150,6 @@ def generate_batch_jsonl(
         lambda s: create_prompt(grammar_str=grammar_str, sample=s)
     )
 
-    # client = openai.OpenAI()
     sample_df["openai_batched_json"] = sample_df.apply(
         lambda row: ChatCompletionResponse(
             user_prompt=row["prompt"],
@@ -171,12 +170,6 @@ def generate_batch_jsonl(
     with open(openai_batch_jsonl_path, "w") as f:
         for j in sample_df["openai_batched_json"]:
             f.write(f"{j}\n")
-
-    # write dataframe to tsv
-    tsv_filename = f"{grammar_file_name}_prompts_{len(sample_df)}.tsv"
-    tsv_path = data_path / tsv_filename
-    log.info(f"Writing prompts to {tsv_path}")
-    sample_df.to_csv(tsv_path, sep="\t", index=False)
 
 
 def load_prompt_tsv(
