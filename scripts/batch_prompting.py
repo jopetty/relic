@@ -12,11 +12,12 @@ from typing import Any
 
 import dotenv
 import fire
-import formal_gym.grammar as fg_grammar
-import formal_gym.utils.utils as fg_utils
 import openai
 import pandas as pd
 import pyrootutils
+
+import formal_gym.grammar as fg_grammar
+import formal_gym.utils.utils as fg_utils
 
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",

@@ -1,9 +1,10 @@
 import logging
 
 import fire
+import pyrootutils
+
 import formal_gym.metagrammar as fg_metagrammar
 import formal_gym.utils.utils as fg_utils
-import pyrootutils
 
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
