@@ -118,7 +118,7 @@ def generate_batch_jsonl(
     g = fg_grammar.Grammar.from_grammar(grammar_path)
 
     log.info(f"Generating {n_samples} positive samples from {grammar_file}")
-    pos_samples = list(g.generate(n_samples=n_samples, sep=" "))
+    pos_samples = list(set(g.generate(n_samples=n_samples, sep=" ")))
     if save_sample_files or not pos_sample_path.is_file():
         log.info(f"Writing positive examples to {pos_sample_path}")
         with open(pos_sample_path, "w") as f:
@@ -127,8 +127,10 @@ def generate_batch_jsonl(
 
     log.info(f"Generating {n_samples} negative samples from {grammar_file}")
     neg_samples = list(
-        g.generate_negative_samples_matching_lengths(
-            positive_sample_path=pos_sample_path,
+        set(
+            g.generate_negative_samples_matching_lengths(
+                positive_sample_path=pos_sample_path,
+            )
         )
     )
     if save_sample_files or not neg_sample_path.is_file():
@@ -173,20 +175,6 @@ def generate_batch_jsonl(
             f.write(f"{j}\n")
 
 
-def load_prompt_tsv(
-    tsv_file: pathlib.Path | str,
-    data_path: pathlib.Path | str = PROJECT_ROOT / "data",
-):
-    if isinstance(tsv_file, str):
-        tsv_file = pathlib.Path(tsv_file)
-
-    tst_path = data_path / tsv_file
-
-    log.info(f"Loading prompts from {tst_path}")
-    df = pd.read_csv(tst_path, sep="\t")
-    return df
-
-
 def upload_batch_job(
     batch_file: pathlib.Path | str,
     data_path: pathlib.Path | str = PROJECT_ROOT / "data",
@@ -214,9 +202,6 @@ def upload_batch_job(
 
     log.info(f"Batch job created: {batch_obj}")
 
-    print(batch_input_file)
-
-    # write info to log file in `logs`
     timestamp = dt.datetime.now().strftime("%Y%m%d_%H%M%S")
     log_file_path = PROJECT_ROOT / "logs" / f"batch_job_{timestamp}.log"
     with open(log_file_path, "w") as f:
@@ -253,7 +238,6 @@ def get_batch_results(
         output_file = client.files.content(batch_results.output_file_id)
         output_path = data_path / f"{batch_id}_results.jsonl"
 
-        # write results to file
         log.info(f"Writing batch inputs to {input_path}")
         with open(input_path, "w") as f:
             f.write(input_file.text)
