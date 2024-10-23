@@ -42,7 +42,7 @@ class ChatCompletionResponse:
     max_tokens: int = 1024
 
     # TODO: validate this
-    def to_anthropic_json(self, model: str):
+    def to_anthropic_json(self, model: str) -> str:
         return json.dumps(
             {
                 "method": "POST",
@@ -56,7 +56,7 @@ class ChatCompletionResponse:
         )
 
     # TODO: validate this
-    def to_openai_json(self, model: str):
+    def to_openai_json(self, model: str) -> str:
         return json.dumps(
             {
                 "method": "POST",
@@ -72,7 +72,7 @@ class ChatCompletionResponse:
             }
         )
 
-    def to_openai_batched_json(self, model: str, custom_id: str):
+    def to_openai_batched_json(self, model: str, custom_id: str) -> str:
         return json.dumps(
             {
                 "custom_id": custom_id,
@@ -101,8 +101,9 @@ def create_prompt(grammar_str: str, sample: str) -> str:
 def generate_batch_jsonl(
     grammar_file: pathlib.Path | str,
     data_path: pathlib.Path | str = PROJECT_ROOT / "data",
-    n_samples: int = 300,
+    n_samples: int = 1000,
     save_sample_files: bool = False,
+    model: str = "gpt-4o-mini",
 ):
     if isinstance(grammar_file, str):
         grammar_file = pathlib.Path(grammar_file)
@@ -151,25 +152,24 @@ def generate_batch_jsonl(
         lambda s: create_prompt(grammar_str=grammar_str, sample=s)
     )
 
-    sample_df["openai_batched_json"] = sample_df.apply(
+    sample_df[f"{model}_batched_json"] = sample_df.apply(
         lambda row: ChatCompletionResponse(
             user_prompt=row["prompt"],
             metadata={
                 "sample_type": row["sample_type"],
                 "sample": row["sample"],
                 "grammar_file": grammar_file_name,
+                "model": model,
             },
-        ).to_openai_batched_json(model="gpt-4o-mini", custom_id=f"request-{row.name}"),
+        ).to_openai_batched_json(model=model, custom_id=f"request-{row.name}"),
         axis=1,
     )
 
-    openai_batch_jsonl_filename = (
-        f"{grammar_file_name}_openai_batched_{len(sample_df)}.jsonl"
-    )
-    openai_batch_jsonl_path = data_path / openai_batch_jsonl_filename
-    log.info(f"Writing OpenAI batch job to {openai_batch_jsonl_path}")
-    with open(openai_batch_jsonl_path, "w") as f:
-        for j in sample_df["openai_batched_json"]:
+    batch_jsonl_filename = f"{grammar_file_name}_{model}_batched_{len(sample_df)}.jsonl"
+    batch_jsonl_path = data_path / batch_jsonl_filename
+    log.info(f"Writing batch job to {batch_jsonl_path}")
+    with open(batch_jsonl_path, "w") as f:
+        for j in sample_df[f"{model}_batched_json"]:
             f.write(f"{j}\n")
 
 
@@ -188,13 +188,13 @@ def load_prompt_tsv(
 
 
 def upload_batch_job(
-    batch_jsonl_file: pathlib.Path | str,
+    batch_file: pathlib.Path | str,
     data_path: pathlib.Path | str = PROJECT_ROOT / "data",
 ):
-    if isinstance(batch_jsonl_file, str):
-        batch_jsonl_file = pathlib.Path(batch_jsonl_file)
+    if isinstance(batch_file, str):
+        batch_file = pathlib.Path(batch_file)
 
-    batch_jsonl_path = data_path / batch_jsonl_file
+    batch_jsonl_path = data_path / batch_file
     log.info(f"Uploading batch job from {batch_jsonl_path}")
 
     client = openai.OpenAI()
