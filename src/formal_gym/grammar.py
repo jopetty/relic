@@ -144,6 +144,14 @@ class Grammar:
 
         return list(unique_negative_samples)
 
+    def test_sample(self, sample: str) -> bool:
+        if self.type != self.Type.CFG:
+            raise ValueError("Testing samples is only supported for CFGs.")
+
+        parser = nltk.ChartParser(self.grammar_obj)
+        parses = list(parser.parse(sample.split(" ")))
+        return len(parses) > 0
+
     def _generate_derivation(self, nonterminal: Nonterminal, sep: str) -> str:
         sentence: List[str] = []
         symbol: Symbol
