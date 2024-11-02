@@ -26,6 +26,8 @@ def main(
     data_dir: pathlib.Path | str = PROJECT_ROOT / "data",
     max_samples: int = 10_000,
     max_recursion_depth: int = 100,
+    max_neg_trials: int = 10,
+    max_neg_length: int = 100,
     negative: bool = False,
 ):
     if isinstance(grammar_file, str):
@@ -55,8 +57,15 @@ def main(
     )
     grammar = fg_grammar.ContextFreeGrammar.from_file(grammar_path)
     for _ in tqdm.tqdm(range(max_samples)):
-        sample = grammar.generate(max_depth=max_recursion_depth)
-        samples.add(sample)
+        if negative:
+            sample = grammar.generate_negative_sample(
+                max_trials=max_neg_trials, max_length=max_neg_length
+            )
+        else:
+            sample = grammar.generate(max_depth=max_recursion_depth)
+
+        if sample is not None:
+            samples.add(sample)
 
     ending_len = len(samples)
 

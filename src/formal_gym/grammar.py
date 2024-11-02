@@ -313,7 +313,14 @@ class ContextFreeGrammar(Grammar):
 
         return random.choices(productions, weights=probs)[0]
 
-    def generate(self, sep: str = " ", max_depth: int = 50) -> Optional[str]:
+    def generate(self, sep: str = " ", max_depth: int = 50) -> str:
+        """Generates a single sample from the grammar.
+
+        Args:
+            sep: Separator to use between symbols.
+            max_depth: Maximum depth of recursion.
+        """
+
         def _sample_recursive(symbol: Nonterminal, depth: int) -> Optional[List[str]]:
             if depth > max_depth:
                 return None
@@ -343,6 +350,22 @@ class ContextFreeGrammar(Grammar):
             return sep.join(result)
 
     def test_sample(self, sample: str) -> bool:
+        """Returns true if the sample is parsable by the grammar."""
         parser = nltk.ChartParser(self.as_cfg)
         parses = list(parser.parse(sample.split(" ")))
         return len(parses) > 0
+
+    def generate_negative_sample(
+        self,
+        max_trials: int = 20,
+        max_length: int = 50,
+        sep: str = " ",
+    ) -> Optional[str]:
+        trials = 0
+        while trials < max_trials:
+            trials += 1
+            str_len = random.randint(1, max_length)
+            sample = sep.join(random.choices(list(self.terminals), k=str_len))
+            if not self.test_sample(sample):
+                return sample
+        return None
