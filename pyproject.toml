@@ -11,8 +11,10 @@ authors = [
 ]
 
 dependencies = [
+    "anthropic>=0.37.1",
     "exrex>=0.11.0",
     "fire>=0.6.0",
+    "google-generativeai>=0.8.3",
     "ipykernel>=6.29.5",
     "nbstripout>=0.7.1",
     "nltk>=3.9.1",
