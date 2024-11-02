@@ -9,8 +9,8 @@ import json
 import logging
 import pathlib
 import random
-from typing import Any
 
+import anthropic
 import dotenv
 import fire
 import openai
@@ -19,6 +19,12 @@ import pyrootutils
 
 import formal_gym.grammar as fg_grammar
 import formal_gym.utils.utils as fg_utils
+
+# Type aliases
+ClaudeMessageCreateParamsNonStreaming = (
+    anthropic.types.beta.message_create_params.MessageCreateParamsNonStreaming
+)
+ClaudeRequest = anthropic.types.beta.messages.batch_create_params.Request
 
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
@@ -73,6 +79,16 @@ class ChatCompletionResponse:
             }
         )
 
+    def to_anthropic_request(self, model: str, custom_id: str) -> ClaudeRequest:
+        return ClaudeRequest(
+            custom_id=custom_id,
+            params=ClaudeMessageCreateParamsNonStreaming(
+                model=model,
+                max_tokens=self.max_tokens,
+                messages=[{"role": "user", "content": self.user_prompt}],
+            ),
+        )
+
     def to_openai_batched_json(self, model: str, custom_id: str) -> str:
         return json.dumps(
             {
@@ -113,14 +129,14 @@ def create_prompt(grammar_str: str, sample: str, shots: dict[str, list[str]]) ->
     return prefix + few_shot + question
 
 
-def generate_batch_jsonl(
+def _get_batch_df(
     grammar_file: pathlib.Path | str,
     data_path: pathlib.Path | str = PROJECT_ROOT / "data",
     n_samples: int = 1000,
     save_sample_files: bool = False,
     model: str = "gpt-4o-mini",
     n_shots: int = 0,
-):
+) -> pd.DataFrame:
     if isinstance(grammar_file, str):
         grammar_file = pathlib.Path(grammar_file)
 
@@ -179,6 +195,70 @@ def generate_batch_jsonl(
 
     sample_df["prompt"] = sample_df["sample"].apply(
         lambda s: create_prompt(grammar_str=grammar_str, sample=s, shots=demo_samples)
+    )
+
+    return sample_df
+
+
+def generate_claude_batch(
+    grammar_file: pathlib.Path | str,
+    data_path: pathlib.Path | str = PROJECT_ROOT / "data",
+    n_samples: int = 1000,
+    save_sample_files: bool = False,
+    model: str = "claude-3-5-sonnet-20241022",
+    n_shots: int = 0,
+):
+    if isinstance(grammar_file, str):
+        grammar_file = pathlib.Path(grammar_file)
+
+    sample_df = _get_batch_df(
+        grammar_file=grammar_file,
+        data_path=data_path,
+        n_samples=n_samples,
+        save_sample_files=save_sample_files,
+        model=model,
+        n_shots=n_shots,
+    )
+
+    sample_df[f"{model}_request"] = sample_df.apply(
+        lambda row: ChatCompletionResponse(
+            user_prompt=row["prompt"],
+            metadata={
+                "sample_type": row["sample_type"],
+                "sample": row["sample"],
+                "grammar_file": grammar_file.stem,
+                "model": model,
+                "n_shots": str(2 * n_shots),
+            },
+        ).to_anthropic_request(model=model, custom_id=f"request-{row.name}"),
+        axis=1,
+    )
+
+    requets = sample_df[f"{model}_request"].tolist()
+    print(requets[0])
+    print(sample_df["sample"].iloc[0])
+    print(sample_df["sample_type"].iloc[0])
+
+
+def generate_batch_jsonl(
+    grammar_file: pathlib.Path | str,
+    data_path: pathlib.Path | str = PROJECT_ROOT / "data",
+    n_samples: int = 1000,
+    save_sample_files: bool = False,
+    model: str = "gpt-4o-mini",
+    n_shots: int = 0,
+):
+    if isinstance(grammar_file, str):
+        grammar_file = pathlib.Path(grammar_file)
+
+    grammar_file_name = grammar_file.stem
+    sample_df = _get_batch_df(
+        grammar_file=grammar_file,
+        data_path=data_path,
+        n_samples=n_samples,
+        save_sample_files=save_sample_files,
+        model=model,
+        n_shots=n_shots,
     )
 
     sample_df[f"{model}_batched_json"] = sample_df.apply(
