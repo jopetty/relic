@@ -341,3 +341,8 @@ class ContextFreeGrammar(Grammar):
             return self.generate(sep=sep, max_depth=max_depth)
         else:
             return sep.join(result)
+
+    def test_sample(self, sample: str) -> bool:
+        parser = nltk.ChartParser(self.as_cfg)
+        parses = list(parser.parse(sample.split(" ")))
+        return len(parses) > 0
