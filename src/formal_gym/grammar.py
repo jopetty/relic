@@ -202,6 +202,12 @@ class ContextFreeGrammar(Grammar):
     def as_pcfg(self) -> nltk.PCFG:
         return self._nltk_pcfg
 
+    @property
+    def terminals(self) -> Set[str]:
+        lexical_rules = [t for t in self.as_cfg.productions() if t.is_lexical()]
+        terminals = set([r.rhs()[0] for r in lexical_rules])
+        return terminals
+
     @classmethod
     def from_file(cls, grammar_file: pathlib.Path | str) -> "ContextFreeGrammar":
         if isinstance(grammar_file, str):
@@ -307,7 +313,7 @@ class ContextFreeGrammar(Grammar):
 
         return random.choices(productions, weights=probs)[0]
 
-    def generate(self, sep: str = "", max_depth: int = 50) -> Optional[str]:
+    def generate(self, sep: str = " ", max_depth: int = 50) -> Optional[str]:
         def _sample_recursive(symbol: Nonterminal, depth: int) -> Optional[List[str]]:
             if depth > max_depth:
                 return None
