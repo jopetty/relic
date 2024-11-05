@@ -16,6 +16,7 @@ import fire
 import openai
 import pandas as pd
 import pyrootutils
+import tqdm
 
 import formal_gym.grammar as fg_grammar
 import formal_gym.utils.utils as fg_utils
@@ -200,83 +201,6 @@ def _get_batch_df(
     return sample_df
 
 
-def generate_claude_batch(
-    samples_file: pathlib.Path | str,
-    samples_dir: pathlib.Path | str = PROJECT_ROOT / "data" / "samples",
-    model: str = "claude-3-5-sonnet-20241022",
-    n_shots: int = 0,
-):
-    if isinstance(samples_file, str):
-        samples_file = pathlib.Path(samples_file)
-
-    grammar_base = samples_file.parent.name + ".cfg"
-    grammar_file = PROJECT_ROOT / "data" / grammar_base
-    with open(grammar_file, "r") as f:
-        grammar_str = f.read()
-
-    samples_path = samples_dir / samples_file
-    samples_df = pd.read_csv(samples_path)
-
-    pos_samples = samples_df[samples_df["type"] == "positive"].reset_index(drop=True)
-    neg_samples = samples_df[samples_df["type"] == "negative"].reset_index(drop=True)
-
-    samples_df["prompt"] = ""
-
-    for idx, row in pos_samples.iterrows():
-        if row["type"] == "positive":
-            id_type = "positive"
-            od_type = "negative"
-            id_samples = pos_samples
-            od_samples = neg_samples
-        else:
-            id_type = "negative"
-            od_type = "positive"
-            id_samples = neg_samples
-            od_samples = pos_samples
-
-        in_domain_idxs = [i for i in id_samples.index.values if i != idx]
-        max_ood = max(od_samples.index.values)
-        possible_idxs = [i for i in in_domain_idxs if i < max_ood]
-
-        alt_ilocs = random.choices(possible_idxs, k=n_shots)
-        id_alts = []
-        od_alts = []
-        for i in alt_ilocs:
-            id_alts.append(id_samples.iloc[i]["sample"])
-            od_alts.append(od_samples.iloc[i]["sample"])
-        alt_samples = {
-            id_type: id_alts,
-            od_type: od_alts,
-        }
-
-        samples_df.at[idx, "prompt"] = create_prompt(
-            grammar_str=grammar_str,
-            sample=row["sample"],
-            shots=alt_samples,
-        )
-
-    samples_df = samples_df.rename(columns={"type": "sample_type"})
-
-    samples_df[f"{model}_request"] = samples_df.apply(
-        lambda row: ChatCompletionResponse(
-            user_prompt=row["prompt"],
-            metadata={
-                "sample_type": row["sample_type"],
-                "sample": row["sample"],
-                "grammar_file": grammar_file.stem,
-                "model": model,
-                "n_shots": str(2 * n_shots),
-            },
-        ).to_anthropic_request(model=model, custom_id=f"request-{row.name}"),
-        axis=1,
-    )
-
-    requets = samples_df[f"{model}_request"].tolist()
-    print(requets[0])
-    print(samples_df["sample"].iloc[0])
-    print(samples_df["sample_type"].iloc[0])
-
-
 def generate_batch_jsonl(
     samples_file: pathlib.Path | str,
     samples_dir: pathlib.Path | str = PROJECT_ROOT / "data" / "samples",
@@ -288,7 +212,6 @@ def generate_batch_jsonl(
 
     grammar_base = samples_file.parent.name + ".cfg"
     grammar_file = PROJECT_ROOT / "data" / grammar_base
-    data_path = PROJECT_ROOT / "data"
     grammar_file_name = grammar_file.stem
     with open(grammar_file, "r") as f:
         grammar_str = f.read()
@@ -301,7 +224,7 @@ def generate_batch_jsonl(
 
     samples_df["prompt"] = ""
 
-    for idx, row in pos_samples.iterrows():
+    for idx, row in tqdm.tqdm(samples_df.iterrows(), total=len(samples_df)):
         if row["type"] == "positive":
             id_type = "positive"
             od_type = "negative"
