@@ -16,3 +16,5 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 ```shell
 uv run src/sample.py  # Runs sample.py inside a virtual environment managed by uv.
 ```
+
+Note: figure out how to install python bindings for OpenFST.
