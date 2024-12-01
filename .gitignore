@@ -1,4 +1,5 @@
 data/crasp
+data/tokenized
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -3,8 +3,10 @@ import fire
 import random
 from nltk import PCFG
 
+import glob
 import ast
 import operator
+from tqdm import tqdm
 
 
 def generate_grammar(
@@ -16,17 +18,19 @@ def generate_grammar(
 
         FUNC -> 'lambda' 'x, y, z, arr' ':' EXPR [1.0]
         
-        EXPR -> EXPR '+' TERM [0.25] | EXPR '-' TERM [0.25] | TERM [0.2] | BOOLEAN [0.1] | INTEGER [0.05] | MIN_MAX [0.05] | COUNT [0.05] | IF_ELSE [0.05]
-
+        EXPR -> EXPR '+' TERM [0.25] | EXPR '-' TERM [0.25] | TERM [0.2] |  MIN_MAX [0.1] | COUNT [0.1] | IF_ELSE [0.1]
+                               
+        EXPR_NO_IE -> EXPR_NO_IE '+' TERM [0.25] | EXPR_NO_IE '-' TERM [0.25] | TERM [0.25] |  MIN_MAX [0.15] | COUNT [0.1] 
+                               
         TERM -> VAR [0.4] | INTEGER [0.2] | '(' EXPR ')' [0.4]
 
         MIN_MAX -> 'min(' EXPR ',' EXPR ')' [0.5] | 'max(' EXPR ',' EXPR ')' [0.5]
 
         COUNT -> 'arr.count(' INTEGER ')' [1.0]
 
-        BOOLEAN -> 'not' BOOLEAN [0.10] | BOOLEAN 'and' BOOLEAN [0.10] | BOOLEAN 'or' BOOLEAN [0.10] | EXPR '==' EXPR [0.10] | EXPR '!=' EXPR [0.10] | EXPR '<' EXPR [0.10] | EXPR '<=' EXPR [0.10] | EXPR '>' EXPR [0.10] | EXPR '>=' EXPR [0.10] | 'True' [0.05] | 'False' [0.05]
+        BOOLEAN -> 'not' BOOLEAN [0.10] | BOOLEAN 'and' BOOLEAN [0.10] | BOOLEAN 'or' BOOLEAN [0.10] | EXPR_NO_IE '==' EXPR_NO_IE [0.10] | EXPR_NO_IE '!=' EXPR_NO_IE [0.10] | EXPR_NO_IE '<' EXPR_NO_IE [0.10] | EXPR_NO_IE '<=' EXPR_NO_IE [0.10] | EXPR_NO_IE '>' EXPR_NO_IE [0.10] | EXPR_NO_IE '>=' EXPR_NO_IE [0.10] | 'True' [0.05] | 'False' [0.05]
 
-        IF_ELSE -> EXPR 'if' BOOLEAN 'else' EXPR [1.0]
+        IF_ELSE -> EXPR_NO_IE 'if' BOOLEAN 'else' EXPR [1.0]
 
         INTEGER -> '0' [0.1] | '1' [0.1] | '2' [0.1] | '3' [0.1] | '4' [0.1] | '5' [0.1] | '6' [0.1] | '7' [0.1] | '8' [0.1] | '9' [0.1]
 
@@ -38,41 +42,10 @@ def generate_grammar(
             # If depth is 0, only return terminal symbols
             if isinstance(symbol, str):  # Terminal symbols
                 return [symbol]
-            elif symbol == "EXPR":
-                # Return a terminal for EXPR at depth 0
-                return [
-                    random.choice(
-                        [
-                            "0",
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
-                            "x",
-                            "y",
-                            "z",
-                        ]
-                    )
-                ]
             else:
                 return [
                     random.choice(
                         [
-                            "0",
-                            "1",
-                            "2",
-                            "3",
-                            "4",
-                            "5",
-                            "6",
-                            "7",
-                            "8",
-                            "9",
                             "x",
                             "y",
                             "z",
@@ -180,6 +153,20 @@ def eval_with_intermediate_steps(expression, x, y, z, arr):
             # Handle list literals
             return [self.visit(elem) for elem in node.elts]
 
+        def visit_BoolOp(self, node):
+            # Handle boolean operations (and, or)
+            values = [self.visit(value) for value in node.values]
+            op = type(node.op).__name__
+            cot_buffer.append(f"BoolOp: {op} with values {values}.")
+            return self.evaluate_bool_op(values, op)
+
+        def visit_UnaryOp(self, node):
+            # Handle unary operations (not)
+            operand = self.visit(node.operand)
+            op = type(node.op).__name__
+            cot_buffer.append(f"UnaryOp: {op} {operand}.")
+            return self.evaluate_unary_op(operand, op)
+
         def visit(self, node):
             method_name = "visit_" + type(node).__name__
             visitor = getattr(self, method_name, self.generic_visit)
@@ -226,37 +213,53 @@ def eval_with_intermediate_steps(expression, x, y, z, arr):
             }
             return ops[op_type](left, right)
 
+        def evaluate_bool_op(self, values, op_type):
+            # Handle boolean operations
+            if op_type == "And":
+                return all(values)
+            elif op_type == "Or":
+                return any(values)
+            else:
+                raise ValueError(f"Unsupported boolean operation: {op_type}")
+
+        def evaluate_unary_op(self, operand, op_type):
+            # Handle unary operations
+            if op_type == "Not":
+                return not operand
+            else:
+                raise ValueError(f"Unsupported unary operation: {op_type}")
+
     evaluator = Evaluator()
     ret = evaluator.visit(tree.body)
-    cot_buffer.append(f"Result: {ret}.")
+    cot_buffer.append(f"Result: {int(ret)}.")
     cot = " ".join(cot_buffer)
 
     return cot
 
 
-def eval_txt_file(file_path, n: int = 256):
-    with open(file_path, "r") as f:
-        lambda_expr = f.read().strip()
+def eval_txt_file(file_dir, n: int = 256):
+    file_paths = glob.glob(f"{file_dir}/*.txt")
+    for file_path in tqdm(file_paths):
+        with open(file_path, "r") as f:
+            first_line = f.readline()
+            lambda_expr = first_line.strip()
 
-    expr = lambda_expr.split(":")[-1].strip()
+        expr = lambda_expr.split(":")[-1].strip()
 
-    with open(file_path, "r") as f:
-        lines = f.readlines()
+        with open(file_path, "w") as f:
+            f.write(first_line)  # Write the first line back to the file
+            for _ in range(n):
+                x, y, z = (
+                    random.randint(0, 9),
+                    random.randint(0, 9),
+                    random.randint(0, 9),
+                )
+                arr_len = random.randint(4, 8)
+                arr = [random.randint(0, 9) for _ in range(arr_len)]
+                cot = eval_with_intermediate_steps(expr, x, y, z, arr)
+                ret = f"(x={x}, y={y}, z={z}, arr={arr}) -> {cot}\n"
 
-    with open(file_path, "w") as f:
-        f.write(lines[0])  # Write the first line back to the file
-        for _ in range(n):
-            x, y, z = (
-                random.randint(0, 10),
-                random.randint(0, 10),
-                random.randint(0, 10),
-            )
-            arr_len = random.randint(4, 8)
-            arr = [random.randint(0, 10) for _ in range(arr_len)]
-            cot = eval_with_intermediate_steps(expr, x, y, z, arr)
-            ret = f"(x={x}, y={y}, z={z}, arr={arr}) -> {cot}\n"
-
-            f.write(ret)
+                f.write(ret)
 
 
 def main():
