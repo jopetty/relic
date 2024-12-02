@@ -8,9 +8,7 @@ from tqdm import tqdm
 import torch
 
 
-REDPAJAMA_DATA_PATH = os.path.join(
-    "/scratch/myh2014/data/", "datasets/slim_6b_pythia/arxiv"
-)
+REDPAJAMA_DATA_PATH = os.path.join("/scratch/myh2014/data/", "datasets/slim_6b_pythia/")
 
 
 def load_text_files(file_dir):
@@ -75,19 +73,15 @@ def domain_gen_train(data, seq_len, domain_id=None):
 
 def get_slimpj_dataset(seed, is_eval, seq_len):
     if is_eval:
-        data = torch.from_numpy(
-            np.fromfile(
-                os.path.join(REDPAJAMA_DATA_PATH, "val.bin"), dtype=np.uint16
-            ).astype(np.int32)
+        data = np.fromfile(
+            os.path.join(REDPAJAMA_DATA_PATH, "val.bin"), dtype=np.uint16
         )
         return IterableDataset.from_generator(
             domain_gen, gen_kwargs={"data": data, "seq_len": seq_len}
         )
     else:
-        data = torch.from_numpy(
-            np.fromfile(
-                os.path.join(REDPAJAMA_DATA_PATH, "train.bin"), dtype=np.uint16
-            ).astype(np.int32)
+        data = np.fromfile(
+            os.path.join(REDPAJAMA_DATA_PATH, "train.bin"), dtype=np.uint16
         )
         return IterableDataset.from_generator(
             domain_gen_train, gen_kwargs={"data": data, "seq_len": seq_len}
