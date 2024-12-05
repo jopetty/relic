@@ -4,12 +4,12 @@ import os
 import fire
 import datasets
 
-from utils import get_slimpj_dataset
+from .utils import get_slimpj_dataset
 
 
 class InfiniteShuffledDataset(torch.utils.data.IterableDataset):
     def __init__(self, file_dir):
-        self.data = datasets.load_from_disk(file_dir)
+        self.data = datasets.load_from_disk(file_dir).remove_columns(["text"])
         self.data_order = None
         self.current_idx = 0
 
@@ -39,8 +39,12 @@ class HybridDataset(torch.utils.data.IterableDataset):
         slimpj_iter = iter(self.slimpj_dataset)
         synthetic_iter = iter(self.synthetic_dataset)
         while True:
-            if np.random.rand() < self.sampling_prob:
-                yield next(slimpj_iter)
+            if np.random.rand() > self.sampling_prob:
+                input_ids = next(slimpj_iter)["input_ids"].astype(np.int64)
+                input_ids = torch.tensor(input_ids)
+                attn_mask = torch.ones_like(input_ids, dtype=torch.int64)
+
+                yield {"input_ids": input_ids, "attention_mask": attn_mask}
             else:
                 yield next(synthetic_iter)
 
