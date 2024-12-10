@@ -1,6 +1,10 @@
 data/crasp
 data/tokenized
+data/dolma
 wandb
+*.out
+output
+scratch.*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

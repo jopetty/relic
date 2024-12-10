@@ -2,17 +2,15 @@ import argparse
 import logging
 import datetime
 import os
-from torch.optim import AdamW
 
 from transformers import get_scheduler
 from transformers.trainer_pt_utils import get_parameter_names
 from transformers.pytorch_utils import ALL_LAYERNORM_LAYERS
-
-from transformers import DataCollatorForLanguageModeling
+from torch.optim import RMSprop, AdamW
 
 
 def create_optimizer_scheduler(
-    model, lr, max_steps, lr_scheduler_type, warmup_steps=50
+    model, lr, max_steps, optimizer_type, lr_scheduler_type, warmup_steps=50
 ):
     """
     Create AdamW optimizer and learning rate scheduler.
@@ -31,6 +29,9 @@ def create_optimizer_scheduler(
             "weight_decay": 0.00,
         },
     ]
+    # if optimizer_type.lower() == "rmsprop":
+    #     optimizer = RMSprop(optimizer_grouped_parameters, lr=lr, eps=1e-8)
+    # else:
     optimizer = AdamW(optimizer_grouped_parameters, lr=lr, eps=1e-8)
 
     scheduler = get_scheduler(
@@ -130,9 +131,18 @@ def get_argparser():
         default=1,
     )
     parser.add_argument(
+        "--save_every",
+        type=int,
+        default=100,
+    )
+    parser.add_argument(
         "--eval_every",
         type=int,
         default=100,
+    )
+    parser.add_argument(
+        "--optimizer",
+        type=str,
     )
     parser.add_argument(
         "--lr_scheduler",
@@ -152,6 +162,31 @@ def get_argparser():
         "--kl_weight",
         type=float,
         default=0.1,
+    )
+    parser.add_argument(
+        "--gradient_accumulation_steps",
+        type=int,
+        default=1,
+    )
+    parser.add_argument(
+        "--reinit", action="store_true", help="Train model from scratch"
+    )
+    parser.add_argument(
+        "--shrink_and_perturb",
+        action="store_true",
+        help="Shrink and perturb pretrained",
+    )
+    parser.add_argument(
+        "--lamb",
+        type=float,
+        default=0.5,
+        help="Weight assigned to pretrained endpoint in shrink and perturb",
+    )
+    parser.add_argument(
+        "--noise_scale",
+        type=float,
+        default=0.01,
+        help="Noise scale in shrink and perturb",
     )
 
     return parser

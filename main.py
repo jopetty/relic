@@ -1,13 +1,10 @@
 from transformers import AutoTokenizer, set_seed
 import numpy as np
 import wandb
-
+import os
 import torch
-import warnings
-
 
 from src.utils import (
-    get_logger,
     get_argparser,
     make_output_dir,
 )
@@ -73,6 +70,7 @@ def main():
     trainer = StaticTrainer(
         args,
         tokenizer,
+        output_dir_path,
     )
 
     trainer.train(
@@ -81,7 +79,12 @@ def main():
     )
 
     # save
-    trainer.model.save_pretrained(output_dir_path)
+    trainer.model.save_pretrained(
+        os.path.join(
+            output_dir_path,
+            f"model_{args.dataset}_{args.seed}_{args.reinit}_{args.lr}_final",
+        )
+    )
 
 
 if __name__ == "__main__":
