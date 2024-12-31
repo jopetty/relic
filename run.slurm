@@ -18,10 +18,13 @@ module purge
 
 cd /scratch/myh2014/formal-gym
 
+# srun singularity exec --nv \
+# --overlay /scratch/myh2014/singularity/50G.ext3:ro \
+# /scratch/work/public/singularity/cuda11.8.86-cudnn8.7-devel-ubuntu22.04.2.sif  /bin/bash -c \
+# "source /ext3/env.sh; conda activate skillit; python main.py $extra_args" 
+
 srun singularity exec --nv \
 --overlay /scratch/myh2014/singularity/50G.ext3:ro \
 /scratch/work/public/singularity/cuda11.8.86-cudnn8.7-devel-ubuntu22.04.2.sif  /bin/bash -c \
-"source /ext3/env.sh; conda activate skillit; python main.py $extra_args" 
-
-
+"source /ext3/env.sh; conda activate unsloth_env; python run.py" 
 

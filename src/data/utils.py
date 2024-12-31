@@ -1,8 +1,9 @@
 import datasets
 from datasets import load_dataset, IterableDataset
 import os
-import fire
 from transformers import AutoTokenizer
+
+# from unsloth import FastLanguageModel
 import numpy as np
 from tqdm import tqdm
 import torch
@@ -30,14 +31,20 @@ def cache_data(
     dataset = load_text_files(file_dir)
     # initialize tokenizer
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
-    tokenizer.add_special_tokens({"pad_token": "<|padding|>"})
-    # tokenize
+    # tokenizer.add_special_tokens({"pad_token": "<|padding|>"})
+
+    # silly hack
+    # _, tokenizer = FastLanguageModel.from_pretrained(
+    #     model_name=tokenizer_name,
+    #     max_seq_length=2048,
+    #     dtype=None,
+    # )
     dataset = dataset.map(
         lambda x: tokenizer(
             x["text"], padding="max_length", truncation=True, max_length=2048
         ),
         batched=True,
-    )
+    )  # .remove_columns(["text"])
 
     dataset.save_to_disk(out_dir)
 
@@ -183,4 +190,11 @@ def get_slimpajama_6b(
 
 
 if __name__ == "__main__":
-    fire.Fire(get_slimpajama_6b)
+    import fire
+
+    fire.Fire(
+        {
+            "cache_data": cache_data,
+            "get_slimpajama_6b": get_slimpajama_6b,
+        }
+    )

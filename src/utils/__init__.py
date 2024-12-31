@@ -34,12 +34,21 @@ def create_optimizer_scheduler(
     # else:
     optimizer = AdamW(optimizer_grouped_parameters, lr=lr, eps=1e-8)
 
-    scheduler = get_scheduler(
-        name=lr_scheduler_type,
-        optimizer=optimizer,
-        num_warmup_steps=warmup_steps,
-        num_training_steps=max_steps,
-    )
+    if lr_scheduler_type.lower() == "cosine_with_min_lr":
+        scheduler = get_scheduler(
+            name=lr_scheduler_type,
+            optimizer=optimizer,
+            num_warmup_steps=warmup_steps,
+            num_training_steps=max_steps,
+            scheduler_specific_kwargs={"min_lr_rate": 0.1},
+        )
+    else:
+        scheduler = get_scheduler(
+            name=lr_scheduler_type,
+            optimizer=optimizer,
+            num_warmup_steps=warmup_steps,
+            num_training_steps=max_steps,
+        )
 
     return optimizer, scheduler
 
@@ -54,10 +63,6 @@ def get_argparser():
     parser.add_argument(
         "--val_task_name",
         type=str,
-    )
-    parser.add_argument(
-        "--get_grads",
-        action="store_true",
     )
     parser.add_argument(
         "--dataset",

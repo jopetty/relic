@@ -1,17 +1,17 @@
 import numpy as np
 import torch
 import os
-import fire
 import datasets
 
 from .utils import get_slimpj_dataset
 
 
 class InfiniteShuffledDataset(torch.utils.data.IterableDataset):
-    def __init__(self, file_dir):
+    def __init__(self, file_dir, max_steps):
         self.data = datasets.load_from_disk(file_dir).remove_columns(["text"])
         self.data_order = None
         self.current_idx = 0
+        self.length = max_steps
 
     def __iter__(self):
         while True:  # Infinite iteration
@@ -22,6 +22,9 @@ class InfiniteShuffledDataset(torch.utils.data.IterableDataset):
             item = self.data[int(self.data_order[self.current_idx])]
             self.current_idx += 1
             yield item
+
+    def __len__(self):
+        return self.length
 
 
 class HybridDataset(torch.utils.data.IterableDataset):
@@ -58,4 +61,6 @@ def main(seed, is_eval, seq_len, synthetic_dir):
 
 
 if __name__ == "__main__":
+    import fire
+
     fire.Fire(main)

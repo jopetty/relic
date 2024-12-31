@@ -19,18 +19,6 @@ def main():
 
     parser = get_argparser()
     parser.add_argument(
-        "--synth_dir_train",
-        type=str,
-        help="Directory from which to load synthetic training data",
-        default="./data/tokenized/depth6_train",
-    )
-    parser.add_argument(
-        "--synth_dir_val",
-        type=str,
-        help="Directory from which to load synthetic validation data",
-        default="./data/tokenized/depth6_val",
-    )
-    parser.add_argument(
         "--sampling_p",
         type=float,
         default=0.5,
@@ -47,6 +35,11 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained(args.model_name)
     tokenizer.pad_token = tokenizer.eos_token
 
+    dataset_to_path = {
+        "depth6": "./data/tokenized/depth6",
+        "depth9": "./data/tokenized/depth9",
+    }
+
     # load datasets or dataset generators, depending on the task
     if args.dataset == "depth6" or args.dataset == "depth9":
         train_data = HybridDataset(
@@ -54,14 +47,14 @@ def main():
             is_eval=False,
             sampling_prob=args.sampling_p,
             seq_len=2048,
-            synthetic_dir=args.synth_dir_train,
+            synthetic_dir=dataset_to_path[args.dataset],
         )
         validation_data = HybridDataset(
             args.seed,
             is_eval=True,
             sampling_prob=args.sampling_p,
             seq_len=2048,
-            synthetic_dir=args.synth_dir_val,
+            synthetic_dir=dataset_to_path[args.dataset],
         )
     else:
         train_data = get_slimpj_dataset(args.seed, is_eval=False, seq_len=2048)
@@ -76,14 +69,6 @@ def main():
     trainer.train(
         train_data,
         validation_data,
-    )
-
-    # save
-    trainer.model.save_pretrained(
-        os.path.join(
-            output_dir_path,
-            f"model_{args.dataset}_{args.seed}_{args.reinit}_{args.lr}_final",
-        )
     )
 
 

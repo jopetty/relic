@@ -5,6 +5,8 @@ import wandb
 from copy import deepcopy
 import os
 
+from peft import LoraConfig, get_peft_model
+from peft.optimizers import create_loraplus_optimizer
 from transformers import (
     AutoConfig,
     AutoModelForCausalLM,
@@ -65,6 +67,17 @@ class StaticTrainer:
                 trust_remote_code=True,
                 device_map=0,
             )
+            if args.use_lora:
+                lora_config = LoraConfig(
+                    init_lora_weights="pissa",
+                    r=args.lora_rank,  # Rank of the low-rank adaptation space
+                    lora_alpha=args.lora_alpha,  # Scaling factor for LoRA weight A
+                    lora_dropout=args.lora_dropout,  # Dropout rate for LoRA weight A
+                )
+                self.model = get_peft_model(
+                    self.model,
+                    lora_config,
+                )
 
         if args.shrink_and_perturb:
             config = AutoConfig.from_pretrained(args.model_name)
@@ -80,9 +93,13 @@ class StaticTrainer:
             for param, random_param in zip(
                 self.model.parameters(), random_init.parameters()
             ):
-                param.data = (
-                    param.data * args.lamb + random_param.data + args.noise_scale
-                )
+                # leave embeddings as is
+                if isinstance(param, torch.nn.Embedding):
+                    continue
+                else:
+                    param.data = (
+                        param.data * args.lamb + random_param.data + args.noise_scale
+                    )
 
         # copy model as reference model
         if args.kl_loss:
@@ -98,8 +115,11 @@ class StaticTrainer:
             args.warmup_steps,
         )
 
+        self.save_path = os.path.join(self.output_dir, wandb.run.name)
+        os.makedirs(self.save_path, exist_ok=True)
+
         # save args to save dir
-        with open(os.path.join(output_dir, wandb.run.name, "args.txt"), "w") as f:
+        with open(os.path.join(self.save_path, "args.txt"), "w") as f:
             f.write(str(args))
 
     def train(
@@ -129,14 +149,19 @@ class StaticTrainer:
             labels = batch["labels"].cuda()
 
             outputs = self.model(input_ids=input_ids, labels=labels)
-            lm_loss = outputs.loss
+            lm_loss = outputs.loss / self.args.gradient_accumulation_steps
 
             if self.args.kl_loss:
                 with torch.no_grad():
                     teacher_logits = self.reference_model(input_ids).logits
                 kl_loss = kd_loss(outputs.logits, teacher_logits, labels)
 
-                loss = self.args.kl_weight * kl_loss + lm_loss
+                loss = (
+                    self.args.kl_weight
+                    * kl_loss
+                    / self.args.gradient_accumulation_steps
+                    + lm_loss
+                )
             else:
                 loss = lm_loss
 
@@ -173,9 +198,7 @@ class StaticTrainer:
         self.save_model(counter)
 
     def save_model(self, counter):
-        save_path = os.path.join(
-            self.output_dir, wandb.run.name, f"checkpoint-{counter}"
-        )
+        save_path = os.path.join(self.save_path, f"step_{counter}")
         os.makedirs(save_path, exist_ok=True)
         self.model.save_pretrained(save_path)
         torch.save(self.optimizer.state_dict(), os.path.join(save_path, "optimizer.pt"))
