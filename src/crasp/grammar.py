@@ -1,4 +1,5 @@
 import fire
+import numpy as np
 
 import random
 from nltk import PCFG
@@ -9,33 +10,122 @@ import operator
 from tqdm import tqdm
 
 
+CRASP_MIN_GRAMMAR = """
+S -> FUNC [1.0]
+
+FUNC -> 'lambda' 'x, y, z, arr' ':' EXPR [1.0]
+
+EXPR -> EXPR '+' TERM [0.4]  | TERM [0.3] |  MIN_MAX [0.1] | COUNT [0.1] | IF_ELSE [0.1]
+                        
+EXPR_NO_IE -> EXPR_NO_IE '+' TERM [0.4]  | TERM [0.3] |  MIN_MAX [0.2] | COUNT [0.1] 
+                        
+TERM -> VAR [0.4] | INTEGER [0.2] | '(' EXPR ')' [0.4]
+
+MIN_MAX -> 'min(' EXPR ',' EXPR ')' [1.0] 
+
+COUNT -> 'arr.count(' INTEGER ')' [1.0]
+
+BOOLEAN -> 'not' BOOLEAN [0.10] | BOOLEAN 'and' BOOLEAN [0.10] | BOOLEAN 'or' BOOLEAN [0.10] | EXPR_NO_IE '==' EXPR_NO_IE [0.10] | EXPR_NO_IE '!=' EXPR_NO_IE [0.10] | EXPR_NO_IE '<' EXPR_NO_IE [0.10] | EXPR_NO_IE '<=' EXPR_NO_IE [0.10] | EXPR_NO_IE '>' EXPR_NO_IE [0.10] | EXPR_NO_IE '>=' EXPR_NO_IE [0.10] | 'True' [0.05] | 'False' [0.05]
+
+IF_ELSE -> EXPR_NO_IE 'if' BOOLEAN 'else' EXPR [1.0]
+
+INTEGER -> '0' [0.1] | '1' [0.1] | '2' [0.1] | '3' [0.1] | '4' [0.1] | '5' [0.1] | '6' [0.1] | '7' [0.1] | '8' [0.1] | '9' [0.1]
+
+VAR -> 'x' [0.4] | 'y' [0.3] | 'z' [0.3]"""
+
+CRASP_GRAMMAR = """
+S -> FUNC [1.0]
+
+FUNC -> 'lambda' 'x, y, z, arr' ':' EXPR [1.0]
+
+EXPR -> EXPR '+' TERM [0.25] | EXPR '-' TERM [0.25] | TERM [0.2] |  MIN_MAX [0.1] | COUNT [0.1] | IF_ELSE [0.1]
+                        
+EXPR_NO_IE -> EXPR_NO_IE '+' TERM [0.25] | EXPR_NO_IE '-' TERM [0.25] | TERM [0.25] |  MIN_MAX [0.15] | COUNT [0.1] 
+                        
+TERM -> VAR [0.4] | INTEGER [0.2] | '(' EXPR ')' [0.4]
+
+MIN_MAX -> 'min(' EXPR ',' EXPR ')' [0.5] | 'max(' EXPR ',' EXPR ')' [0.5]
+
+COUNT -> 'arr.count(' INTEGER ')' [1.0]
+
+BOOLEAN -> 'not' BOOLEAN [0.10] | BOOLEAN 'and' BOOLEAN [0.10] | BOOLEAN 'or' BOOLEAN [0.10] | EXPR_NO_IE '==' EXPR_NO_IE [0.10] | EXPR_NO_IE '!=' EXPR_NO_IE [0.10] | EXPR_NO_IE '<' EXPR_NO_IE [0.10] | EXPR_NO_IE '<=' EXPR_NO_IE [0.10] | EXPR_NO_IE '>' EXPR_NO_IE [0.10] | EXPR_NO_IE '>=' EXPR_NO_IE [0.10] | 'True' [0.05] | 'False' [0.05]
+
+IF_ELSE -> EXPR_NO_IE 'if' BOOLEAN 'else' EXPR [1.0]
+
+INTEGER -> '0' [0.1] | '1' [0.1] | '2' [0.1] | '3' [0.1] | '4' [0.1] | '5' [0.1] | '6' [0.1] | '7' [0.1] | '8' [0.1] | '9' [0.1]
+
+VAR -> 'x' [0.4] | 'y' [0.3] | 'z' [0.3]"""
+
+
+FOM_GRAMMAR = """
+S -> FUNC [1.0]
+
+FUNC -> 'lambda' 'x, y, z, arr' ':' EXPR [1.0]
+
+EXPR -> EXPR '+' TERM [0.15] | EXPR '-' TERM [0.15] | EXPR '*' TERM [0.20] | TERM [0.2] |  MIN_MAX [0.1] | COUNT [0.1] | IF_ELSE [0.1]
+                        
+EXPR_NO_IE -> EXPR_NO_IE '+' TERM [0.15] | EXPR_NO_IE '-' TERM [0.15] | EXPR_NO_IE '*' TERM [0.20] | TERM [0.25] |  MIN_MAX [0.15] | COUNT [0.1] 
+                        
+TERM -> VAR [0.4] | INTEGER [0.2] | '(' EXPR ')' [0.4]
+
+MIN_MAX -> 'min(' EXPR ',' EXPR ')' [0.5] | 'max(' EXPR ',' EXPR ')' [0.5]
+
+COUNT -> 'arr.count(' INTEGER ')' [1.0]
+
+BOOLEAN -> 'not' BOOLEAN [0.10] | BOOLEAN 'and' BOOLEAN [0.10] | BOOLEAN 'or' BOOLEAN [0.10] | EXPR_NO_IE '==' EXPR_NO_IE [0.10] | EXPR_NO_IE '!=' EXPR_NO_IE [0.10] | EXPR_NO_IE '<' EXPR_NO_IE [0.10] | EXPR_NO_IE '<=' EXPR_NO_IE [0.10] | EXPR_NO_IE '>' EXPR_NO_IE [0.10] | EXPR_NO_IE '>=' EXPR_NO_IE [0.10] | 'True' [0.05] | 'False' [0.05]
+
+IF_ELSE -> EXPR_NO_IE 'if' BOOLEAN 'else' EXPR [1.0]
+
+INTEGER -> '0' [0.1] | '1' [0.1] | '2' [0.1] | '3' [0.1] | '4' [0.1] | '5' [0.1] | '6' [0.1] | '7' [0.1] | '8' [0.1] | '9' [0.1]
+
+VAR -> 'x' [0.4] | 'y' [0.3] | 'z' [0.3]"""
+
+
+def generate_dyck_isabel(min_val, max_val, max_length=510):
+    result = []
+    stack = []
+    symbols = np.arange(min_val, max_val)
+    distribution = [1 / len(symbols)] * len(symbols)
+
+    v = np.random.choice(symbols, p=distribution)
+    stack.append(v)
+    result.append(v)
+
+    while len(result) < max_length and len(stack) > 0:
+        if random.random() < 0.51:
+            v = stack.pop()
+            result.append(v)
+        else:
+            v = np.random.choice(symbols, p=distribution)
+            stack.append(v)
+            result.append(v)
+
+    return result
+
+
+def generate_dyck_txt_file(file_dir, n: int = 100000):
+    with open(f"{file_dir}/dyck_sequences.txt", "w") as f:
+        for i in range(n):
+            result = []
+            while len(result) < 2048:
+                result.extend(generate_dyck_isabel(0, 60))
+            dyck_str = " ".join([str(x) for x in result])
+            f.write(f"{dyck_str}\n")
+
+
 def generate_grammar(
-    n: int = 100, depth: int = 1, outdir: str = "../data/generated_grammar.txt"
+    n: int = 100,
+    depth: int = 1,
+    outdir: str = "../data/generated_grammar.txt",
+    seed: int = None,
+    gen_string_name: str = "CRASP",
 ):
+    if seed is not None:
+        random.seed(seed)
+
     # Define the probabilistic grammar
-    pgrammar = PCFG.fromstring("""
-        S -> FUNC [1.0]
-
-        FUNC -> 'lambda' 'x, y, z, arr' ':' EXPR [1.0]
-        
-        EXPR -> EXPR '+' TERM [0.25] | EXPR '-' TERM [0.25] | TERM [0.2] |  MIN_MAX [0.1] | COUNT [0.1] | IF_ELSE [0.1]
-                               
-        EXPR_NO_IE -> EXPR_NO_IE '+' TERM [0.25] | EXPR_NO_IE '-' TERM [0.25] | TERM [0.25] |  MIN_MAX [0.15] | COUNT [0.1] 
-                               
-        TERM -> VAR [0.4] | INTEGER [0.2] | '(' EXPR ')' [0.4]
-
-        MIN_MAX -> 'min(' EXPR ',' EXPR ')' [0.5] | 'max(' EXPR ',' EXPR ')' [0.5]
-
-        COUNT -> 'arr.count(' INTEGER ')' [1.0]
-
-        BOOLEAN -> 'not' BOOLEAN [0.10] | BOOLEAN 'and' BOOLEAN [0.10] | BOOLEAN 'or' BOOLEAN [0.10] | EXPR_NO_IE '==' EXPR_NO_IE [0.10] | EXPR_NO_IE '!=' EXPR_NO_IE [0.10] | EXPR_NO_IE '<' EXPR_NO_IE [0.10] | EXPR_NO_IE '<=' EXPR_NO_IE [0.10] | EXPR_NO_IE '>' EXPR_NO_IE [0.10] | EXPR_NO_IE '>=' EXPR_NO_IE [0.10] | 'True' [0.05] | 'False' [0.05]
-
-        IF_ELSE -> EXPR_NO_IE 'if' BOOLEAN 'else' EXPR [1.0]
-
-        INTEGER -> '0' [0.1] | '1' [0.1] | '2' [0.1] | '3' [0.1] | '4' [0.1] | '5' [0.1] | '6' [0.1] | '7' [0.1] | '8' [0.1] | '9' [0.1]
-
-        VAR -> 'x' [0.4] | 'y' [0.3] | 'z' [0.3]
-    """)
+    gen_string = globals()[f"{gen_string_name}_GRAMMAR"]
+    pgrammar = PCFG.fromstring(gen_string)
 
     def generate_random_derivation(symbol, current_depth):
         if current_depth == 0:
@@ -177,6 +267,7 @@ def eval_with_intermediate_steps(expression, x, y, z, arr):
             ops = {
                 "Add": operator.add,
                 "Sub": operator.sub,
+                "Mult": operator.mul,
             }
             return ops[op_type](left, right)
 
@@ -267,6 +358,7 @@ def main():
         {
             "generate": generate_grammar,
             "eval": eval_txt_file,
+            "generate_dyck": generate_dyck_txt_file,
         }
     )
 

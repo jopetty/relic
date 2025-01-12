@@ -1,5 +1,5 @@
 import datasets
-from datasets import load_dataset, IterableDataset
+from datasets import load_dataset, IterableDataset, load_from_disk
 import os
 from transformers import AutoTokenizer
 
@@ -10,12 +10,20 @@ import torch
 
 
 REDPAJAMA_DATA_PATH = os.path.join("/scratch/myh2014/data/", "datasets/slim_6b_pythia/")
+DATA_PATHS = {
+    "crasp_min_first": "/scratch/myh2014/formal-gym/data/tokenized/depth9_crasp_min_first",
+    "crasp_min_second": "/scratch/myh2014/formal-gym/data/tokenized/depth9_crasp_min_second",
+    "crasp_first": "/scratch/myh2014/formal-gym/data/tokenized/depth9_crasp_first",
+    "crasp_second": "/scratch/myh2014/formal-gym/data/tokenized/depth9_crasp_second",
+    "fom_first": "/scratch/myh2014/formal-gym/data/tokenized/depth9_fom_first",
+    "fom_second": "/scratch/myh2014/formal-gym/data/tokenized/depth9_fom_second",
+}
 
 
 def load_text_files(file_dir):
     texts = []
     # Read each file in the directory
-    for filename in os.listdir(file_dir):
+    for filename in tqdm(os.listdir(file_dir)):
         if filename.endswith(".txt"):  # Adjust file extension if needed
             file_path = os.path.join(file_dir, filename)
             with open(file_path, "r", encoding="utf-8") as f:
@@ -44,8 +52,69 @@ def cache_data(
             x["text"], padding="max_length", truncation=True, max_length=2048
         ),
         batched=True,
-    )  # .remove_columns(["text"])
+    )
 
+    dataset.save_to_disk(out_dir)
+
+
+def cache_data_from_hf(
+    dataset_name: str, out_dir: str, tokenizer_name: str = "EleutherAI/pythia-160m"
+):
+    # no padding, allow DataCollatorWithFlatten to pad
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
+
+    if "code" in dataset_name:
+        dataset = load_dataset(dataset_name)
+        dataset = dataset.map(
+            lambda x: tokenizer(x["code"], truncation=True, max_length=2048),
+            batched=True,
+        ).remove_columns(
+            [
+                "repo",
+                "path",
+                "url",
+                "code",
+                "code_tokens",
+                "docstring",
+                "docstring_tokens",
+                "language",
+                "partition",
+                "avg_line_len",
+            ]
+        )
+    elif "goat" in dataset_name:
+        # concatenate instruction and ouptut columns
+        dataset = load_dataset(dataset_name)
+        dataset = dataset.map(
+            lambda x: tokenizer(
+                x["instruction"] + " " + x["output"],
+                truncation=True,
+                max_length=2048,
+            ),
+        ).remove_columns(["instruction", "output", "input", "answer"])
+    elif dataset_name == "cogs":
+        dataset = load_dataset(
+            "csv",
+            data_files="./data/cogs_train.tsv",
+            delimiter="\t",
+            column_names=["input", "output", "generalization"],
+            split="train",
+        )
+        dataset = dataset.map(
+            lambda x: tokenizer(
+                x["input"] + " " + x["output"],
+                truncation=True,
+                max_length=2048,
+            ),
+        ).remove_columns(["generalization"])
+    else:
+        dataset = load_dataset(
+            "Salesforce/wikitext", name="wikitext-2-v1", split="train"
+        )
+        dataset = dataset.map(
+            lambda x: tokenizer(x["text"], truncation=True, max_length=2048),
+            batched=True,
+        )
     dataset.save_to_disk(out_dir)
 
 
@@ -70,12 +139,25 @@ def domain_gen_train(data, seq_len, domain_id=None):
         random_order = np.random.permutation(num_sequences)
         for i in random_order:
             if domain_id is None:
-                yield {"input_ids": data[i * seq_len : (i + 1) * seq_len]}
+                yield {
+                    "input_ids": torch.tensor(
+                        data[i * seq_len : (i + 1) * seq_len].astype(np.int64)
+                    )
+                }
             else:
                 yield {
                     "domain_id": torch.tensor([domain_id], dtype=torch.long),
-                    "input_ids": data[i * seq_len : (i + 1) * seq_len],
+                    "input_ids": torch.tensor(
+                        data[i * seq_len : (i + 1) * seq_len].astype(np.int64)
+                    ),
                 }
+
+
+# def get_dataset(dataset_name, **dataset_kwargs):
+#     if dataset_name == "slimpj":
+#         return get_slimpj_dataset(**dataset_kwargs)
+#     else
+#         return datasets.load_from_disk(DATA_PATHS[dataset_name])
 
 
 def get_slimpj_dataset(seed, is_eval, seq_len):
@@ -195,6 +277,7 @@ if __name__ == "__main__":
     fire.Fire(
         {
             "cache_data": cache_data,
+            "cache_data_from_hf": cache_data_from_hf,
             "get_slimpajama_6b": get_slimpajama_6b,
         }
     )

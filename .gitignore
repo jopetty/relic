@@ -1,9 +1,7 @@
-data/crasp
-data/tokenized
-data/dolma
+data
 wandb
 *.out
-output
+output*
 scratch.*
 
 # Byte-compiled / optimized / DLL files

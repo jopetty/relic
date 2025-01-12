@@ -1,16 +1,15 @@
-slices:
-  - sources:
-      - model: EleutherAI/pythia-160M
-        layer_range: [0, 11]
-      - model: ./output/123024/fallen-lake-53/step_5000/
-        layer_range: [0, 11]
-merge_method: slerp
-base_model: EleutherAI/pythia-160M
-parameters:
-  t:
-    - filter: self_attn
-      value: [0, 0.5, 0.3, 0.7, 1]
-    - filter: mlp
-      value: [1, 0.5, 0.7, 0.3, 0]
-    - value: 0.5 # fallback for rest of tensors
-dtype: float16
+genome:
+    models:
+       - EleutherAI/pythia-160m
+       - ./outputs/checkpoint-500
+    merge_method: dare_ties
+    base_model: EleutherAI/pythia-160m
+    tokenizer_source: null 
+    layer_granularity: 12
+    normalize: true
+    allow_negative_weights: true
+    smooth: false
+tasks:
+  - name: hellaswag
+    weight: 1.0 # optional
+    metric: "acc,none" # defaults to acc,none
