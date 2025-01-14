@@ -117,7 +117,7 @@ def generate_grammar(
     n: int = 100,
     depth: int = 1,
     outdir: str = "../data/generated_grammar.txt",
-    seed: int = None,
+    seed: int = 0,
     gen_string_name: str = "CRASP",
 ):
     if seed is not None:

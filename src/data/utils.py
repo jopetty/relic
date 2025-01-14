@@ -39,7 +39,7 @@ def cache_data(
     dataset = load_text_files(file_dir)
     # initialize tokenizer
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
-    # tokenizer.add_special_tokens({"pad_token": "<|padding|>"})
+    tokenizer.add_special_tokens({"pad_token": "<|padding|>"})
 
     # silly hack
     # _, tokenizer = FastLanguageModel.from_pretrained(
@@ -107,6 +107,31 @@ def cache_data_from_hf(
                 max_length=2048,
             ),
         ).remove_columns(["generalization"])
+    elif dataset_name == "s5":
+        dataset = load_dataset(
+            "csv",
+            data_files="./data/s5.csv",
+            split="train",
+            header=0,
+        )
+        dataset = dataset.map(
+            lambda x: tokenizer(
+                x["input"] + " " + x["target"],
+                truncation=True,
+                max_length=2048,
+            ),
+        ).remove_columns(["seed", "input", "target"])
+    elif dataset_name == "dyck":
+        dataset = load_dataset(
+            "text", data_files="./data/dyck_sequences.txt", split="train"
+        )
+        dataset = dataset.map(
+            lambda x: tokenizer(
+                x["text"],
+                truncation=True,
+                max_length=2048,
+            ),
+        ).remove_columns(["text"])
     else:
         dataset = load_dataset(
             "Salesforce/wikitext", name="wikitext-2-v1", split="train"
