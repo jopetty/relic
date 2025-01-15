@@ -24,16 +24,18 @@ def grammar(
     n_nonterminals=6,
     n_binary_rules=6,
     n_lexical_rules=5,
+    data_dir=PROJECT_ROOT / "data" / "grammars",
 ):
     g = fg_metagrammar.sample_cfg_trim(
         n_terminals=n_terminals,
         n_nonterminals=n_nonterminals,
         n_binary_rules=n_binary_rules,
         n_lexical_rules=n_lexical_rules,
+        data_dir=data_dir,
     )["grammar"]
 
     print(f"Sampled grammar:\n{g.grammar_obj}")
 
 
 if __name__ == "__main__":
-    fire.Fire()
+    fire.Fire(grammar)
