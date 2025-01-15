@@ -21,12 +21,6 @@ import tqdm
 import formal_gym.grammar as fg_grammar
 import formal_gym.utils.utils as fg_utils
 
-# Type aliases
-ClaudeMessageCreateParamsNonStreaming = (
-    anthropic.types.beta.message_create_params.MessageCreateParamsNonStreaming
-)
-ClaudeRequest = anthropic.types.beta.messages.batch_create_params.Request
-
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
     datefmt="%Y-%d-%m %H:%M:%S",
@@ -48,47 +42,6 @@ class ChatCompletionResponse:
     metadata: dict[str, str]
     system_prompt: str = "You are a helpful assistant."
     max_tokens: int = 1024
-
-    # TODO: validate this
-    def to_anthropic_json(self, model: str) -> str:
-        return json.dumps(
-            {
-                "method": "POST",
-                "url": "/v1/messages",
-                "body": {
-                    "model": model,
-                    "messages": [{"role": "user", "content": self.user_prompt}],
-                    "max_tokens": self.max_tokens,
-                },
-            }
-        )
-
-    # TODO: validate this
-    def to_openai_json(self, model: str) -> str:
-        return json.dumps(
-            {
-                "method": "POST",
-                "url": "/v1/chat/completions",
-                "body": {
-                    "model": model,
-                    "messages": [
-                        {"role": "system", "content": self.system_prompt},
-                        {"role": "user", "content": self.user_prompt},
-                    ],
-                    "max_tokens": self.max_tokens,
-                },
-            }
-        )
-
-    def to_anthropic_request(self, model: str, custom_id: str) -> ClaudeRequest:
-        return ClaudeRequest(
-            custom_id=custom_id,
-            params=ClaudeMessageCreateParamsNonStreaming(
-                model=model,
-                max_tokens=self.max_tokens,
-                messages=[{"role": "user", "content": self.user_prompt}],
-            ),
-        )
 
     def to_openai_batched_json(self, model: str, custom_id: str) -> str:
         return json.dumps(
@@ -128,77 +81,6 @@ def create_prompt(grammar_str: str, sample: str, shots: dict[str, list[str]]) ->
     question = f"""Here is the string you need to evaluate:\n\nString: `{sample}`.\n\nRemember, end your response with either 'Yes' or 'No'."""  # noqa: E501
 
     return prefix + few_shot + question
-
-
-def _get_batch_df(
-    grammar_file: pathlib.Path | str,
-    data_path: pathlib.Path | str = PROJECT_ROOT / "data",
-    n_samples: int = 1000,
-    save_sample_files: bool = False,
-    model: str = "gpt-4o-mini",
-    n_shots: int = 0,
-) -> pd.DataFrame:
-    if isinstance(grammar_file, str):
-        grammar_file = pathlib.Path(grammar_file)
-
-    grammar_file_name = grammar_file.stem
-    grammar_path = data_path / grammar_file
-    pos_sample_name = f"{grammar_file_name}_positive_{n_samples}.txt"
-    neg_sample_name = f"{grammar_file_name}_negative_{n_samples}.txt"
-    pos_sample_path = data_path / pos_sample_name
-    neg_sample_path = data_path / neg_sample_name
-
-    g = fg_grammar.Grammar.from_grammar(grammar_path)
-
-    log.info(f"Generating {n_samples} positive samples from {grammar_file}")
-    pos_samples = list(set(g.generate(n_samples=n_samples, sep=" ")))
-    if save_sample_files or not pos_sample_path.is_file():
-        log.info(f"Writing positive examples to {pos_sample_path}")
-        with open(pos_sample_path, "w") as f:
-            for gen in pos_samples:
-                f.write(f"{gen}\n")
-
-    log.info(f"Generating {n_samples} negative samples from {grammar_file}")
-    neg_samples = list(
-        set(
-            g.generate_negative_samples_matching_lengths(
-                positive_sample_path=pos_sample_path,
-            )
-        )
-    )
-    if save_sample_files or not neg_sample_path.is_file():
-        log.info(f"Writing negative examples to {neg_sample_path}")
-        with open(neg_sample_path, "w") as f:
-            for gen in neg_samples:
-                f.write(f"{gen}\n")
-
-    demo_samples = {
-        "positive": [],
-        "negative": [],
-    }
-
-    if n_shots > 0:
-        demo_samples["positive"] = random.choices(pos_samples, k=n_shots)
-        demo_samples["negative"] = random.choices(neg_samples, k=n_shots)
-        pos_samples = [s for s in pos_samples if s not in demo_samples["positive"]]
-        neg_samples = [s for s in neg_samples if s not in demo_samples["negative"]]
-
-    pos_df = pd.DataFrame(pos_samples, columns=["sample"])
-    neg_df = pd.DataFrame(neg_samples, columns=["sample"])
-
-    pos_df["sample_type"] = "positive"
-    neg_df["sample_type"] = "negative"
-
-    with open(grammar_path, "r") as f:
-        grammar_str = f.read()
-
-    sample_df = pd.concat([pos_df, neg_df], ignore_index=True)
-
-    sample_df["prompt"] = sample_df["sample"].apply(
-        lambda s: create_prompt(grammar_str=grammar_str, sample=s, shots=demo_samples)
-    )
-
-    return sample_df
 
 
 def generate_batch_jsonl(
