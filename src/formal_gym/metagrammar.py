@@ -178,6 +178,8 @@ def save_and_load_grammar(
         start_productions + nonterminal_productions + lexical_productions
     )
 
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+
     grammar_string = "\n".join([f"{p}" for p in sorted_productions])
     with open(filepath, "w") as f:
         f.write(grammar_string)
