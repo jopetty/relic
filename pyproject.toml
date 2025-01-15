@@ -3,7 +3,7 @@ name = "formal-gym"
 version = "0.0.1"
 description = "A tool to generate formal grammars."
 readme = "README.md"
-requires-python = ">= 3.12"
+requires-python = ">= 3.12, < 3.13"
 license = { file = "LICENSE" }
 authors = [
     { name = "Jackson Petty", email = "research@jacksonpetty.org" },
