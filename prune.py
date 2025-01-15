@@ -78,12 +78,12 @@ class Pruner(Trainer):
 
         loss = zs_loss + kl_loss
 
-        # print(zs_loss, kl_loss)
-
         current_sparsity = 1 - outputs.z_sum / model.num_alpha_params
         wandb.log(
             {
                 "sparsity": current_sparsity,
+                "zs_loss": zs_loss,
+                "kl_loss": kl_loss,
             },
             step=self.state.global_step,
         )

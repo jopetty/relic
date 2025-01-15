@@ -4,17 +4,11 @@ from transformers import (
     AutoModelForCausalLM,
     AutoConfig,
     AutoTokenizer,
-    DataCollatorWithFlattening,
-    DataCollatorForLanguageModeling,
-    Trainer,
-    TrainingArguments,
 )
 from trl import SFTConfig, SFTTrainer
 import torch
 import datasets
 import fire
-
-from src.data.utils import get_slimpj_dataset
 
 
 def main(
@@ -38,7 +32,20 @@ def main(
 ):
     print(locals())
 
-    dataset = datasets.load_from_disk(data_dir)
+    is_a100 = is_bfloat16_supported()
+
+    if data_dir == "c4":
+        dataset = datasets.load_dataset(
+            "json",
+            data_files=[
+                f"/vast/work/public/ml-datasets/c4/en/c4-train.0000{i}-of-01024.json"
+                for i in range(2)
+            ],
+        )
+    elif data_dir == "babylm":
+        dataset = datasets.load_dataset("ltg/babylm-2024-baby-cosmo-fine-100m")
+    else:
+        dataset = datasets.load_from_disk(data_dir)
 
     if "train" in dataset:
         dataset = dataset["train"]
@@ -47,22 +54,25 @@ def main(
         config = AutoConfig.from_pretrained(model_name)
         model = AutoModelForCausalLM.from_config(
             config,
-            torch_dtype=torch.bfloat16 if is_bfloat16_supported() else torch.float32,
+            torch_dtype=torch.bfloat16 if is_a100 else torch.float32,
         )
     else:
         model = AutoModelForCausalLM.from_pretrained(
             model_name,
             # revision=revision,
             # attn_implementation="flash_attention_2" if is_bfloat16_supported() else "sdpa",
-            torch_dtype=torch.bfloat16 if is_bfloat16_supported() else torch.float32,
+            torch_dtype=torch.bfloat16 if is_a100 else torch.float32,
             trust_remote_code=True,
         )
     model.cuda()
 
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    tokenizer.add_special_tokens({"pad_token": "<|padding|>"})
+
     packing = any(
         # the datasets that are not pre-packed to 2048
         keyword in data_dir
-        for keyword in ["code", "cogs", "arithmetic", "s5"]
+        for keyword in ["code", "cogs", "arithmetic", "s5", "c4", "babylm"]
     )
 
     training_args = SFTConfig(
@@ -86,6 +96,9 @@ def main(
         model=model,
         args=training_args,
         train_dataset=dataset,
+        dataset_text_field="text",
+        tokenizer=tokenizer,
+        max_seq_length=max_seq_length,
     )
 
     trainer.train()

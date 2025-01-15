@@ -141,7 +141,7 @@ class PPTNeoXAttention(nn.Module):
         self.is_causal = True
 
         self.log_alpha_heads = nn.Parameter(torch.empty(self.num_attention_heads))
-        self.log_alpha_heads.data.normal_(mean=1.0, std=0.01)
+        self.log_alpha_heads.data.normal_(mean=5.0, std=0.01)
 
         self.threshold_for_deterministic = None
         self.should_read_avg_activation = False
@@ -291,8 +291,6 @@ class PPTNeoXAttention(nn.Module):
             threshold_for_deterministic=self.threshold_for_deterministic,
         )
         z_sum = z_heads.sum()
-
-        # breakpoint()
 
         if self.should_read_avg_activation:
             self.read_avg_activation += attn_output.detach().sum(dim=2).sum(dim=0)
@@ -1347,10 +1345,11 @@ class PPTNeoXForCausalLM(PPTNeoXPreTrainedModel):
         if target_sparsity is not None:
             target_sparsity = torch.tensor(target_sparsity)
             current_sparsity = 1 - (z_sum / self.num_alpha_params)
-            zs_loss = (
-                self.sparsity_lambda_1 * (target_sparsity - current_sparsity)
-                + self.sparsity_lambda_2 * (target_sparsity - current_sparsity) ** 2
-            )
+            # zs_loss = (
+            #     self.sparsity_lambda_1 * (target_sparsity - current_sparsity)
+            #     + self.sparsity_lambda_2 * (target_sparsity - current_sparsity) ** 2
+            # )
+            zs_loss = (target_sparsity - current_sparsity) ** 2
         else:
             current_sparsity = None
             zs_loss = None
