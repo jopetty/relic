@@ -1,10 +1,6 @@
 from unsloth import is_bfloat16_supported
 
-from transformers import (
-    AutoModelForCausalLM,
-    AutoConfig,
-    AutoTokenizer,
-)
+from transformers import AutoModelForCausalLM, AutoConfig, AutoTokenizer, set_seed
 from trl import SFTConfig, SFTTrainer
 import torch
 import datasets
@@ -29,8 +25,10 @@ def main(
     report_to="wandb",
     lr=5e-5,
     min_lr_rate=0.1,
+    override_packing=False,
 ):
     print(locals())
+    set_seed(seed)
 
     is_a100 = is_bfloat16_supported()
 
@@ -39,7 +37,7 @@ def main(
             "json",
             data_files=[
                 f"/vast/work/public/ml-datasets/c4/en/c4-train.0000{i}-of-01024.json"
-                for i in range(2)
+                for i in range(4)
             ],
         )
     elif data_dir == "babylm":
@@ -57,10 +55,10 @@ def main(
             torch_dtype=torch.bfloat16 if is_a100 else torch.float32,
         )
     else:
+        # on a100s, does unsloth pick the right attn implementation?
         model = AutoModelForCausalLM.from_pretrained(
             model_name,
             # revision=revision,
-            # attn_implementation="flash_attention_2" if is_bfloat16_supported() else "sdpa",
             torch_dtype=torch.bfloat16 if is_a100 else torch.float32,
             trust_remote_code=True,
         )
@@ -89,7 +87,7 @@ def main(
         learning_rate=lr,
         lr_scheduler_type="cosine_with_min_lr",
         lr_scheduler_kwargs={"min_lr_rate": min_lr_rate},
-        packing=packing,
+        packing=packing if not override_packing else False,
     )
 
     trainer = SFTTrainer(
