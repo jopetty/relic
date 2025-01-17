@@ -62,6 +62,7 @@ def cache_data_from_hf(
 ):
     # no padding, allow DataCollatorWithFlatten to pad
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_name)
+    tokenizer.add_special_tokens({"pad_token": "<|padding|>"})
 
     if "code" in dataset_name:
         dataset = load_dataset(dataset_name)
@@ -132,6 +133,30 @@ def cache_data_from_hf(
                 max_length=2048,
             ),
         ).remove_columns(["text"])
+    elif dataset_name == "blimp":
+        dataset = datasets.load_dataset("WillHeld/blimp", split="train")
+
+        def tokenize_examples(examples):
+            good = tokenizer(
+                examples["sentence_good"],
+                truncation=True,
+                max_length=128,
+            )
+            bad = tokenizer(
+                examples["sentence_bad"],
+                truncation=True,
+                max_length=128,
+            )
+            return {
+                "good_input_ids": good["input_ids"],
+                "good_attention_mask": good["attention_mask"],
+                "bad_input_ids": bad["input_ids"],
+                "bad_attention_mask": bad["attention_mask"],
+            }
+
+        cols = dataset.column_names
+        dataset = dataset.map(tokenize_examples, batched=True).remove_columns(cols)
+
     else:
         dataset = load_dataset(
             "Salesforce/wikitext", name="wikitext-2-v1", split="train"

@@ -14,6 +14,32 @@ import datasets
 import fire
 
 
+class SaveAtStepsCallback(TrainerCallback):
+    """Custom callback to save model at specific training steps."""
+
+    def __init__(self, save_steps: List[int], output_dir: str):
+        """
+        Args:
+            save_steps: List of steps at which to save the model
+            output_dir: Base directory for saving checkpoints
+        """
+        self.save_steps = sorted(save_steps)  # Sort steps in ascending order
+        self.output_dir = output_dir
+
+    def on_step_end(self, args, state, control, **kwargs):
+        """Called at the end of each step."""
+        if state.global_step in self.save_steps:
+            # Create a subdirectory for this specific step
+            checkpoint_dir = f"{self.output_dir}/checkpoint-{state.global_step}"
+            kwargs["model"].save_pretrained(checkpoint_dir)
+
+            # If you're using a tokenizer, you might want to save it too
+            if "tokenizer" in kwargs:
+                kwargs["tokenizer"].save_pretrained(checkpoint_dir)
+
+            print(f"Saved model at step {state.global_step}")
+
+
 def main(
     data_dir="./data/tokenized/depth9_train",
     model_name="EleutherAI/pythia-160m",
@@ -36,6 +62,11 @@ def main(
 ):
     print(locals())
     set_seed(seed)
+
+    callback = SaveAtStepsCallback(
+        save_steps=list(range(0, 4000, 100)) + [save_steps],
+        output_dir=output_dir,
+    )
 
     is_a100 = is_bfloat16_supported()
 
@@ -106,6 +137,7 @@ def main(
         tokenizer=tokenizer,
         max_seq_length=max_seq_length,
     )
+    trainer.add_callback(callback)
 
     trainer.train()
 

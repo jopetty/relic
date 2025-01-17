@@ -4,15 +4,16 @@ from scipy.stats import pearsonr
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
-    DataCollatorForLanguageModeling,
 )
 import datasets
 
 import torch
+import torch.nn.functional as F
 import numpy as np
 import os
 import json
 import fire
+import glob
 
 
 def id_estimate(X, fraction=0.9, verbose=False):
@@ -156,24 +157,20 @@ def convert_np_to_py_type(x):
         return x
 
 
-def main(
+def compute_stats(
     model_dir,
-    output_dir,
     compute_loss=True,
     compute_weight_norm=True,
     compute_id=True,
     sample_size=1024,
-    max_seq_length=2048,
-    bsz=16,
+    bsz=1,
 ):
-    os.makedirs(output_dir, exist_ok=True)
-
-    id_output_path = output_dir + "id.json"
+    id_output_path = os.path.join(model_dir, "id.json")
     if os.path.exists(id_output_path):
         print(f"{id_output_path} already exists.")
         compute_id = False
 
-    weight_norm_output_path = output_dir + "weight_norm.json"
+    weight_norm_output_path = os.path.join(model_dir, "weight_norm.json")
     if os.path.exists(weight_norm_output_path):
         print(f"{weight_norm_output_path} already exists.")
         compute_weight_norm = False
@@ -197,12 +194,12 @@ def main(
                 for i in range(8)
             ],
         )["train"]
-        .shuffle(0)
+        # .shuffle(0)
         .select(range(sample_size))
     )
 
     model = AutoModelForCausalLM.from_pretrained(model_dir).cuda()
-    tokenizer = AutoTokenizer.from_pretrained(model_dir)
+    tokenizer = AutoTokenizer.from_pretrained("EleutherAI/pythia-160m")
     tokenizer.add_special_tokens({"pad_token": "<|padding|>"})
 
     def tokenize_examples(examples):
@@ -282,14 +279,19 @@ def main(
                 output_dict["loss"] = [outputs.loss.item()]
         if compute_id:
             if isinstance(outputs, dict):
-                output_dict["cls_embeddings"] = [
-                    # outputs["hidden_states"][-1][:, lengths, :]
-                    outputs["hidden_states"][-1][torch.arange(len(lengths)), lengths, :]
-                ]
+                for layer in range(12):
+                    output_dict[f"cls_embeddings_{layer}"] = [
+                        outputs["hidden_states"][layer][
+                            torch.arange(len(lengths)), lengths, :
+                        ]
+                    ]
             else:
-                output_dict["cls_embeddings"] = [
-                    outputs.hidden_states[-1][torch.arange(len(lengths)), lengths, :]
-                ]
+                for layer in range(12):
+                    output_dict[f"cls_embeddings_{layer}"] = [
+                        outputs.hidden_states[layer][
+                            torch.arange(len(lengths)), lengths, :
+                        ]
+                    ]
         return output_dict
 
     cols = collated.column_names
@@ -308,30 +310,36 @@ def main(
     )
 
     if compute_id:
-        cls_embeddings = list(
-            [torch.FloatTensor(x) for x in collated["cls_embeddings"]]
-        )
-        # Calculate cosine distances and use pairwise distances to estimate dataset ID
-        # Calculate on first 1000
-        cls_embeddings = torch.cat(cls_embeddings, dim=0)  # [:1000]
-        emb_sim_matrix = (
-            sim_matrix(cls_embeddings, cls_embeddings).cpu().detach().numpy()
-        )
-        _, _, d, r, pval = id_estimate(1 - emb_sim_matrix, fraction=1.0, verbose=True)
-        with open(id_output_path, "w") as f:
-            json.dump(
-                {
-                    "intrinsic_dimension": convert_np_to_py_type(d),
-                    "pearson_corr_coeff": convert_np_to_py_type(r),
-                    "p-value": convert_np_to_py_type(pval),
-                },
-                f,
+        ret = {}
+        for layer in range(12):
+            cls_embeddings = list(
+                [torch.FloatTensor(x) for x in collated[f"cls_embeddings_{layer}"]]
             )
+            # Calculate cosine distances and use pairwise distances to estimate dataset ID
+            # Calculate on first 1000
+            cls_embeddings = torch.cat(cls_embeddings, dim=0)
+            emb_sim_matrix = (
+                sim_matrix(cls_embeddings, cls_embeddings).cpu().detach().numpy()
+            )
+            _, _, d, r, pval = id_estimate(
+                1 - emb_sim_matrix, fraction=1.0, verbose=False
+            )
+            print(
+                f"Layer: {layer}. Intrinsic dimension: {d}, Pearson corr coeff: {r}, p-value: {pval}"
+            )
+            ret[layer] = {
+                "intrinsic_dimension": convert_np_to_py_type(d),
+                "pearson_corr_coeff": convert_np_to_py_type(r),
+                "p-value": convert_np_to_py_type(pval),
+            }
+
+        with open(id_output_path, "w") as f:
+            json.dump(ret, f)
 
     if compute_loss:
         # write out loss
         loss = list(collated["loss"])
-        with open(output_dir + "loss.json", "w") as f:
+        with open(model_dir + "loss.json", "w") as f:
             f.write(json.dumps(loss) + "\n")
 
     if compute_weight_norm:
@@ -344,5 +352,121 @@ def main(
             f.write(json.dumps(weight_norms) + "\n")
 
 
+def blimp_eval(model_dir, bsz=128):
+    if os.path.exists(os.path.join(model_dir, "blimp.json")):
+        print(f"{model_dir} blimp already exists.")
+        return
+
+    dataset = datasets.load_dataset("WillHeld/blimp")["train"]
+    tokenizer = AutoTokenizer.from_pretrained("EleutherAI/pythia-160m")
+    tokenizer.add_special_tokens({"pad_token": "<|padding|>"})
+
+    model = AutoModelForCausalLM.from_pretrained(model_dir).cuda()
+
+    # tokenize sentence_good and sentence_bad
+    def tokenize_examples(examples):
+        good = tokenizer(
+            examples["sentence_good"],
+            padding="max_length",
+            truncation=True,
+            max_length=128,
+        )
+        bad = tokenizer(
+            examples["sentence_bad"],
+            padding="max_length",
+            truncation=True,
+            max_length=128,
+        )
+        return {
+            "good_input_ids": good["input_ids"],
+            "good_attention_mask": good["attention_mask"],
+            "bad_input_ids": bad["input_ids"],
+            "bad_attention_mask": bad["attention_mask"],
+        }
+
+    tokenized = dataset.map(tokenize_examples, batched=True)  # .select(range(4096))
+
+    model_kwargs = {
+        "return_dict": True,
+    }
+
+    @torch.inference_mode()
+    def compute_batch_accuracy(
+        model,
+        model_kwargs,
+        good_input_ids,
+        good_attention_mask,
+        bad_input_ids,
+        bad_attention_mask,
+    ):
+        good_input_ids = torch.tensor(good_input_ids).cuda()
+        good_attention_mask = torch.tensor(good_attention_mask).cuda()
+        bad_input_ids = torch.tensor(bad_input_ids).cuda()
+        bad_attention_mask = torch.tensor(bad_attention_mask).cuda()
+        good_output = model(
+            input_ids=good_input_ids,
+            attention_mask=good_attention_mask,
+            **model_kwargs,
+        )
+        bad_output = model(
+            input_ids=bad_input_ids,
+            attention_mask=bad_attention_mask,
+            **model_kwargs,
+        )
+        good_ll = torch.tensor(
+            [
+                -F.cross_entropy(
+                    good_output.logits[i, : length - 1],
+                    good_input_ids[i, 1:length],
+                    reduction="sum",
+                )
+                for i, length in enumerate(
+                    (good_input_ids != tokenizer.pad_token_id).sum(1)
+                )
+            ]
+        )
+
+        bad_ll = torch.tensor(
+            [
+                -F.cross_entropy(
+                    bad_output.logits[i, : length - 1],
+                    bad_input_ids[i, 1:length],
+                    reduction="sum",
+                )
+                for i, length in enumerate(
+                    (bad_input_ids != tokenizer.pad_token_id).sum(1)
+                )
+            ]
+        )
+        is_correct = good_ll > bad_ll
+        return {"correct": is_correct.cpu().numpy()}
+
+    cols = tokenized.column_names
+    tokenized = tokenized.map(
+        lambda ex: compute_batch_accuracy(
+            model,
+            model_kwargs,
+            ex["good_input_ids"],
+            ex["good_attention_mask"],
+            ex["bad_input_ids"],
+            ex["bad_attention_mask"],
+        ),
+        batched=True,
+        batch_size=bsz,
+        remove_columns=cols,
+    )
+    correct = np.sum(list(tokenized["correct"])) / 67000
+    correct = convert_np_to_py_type(correct)
+
+    with open(os.path.join(model_dir, "blimp.json"), "w") as f:
+        f.write(json.dumps(correct) + "\n")
+
+
+def main(super_dir, bsz=32, sample_size=32):
+    for model_dir in glob.glob(super_dir + "/*"):
+        print(f"Processing {model_dir}")
+        compute_stats(model_dir, bsz=bsz, sample_size=sample_size)
+
+
 if __name__ == "__main__":
-    fire.Fire(main)
+    fire.Fire({"main": main, "blimp": blimp_eval})
