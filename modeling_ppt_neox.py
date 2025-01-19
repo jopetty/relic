@@ -141,7 +141,7 @@ class PPTNeoXAttention(nn.Module):
         self.is_causal = True
 
         self.log_alpha_heads = nn.Parameter(torch.empty(self.num_attention_heads))
-        self.log_alpha_heads.data.normal_(mean=5.0, std=0.01)
+        self.log_alpha_heads.data.normal_(mean=5.0, std=0.1)
 
         self.threshold_for_deterministic = None
         self.should_read_avg_activation = False
@@ -291,7 +291,6 @@ class PPTNeoXAttention(nn.Module):
             threshold_for_deterministic=self.threshold_for_deterministic,
         )
         z_sum = z_heads.sum()
-
         if self.should_read_avg_activation:
             self.read_avg_activation += attn_output.detach().sum(dim=2).sum(dim=0)
             self.bsz_sum += attn_output.shape[0] * attn_output.shape[2]
@@ -1239,8 +1238,8 @@ class PPTNeoXForCausalLM(PPTNeoXPreTrainedModel):
         self.gpt_neox = PPTNeoXModel(config)
         self.embed_out = nn.Linear(config.hidden_size, config.vocab_size, bias=False)
 
-        self.sparsity_lambda_1 = torch.nn.Parameter(torch.tensor(0.0))
-        self.sparsity_lambda_2 = torch.nn.Parameter(torch.tensor(0.0))
+        self.sparsity_lambda_1 = torch.nn.Parameter(torch.tensor(1.0))
+        self.sparsity_lambda_2 = torch.nn.Parameter(torch.tensor(1.0))
         self.num_alpha_params = self.get_num_alpha_params()
 
         # Initialize weights and apply final processing
@@ -1343,23 +1342,14 @@ class PPTNeoXForCausalLM(PPTNeoXPreTrainedModel):
             z_sum = outputs[-1]
 
         if target_sparsity is not None:
-            target_sparsity = torch.tensor(target_sparsity)
             current_sparsity = 1 - (z_sum / self.num_alpha_params)
-            # zs_loss = (
-            #     self.sparsity_lambda_1 * (target_sparsity - current_sparsity)
-            #     + self.sparsity_lambda_2 * (target_sparsity - current_sparsity) ** 2
-            # )
-            zs_loss = (target_sparsity - current_sparsity) ** 2
+            zs_loss = (
+                self.sparsity_lambda_1 * (target_sparsity - current_sparsity)
+                + self.sparsity_lambda_2 * (target_sparsity - current_sparsity) ** 2
+            )
         else:
             current_sparsity = None
             zs_loss = None
-
-        # zs_loss.backward()
-        # for name, param in self.gpt_neox.named_parameters():
-        #     if param.grad is not None:
-        #         print(f"Gradient for {name}: {param.grad}")
-
-        # breakpoint()
 
         hidden_states = outputs[0]
         lm_logits = self.embed_out(hidden_states)

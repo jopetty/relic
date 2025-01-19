@@ -19,7 +19,7 @@ if [ ! -d "$base_dir" ]; then
 fi
 
 # Iterate through all subdirectories
-for subdir in "$base_dir"/*/; do
+for subdir in "$base_dir"*/; do
     if [ -d "$subdir" ]; then
         echo "Processing checkpoint in: $subdir"
         sbatch "$LAUNCH_SLURM_PATH" "blimp --model_dir $subdir --bsz 128"

@@ -1,7 +1,6 @@
 import math
 import torch
-import torch.nn as nn
-
+import os
 from typing import Dict, Union, Any
 import pickle
 from copy import deepcopy
@@ -13,96 +12,13 @@ import wandb
 
 from transformers import (
     Trainer,
+    AutoModelForCausalLM,
     AutoTokenizer,
     TrainingArguments,
     get_linear_schedule_with_warmup,
     DataCollatorForLanguageModeling,
 )
 from modeling_ppt_neox import PPTNeoXForCausalLM
-
-
-class Pruner(Trainer):
-    def __init__(self, *args, **kwargs):
-        self.target_sparsity = kwargs.pop("target_sparsity", 0.0)
-        self.start_sparsity = kwargs.pop("start_sparsity", 0.0)
-        self.num_sparsity_warmup_steps = kwargs.pop("num_sparsity_warmup_steps", 0)
-        self.warmup_type = kwargs.pop("warmup_type", "linear")
-        self.ref_model = kwargs.pop("ref_model", None)
-        super().__init__(*args, **kwargs)
-
-    def get_current_target_sparsity(self, global_step):
-        if global_step < self.num_sparsity_warmup_steps:
-            if self.warmup_type == "linear":
-                return (
-                    self.start_sparsity
-                    + (self.target_sparsity - self.start_sparsity)
-                    * global_step
-                    / self.num_sparsity_warmup_steps
-                )
-            elif self.warmup_type == "logarithmic":
-                log_one_minus_sparsity = (
-                    math.log(1 - self.start_sparsity)
-                    + (
-                        math.log(1 - self.target_sparsity)
-                        - math.log(1 - self.start_sparsity)
-                    )
-                    * global_step
-                    / self.num_sparsity_warmup_steps
-                )
-                return 1 - math.exp(log_one_minus_sparsity)
-            else:
-                raise ValueError(f"Unknown warmup type: {self.warmup_type}")
-        else:
-            return self.target_sparsity
-
-    def compute_loss(self, model, inputs, num_items_in_batch, return_outputs=False):
-        # remove labels
-        outputs = model(
-            **inputs,
-            target_sparsity=self.get_current_target_sparsity(self.state.global_step),
-        )
-
-        zs_loss = outputs.zs_loss
-        logits = outputs.logits
-
-        with torch.inference_mode():
-            ref_logits = self.ref_model(**inputs).logits
-
-        logits = torch.nn.functional.log_softmax(logits, dim=-1)
-        ref_logits = torch.nn.functional.log_softmax(ref_logits, dim=-1)
-
-        # Use a KL loss, since we want faithfulness above all
-        kl_loss = torch.nn.functional.kl_div(
-            logits, ref_logits, reduction="batchmean", log_target=True
-        )
-
-        loss = zs_loss + kl_loss
-
-        current_sparsity = 1 - outputs.z_sum / model.num_alpha_params
-        wandb.log(
-            {
-                "sparsity": current_sparsity,
-                "zs_loss": zs_loss,
-                "kl_loss": kl_loss,
-            },
-            step=self.state.global_step,
-        )
-
-        return (loss, outputs) if return_outputs else loss
-
-    # def training_step(
-    #     self,
-    #     model: nn.Module,
-    #     inputs: Dict[str, Union[torch.Tensor, Any]],
-    #     num_items_in_batch=None,
-    # ) -> torch.Tensor:
-    #     loss = super().training_step(model, inputs, num_items_in_batch)
-
-    #     for name, param in model.named_parameters():
-    #         if param.grad is not None:
-    #             print(f"Name {name}. Gradient: {param.grad}. Param: {param}")
-    #     # breakpoint()
-    #     return loss
 
 
 def get_optimizers(model, lr, reg_lr, num_training_steps, warmup_steps=0):
@@ -119,6 +35,8 @@ def get_optimizers(model, lr, reg_lr, num_training_steps, warmup_steps=0):
         [
             {
                 "params": optimizer_1_group,
+                "maximize": False,  # The log alphas try to minimize the loss
+                "lr": lr,
             },
             {
                 "params": optimizer_2_group,
@@ -126,13 +44,77 @@ def get_optimizers(model, lr, reg_lr, num_training_steps, warmup_steps=0):
                 "lr": reg_lr,
             },
         ],
-        lr=lr,
     )
     scheduler = get_linear_schedule_with_warmup(
         optimizer, num_warmup_steps=warmup_steps, num_training_steps=num_training_steps
     )
 
     return optimizer, scheduler
+
+
+class Pruner(Trainer):
+    def __init__(self, *args, **kwargs):
+        self.target_sparsity = kwargs.pop("target_sparsity", 0.0)
+        self.start_sparsity = kwargs.pop("start_sparsity", 0.0)
+        self.num_sparsity_warmup_steps = kwargs.pop("num_sparsity_warmup_steps", 0)
+        self.warmup_type = kwargs.pop("warmup_type", "linear")
+        self.ref_model = kwargs.pop("ref_model", None)
+        self.reg_lr = kwargs.pop("reg_lr", 0.1)  # Add reg_lr as a class parameter
+        super().__init__(*args, **kwargs)
+
+        # Initialize lambda clips
+        self.lambda_min = 0.0
+        self.lambda_max = float("inf")  # Or set a specific upper bound if desired
+
+    def get_current_target_sparsity(self, global_step):
+        if global_step < self.num_sparsity_warmup_steps:
+            if self.warmup_type == "linear":
+                return (
+                    self.start_sparsity
+                    + (self.target_sparsity - self.start_sparsity)
+                    * global_step
+                    / self.num_sparsity_warmup_steps
+                )
+            else:
+                raise ValueError(f"Unknown warmup type: {self.warmup_type}")
+        else:
+            return self.target_sparsity
+
+    def compute_loss(self, model, inputs, num_items_in_batch, return_outputs=False):
+        outputs = model(
+            **inputs,
+            target_sparsity=self.get_current_target_sparsity(self.state.global_step),
+        )
+
+        zs_loss = outputs.zs_loss
+        logits = outputs.logits
+
+        with torch.inference_mode():
+            ref_logits = self.ref_model(**inputs).logits
+
+        logits = torch.nn.functional.log_softmax(logits, dim=-1)
+        ref_logits = torch.nn.functional.log_softmax(ref_logits, dim=-1)
+
+        kl_loss = torch.nn.functional.kl_div(
+            logits, ref_logits, reduction="batchmean", log_target=True
+        )
+
+        loss = zs_loss + kl_loss
+
+        current_sparsity = 1 - outputs.z_sum / model.num_alpha_params
+        target_sparsity = self.get_current_target_sparsity(self.state.global_step)
+
+        wandb.log(
+            {
+                "sparsity": current_sparsity,
+                "target_sparsity": target_sparsity,
+                "zs_loss": zs_loss,
+                "kl_loss": kl_loss,
+            },
+            step=self.state.global_step,
+        )
+
+        return (loss, outputs) if return_outputs else loss
 
 
 def freeze_all_expecting_pruning_params(model):
@@ -153,21 +135,19 @@ def load_avg_activations(model, avg_activation_path, device):
 def main(
     data_dir="./data/tokenized/depth9_train",
     model_name="EleutherAI/pythia-160m",
-    # revision="main",
-    gradient_accumulation_steps=2,
+    gradient_accumulation_steps=1,
     max_steps=5000,
     bsz=8,
     warmup_steps=500,
     logging_steps=1,
     save_steps=125,
     output_dir="output",
-    avg_activation_path="avg_activations.pkl",
     seed=3407,
     report_to="wandb",
     lr=0.1,
     reg_lr=1,
     target_sparsity=0.5,
-    sparsity_warmup_steps=5000,
+    sparsity_warmup_steps=1000,
 ):
     print(locals())
 
@@ -180,12 +160,13 @@ def main(
         PPTNeoXForCausalLM.from_pretrained(model_name, attn_implementation="eager")
     ).cuda()
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    ref_model = deepcopy(model)
+    ref_model = AutoModelForCausalLM.from_pretrained(model_name).cuda().eval()
 
     data_collator = DataCollatorForLanguageModeling(
         tokenizer=tokenizer, mlm=False, pad_to_multiple_of=2048
     )
 
+    avg_activation_path = os.path.join(model_name, "avg_activations.pkl")
     load_avg_activations(model, avg_activation_path, "cuda")
     freeze_all_expecting_pruning_params(model)
 
@@ -217,7 +198,7 @@ def main(
         train_dataset=dataset,
         optimizers=optimizers,
         data_collator=data_collator,
-        target_sparsity=target_sparsity * 100,
+        target_sparsity=target_sparsity,
         num_sparsity_warmup_steps=sparsity_warmup_steps,
     )
 
