@@ -98,6 +98,21 @@ class PPTNeoXPreTrainedModel(PreTrainedModel):
     _skip_keys_device_placement = "past_key_values"
     _supports_flash_attn_2 = True
 
+    def set_log_alpha_params(self, log_alpha_heads: torch.Tensor):
+        """
+        Iterate over the model's layers and set the 'log alpha' parameters.
+        """
+        if log_alpha_heads.shape != (
+            len(self.layers),
+            self.layers[0].attention.log_alpha_heads.shape[0],
+        ):
+            raise ValueError(
+                f"Shape mismatch: Expected {len(self.layers), self.layers[0].attention.log_alpha_heads.shape[0]}, got {log_alpha_heads.shape}"
+            )
+
+        for i, layer in enumerate(self.layers):
+            layer.attention.log_alpha_heads.data = log_alpha_heads[i]
+
     def _init_weights(self, module):
         """Initialize the weights"""
         if isinstance(module, nn.Linear):
@@ -718,7 +733,6 @@ class GPTNeoXRotaryEmbedding(nn.Module):
 
 
 # copied from transformers.models.llama.modeling_llama.LlamaLinearScalingRotaryEmbedding.__init__
-# TODO @gante bring compatibility back
 class GPTNeoXLinearScalingRotaryEmbedding(GPTNeoXRotaryEmbedding):
     """GPTNeoXRotaryEmbedding extended with linear scaling. Credits to the Reddit user /u/kaiokendev"""
 

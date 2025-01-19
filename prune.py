@@ -19,6 +19,7 @@ from transformers import (
     DataCollatorForLanguageModeling,
 )
 from modeling_ppt_neox import PPTNeoXForCausalLM
+from utils import freeze_all_expecting_pruning_params, load_avg_activations
 
 
 def get_optimizers(model, lr, reg_lr, num_training_steps, warmup_steps=0):
@@ -115,21 +116,6 @@ class Pruner(Trainer):
         )
 
         return (loss, outputs) if return_outputs else loss
-
-
-def freeze_all_expecting_pruning_params(model):
-    for n, p in model.named_parameters():
-        if "log_alpha" in n or "sparsity_lambda" in n:
-            p.requires_grad = True
-        else:
-            p.requires_grad = False
-
-
-def load_avg_activations(model, avg_activation_path, device):
-    avg_activations = pickle.load(open(avg_activation_path, "rb"))
-    for n, m in model.named_modules():
-        if n in avg_activations:
-            m.set_avg_activation(torch.from_numpy(avg_activations[n]).to(device))
 
 
 def main(

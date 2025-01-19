@@ -43,16 +43,6 @@ def sample_z_from_u(u, log_alpha, limit_left=-0.1, limit_right=1.1, temperature=
     return (limit_right - limit_left) * s + limit_left
 
 
-# def sample_z_from_log_alpha(log_alpha, eps=1e-6):
-#     u = torch.autograd.Variable(
-#         torch.FloatTensor(log_alpha.shape).uniform_(eps, 1 - eps)
-#     ).to(log_alpha.device)
-#     z = sample_z_from_u(u, log_alpha)
-#     z = F.hardtanh(z, 0, 1)
-
-#     return z
-
-
 def sample_z_from_log_alpha(log_alpha, eps=1e-6):
     u = (
         torch.rand_like(log_alpha) * (1 - 2 * eps) + eps

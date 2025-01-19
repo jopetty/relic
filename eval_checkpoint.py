@@ -15,6 +15,9 @@ import json
 import fire
 import glob
 
+from modeling_ppt_neox import PPTNeoXForCausalLM
+from utils import load_avg_activations
+
 
 def id_estimate(X, fraction=0.9, verbose=False):
     """
@@ -164,13 +167,23 @@ def compute_stats(
     compute_id=True,
     sample_size=1024,
     bsz=1,
+    load_pruned_model=False,
+    log_alpha_path=None,
 ):
-    id_output_path = os.path.join(model_dir, "id.json")
+    if log_alpha_path is not None:
+        log_alpha_name = log_alpha_path.split("/")[-1].split(".")[0]
+    else:
+        log_alpha_name = None
+    id_output_path = os.path.join(
+        model_dir, f"id_{load_pruned_model}_{log_alpha_name}.json"
+    )
     if os.path.exists(id_output_path):
         print(f"{id_output_path} already exists.")
         compute_id = False
 
-    weight_norm_output_path = os.path.join(model_dir, "weight_norm.json")
+    weight_norm_output_path = os.path.join(
+        model_dir, f"weight_norm_{load_pruned_model}_{log_alpha_name}.json"
+    )
     if os.path.exists(weight_norm_output_path):
         print(f"{weight_norm_output_path} already exists.")
         compute_weight_norm = False
@@ -198,7 +211,18 @@ def compute_stats(
         .select(range(sample_size))
     )
 
-    model = AutoModelForCausalLM.from_pretrained(model_dir).cuda()
+    if load_pruned_model:
+        model = PPTNeoXForCausalLM.from_pretrained(model_dir).cuda().eval()
+        log_alpha_heads = torch.tensor(
+            np.load(log_alpha_path), dtype=torch.float32
+        ).cuda()
+        model.gpt_neox.set_log_alpha_params(log_alpha_heads)
+
+        avg_activation_path = os.path.join(model_dir, "avg_activations.pkl")
+        load_avg_activations(model, avg_activation_path, "cuda")
+    else:
+        model = AutoModelForCausalLM.from_pretrained(model_dir).cuda().eval()
+
     tokenizer = AutoTokenizer.from_pretrained("EleutherAI/pythia-160m")
     tokenizer.add_special_tokens({"pad_token": "<|padding|>"})
 
@@ -339,7 +363,10 @@ def compute_stats(
     if compute_loss:
         # write out loss
         loss = list(collated["loss"])
-        with open(model_dir + "loss.json", "w") as f:
+        with open(
+            os.path.join(model_dir, f"loss_{load_pruned_model}_{log_alpha_name}.json"),
+            "w",
+        ) as f:
             f.write(json.dumps(loss) + "\n")
 
     if compute_weight_norm:
@@ -352,8 +379,15 @@ def compute_stats(
             f.write(json.dumps(weight_norms) + "\n")
 
 
-def blimp_eval(model_dir, bsz=128):
-    if os.path.exists(os.path.join(model_dir, "blimp.json")):
+def blimp_eval(model_dir, bsz=128, load_pruned_model=False, log_alpha_path=None):
+    if log_alpha_path is not None:
+        log_alpha_name = log_alpha_path.split("/")[-1].split(".")[0]
+    else:
+        log_alpha_name = None
+
+    if os.path.exists(
+        os.path.join(model_dir, f"blimp_{load_pruned_model}_{log_alpha_path}.json")
+    ):
         print(f"{model_dir} blimp already exists.")
         return
 
@@ -361,7 +395,17 @@ def blimp_eval(model_dir, bsz=128):
     tokenizer = AutoTokenizer.from_pretrained("EleutherAI/pythia-160m")
     tokenizer.add_special_tokens({"pad_token": "<|padding|>"})
 
-    model = AutoModelForCausalLM.from_pretrained(model_dir).cuda()
+    if load_pruned_model:
+        model = PPTNeoXForCausalLM.from_pretrained(model_dir).cuda().eval()
+        log_alpha_heads = torch.tensor(
+            np.load(log_alpha_path), dtype=torch.float32
+        ).cuda()
+        model.gpt_neox.set_log_alpha_params(log_alpha_heads)
+
+        avg_activation_path = os.path.join(model_dir, "avg_activations_blimp.pkl")
+        load_avg_activations(model, avg_activation_path, "cuda")
+    else:
+        model = AutoModelForCausalLM.from_pretrained(model_dir).cuda()
 
     # tokenize sentence_good and sentence_bad
     def tokenize_examples(examples):
@@ -458,7 +502,9 @@ def blimp_eval(model_dir, bsz=128):
     correct = np.sum(list(tokenized["correct"])) / 67000
     correct = convert_np_to_py_type(correct)
 
-    with open(os.path.join(model_dir, "blimp.json"), "w") as f:
+    with open(
+        os.path.join(model_dir, f"blimp_{load_pruned_model}_{log_alpha_name}.json"), "w"
+    ) as f:
         f.write(json.dumps(correct) + "\n")
 
 
@@ -469,4 +515,4 @@ def main(super_dir, bsz=32, sample_size=32):
 
 
 if __name__ == "__main__":
-    fire.Fire({"main": main, "blimp": blimp_eval})
+    fire.Fire({"main": main, "blimp": blimp_eval, "compute_stats": compute_stats})
