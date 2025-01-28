@@ -75,15 +75,15 @@ LAUNCH_SLURM_PATH="/scratch/myh2014/formal-gym/run.slurm"
 #     done
 # done
 
-for task in crasp_100k dyck fom min s5
-do 
-    for model in EleutherAI/pythia-160m 
-    do
-        model_name=$(basename "$model")
-        echo "Task: $task. Model: $model_name"
-        sbatch "$LAUNCH_SLURM_PATH" "--model_name $model --data_dir ./data/tokenized/$task --output_dir ./output/optimal_language/$task/$model_name --save_steps 500 --max_steps 500"
-    done
-done
+# for task in crasp_100k dyck fom min s5
+# do 
+#     for model in EleutherAI/pythia-160m 
+#     do
+#         model_name=$(basename "$model")
+#         echo "Task: $task. Model: $model_name"
+#         sbatch "$LAUNCH_SLURM_PATH" "--model_name $model --data_dir ./data/tokenized/$task --output_dir ./output/optimal_language/$task/$model_name --save_steps 500 --max_steps 500"
+#     done
+# done
 
 # sbatch "$LAUNCH_SLURM_PATH" "--model_name EleutherAI/pythia-160m --data_dir ./data/tokenized/wikitext --output_dir ./output/transfer/wikitext/pythia-160 --save_steps 125 --max_steps 1000"
 

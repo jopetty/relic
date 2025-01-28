@@ -16,7 +16,7 @@ from transformers import AutoTokenizer
 from modeling_ppt_neox import PPTNeoXModel
 
 
-def save_avg_blimp_activation(initialize_from, max_num_examples=4096):
+def save_avg_blimp_activation(initialize_from, max_num_examples=2048):
     """
     If items are of different lengths, batch size should be 1
     """
@@ -60,9 +60,6 @@ def save_avg_blimp_activation(initialize_from, max_num_examples=4096):
     for n, m in model.named_modules():
         if hasattr(m, "get_avg_activation"):
             avg_activations[n] = m.get_avg_activation().cpu().numpy()
-            print(n)
-            print(avg_activations[n])
-            print()
 
     output_path = os.path.join(initialize_from, "avg_activations_blimp.pkl")
     pickle.dump(avg_activations, open(output_path, "wb+"))
@@ -72,11 +69,15 @@ def save_avg_activation(
     initialize_from,
     data_dir,
     bsz=16,
-    max_num_examples=4096,
+    max_num_examples=2048,
 ):
     """
     If items are of different lengths, batch size should be 1
     """
+    if os.path.exists(os.path.join(initialize_from, "avg_activations.pkl")):
+        print("Already exists")
+        return
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     model = (PPTNeoXModel.from_pretrained(initialize_from)).to(device)
@@ -136,12 +137,11 @@ def main(super_dir, data_dir=None, bsz=32, blimp=True):
         print(model_dir)
         if blimp:
             save_avg_blimp_activation(
-                dataset="./data/tokenized/blimp",
                 initialize_from=model_dir,
             )
         else:
             save_avg_activation(
-                dataset=data_dir,
+                data_dir=data_dir,
                 initialize_from=model_dir,
                 bsz=bsz,
             )

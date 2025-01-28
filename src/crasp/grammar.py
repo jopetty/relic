@@ -1,5 +1,6 @@
 import fire
 import numpy as np
+import os
 
 import random
 from nltk import PCFG
@@ -7,7 +8,7 @@ from nltk import PCFG
 import glob
 import ast
 import operator
-from tqdm import tqdm
+from tqdm import tqdm, trange
 
 
 CRASP_MIN_GRAMMAR = """
@@ -81,35 +82,205 @@ INTEGER -> '0' [0.1] | '1' [0.1] | '2' [0.1] | '3' [0.1] | '4' [0.1] | '5' [0.1]
 VAR -> 'x' [0.4] | 'y' [0.3] | 'z' [0.3]"""
 
 
-def generate_dyck_isabel(min_val, max_val, max_length=510):
+def generate_dyck(num_symbols, max_length=510):
+    """Generates a Dyck sequence with specified number of symbols.
+
+    Args:
+        num_symbols: The number of distinct symbol pairs (k in k-Dyck).
+        max_length: The maximum length of the generated sequence.
+
+    Returns:
+        A list representing the Dyck sequence, or None if generation fails
+        (e.g., due to exceeding max_length prematurely).
+    """
+
     result = []
     stack = []
-    symbols = np.arange(min_val, max_val)
-    distribution = [1 / len(symbols)] * len(symbols)
 
-    v = np.random.choice(symbols, p=distribution)
-    stack.append(v)
-    result.append(v)
-
-    while len(result) < max_length and len(stack) > 0:
-        if random.random() < 0.51:
-            v = stack.pop()
-            result.append(v)
+    while len(result) < max_length:
+        if not stack:  # If the stack is empty, we must open a new bracket
+            opening_symbol = np.random.randint(0, num_symbols)
+            result.append(opening_symbol)
+            stack.append(opening_symbol)
         else:
-            v = np.random.choice(symbols, p=distribution)
-            stack.append(v)
-            result.append(v)
+            if random.random() < 0.5:  # Decide whether to open or close
+                if len(result) >= max_length - 1:
+                    closing_symbol = stack.pop() + num_symbols
+                    result.append(closing_symbol)
+                    if not stack:
+                        break
+                    continue
+                opening_symbol = np.random.randint(0, num_symbols)
+                result.append(opening_symbol)
+                stack.append(opening_symbol)
+
+            else:
+                if stack:
+                    closing_symbol = stack.pop() + num_symbols
+                    result.append(closing_symbol)
+                else:
+                    break  # prevent infinite loop
+
+    if stack:  # if stack is not empty, then we did not finish correctly. Return none
+        return None
+    return result
+
+
+def generate_dyck_txt_file(file_dir, num_symbols=30, n=100000, target_length=2048):
+    """Generates a text file containing Dyck sequences.
+
+    Args:
+        file_dir: The directory to save the file.
+        num_symbols: The number of distinct symbol pairs (k in k-Dyck).
+        n: The number of sequences to generate.
+    """
+    import os
+
+    os.makedirs(file_dir, exist_ok=True)
+    with open(f"{file_dir}/dyck_sequences_{num_symbols}.txt", "w") as f:
+        for i in trange(n):
+            result = []
+            while len(result) < target_length:
+                new_seq = generate_dyck(num_symbols)
+                if new_seq is None:
+                    continue
+                result.extend(new_seq)
+
+            dyck_str = " ".join(
+                [str(x) for x in result[:target_length]]
+            )  # truncate to target length
+            f.write(f"{dyck_str}\n")
+
+
+def generate_repeated_token_sequences(
+    file_dir, num_symbols=30, k=10, n=100000, target_length=2048
+):
+    """Generates n strings of target_length, each composed of repetitions
+    of a *single* k-length random token sequence.
+
+    Args:
+        num_symbols: The number of distinct symbols.
+        k: The length of the repeating token sequence.
+        n: The number of sequences to generate.
+        target_length: The desired length of each generated string.
+        file_dir: The directory to save the generated sequences.
+    """
+
+    os.makedirs(file_dir, exist_ok=True)
+    with open(f"{file_dir}/repeated_token_sequences_{num_symbols}_{k}.txt", "w") as f:
+        for _ in trange(n):
+            # Generate the k-length token sequence *once* per output sequence
+            token_sequence = np.random.randint(0, num_symbols, size=k).tolist()
+            sequence = []
+            while len(sequence) < target_length:
+                sequence.extend(token_sequence)  # Repeat the same sequence
+            sequence = sequence[:target_length]  # Truncate to the target length
+            sequence_str = " ".join(map(str, sequence))
+            f.write(f"{sequence_str}\n")
+
+
+def generate_dyck_cross_serial(num_symbols, max_length=510, p=0.5):
+    """Generates a Dyck sequence with cross-serial dependencies,
+    meaning parentheses only need to be balanced, not necessarily nested.
+
+    Args:
+        num_symbols: The number of distinct symbol pairs (k in k-Dyck).
+        max_length: The maximum length of the generated sequence.
+
+    Returns:
+        A list representing the Dyck sequence with cross-serial dependencies,
+        or None if generation fails (e.g., exceeding max_length).
+    """
+
+    result = []
+    counts = [0] * num_symbols  # Keep track of open counts for each symbol
+
+    while len(result) < max_length:
+        if all(c == 0 for c in counts):
+            # If all counts are zero, we must open a new bracket
+            opening_symbol = np.random.randint(0, num_symbols)
+            result.append(opening_symbol)
+            counts[opening_symbol] += 1
+        else:
+            if random.random() < p:
+                if len(result) >= max_length - 1:
+                    for symbol in range(num_symbols):
+                        while counts[symbol] > 0:
+                            result.append(symbol + num_symbols)
+                            counts[symbol] -= 1
+                    if not all(c == 0 for c in counts):
+                        return None
+                    break
+                # Decide to open a new bracket
+                opening_symbol = np.random.randint(0, num_symbols)
+                result.append(opening_symbol)
+                counts[opening_symbol] += 1
+            else:
+                # Decide to close an existing bracket
+
+                open_symbols = [i for i, c in enumerate(counts) if c > 0]
+
+                if not open_symbols:
+                    # prevent infinite loop
+                    # force open a new bracket
+                    if len(result) >= max_length - 1:
+                        for symbol in range(num_symbols):
+                            while counts[symbol] > 0:
+                                result.append(symbol + num_symbols)
+                                counts[symbol] -= 1
+                        if not all(c == 0 for c in counts):
+                            return None
+                        break
+                    opening_symbol = np.random.randint(0, num_symbols)
+                    result.append(opening_symbol)
+                    counts[opening_symbol] += 1
+
+                else:
+                    closing_symbol = np.random.choice(open_symbols)
+                    result.append(closing_symbol + num_symbols)
+                    counts[closing_symbol] -= 1
+
+    if not all(c == 0 for c in counts):
+        return None
 
     return result
 
 
-def generate_dyck_txt_file(file_dir, n: int = 100000):
-    with open(f"{file_dir}/dyck_sequences.txt", "w") as f:
-        for i in range(n):
+def generate_dyck_txt_file_cross_serial(
+    file_dir, num_symbols=30, n=100000, target_length=2048, p=0.5
+):
+    """Generates a text file containing Dyck sequences with cross-serial dependencies.
+
+    Args:
+        file_dir: The directory to save the file.
+        num_symbols: The number of distinct symbol pairs (k in k-Dyck).
+        n: The number of sequences to generate.
+        target_length: desired sequence length.
+    """
+    import os
+
+    os.makedirs(file_dir, exist_ok=True)
+    print(num_symbols, p)
+    # if exists, return
+    if os.path.exists(f"{file_dir}/dyck_sequences_cross_serial_{num_symbols}_{p}.txt"):
+        print("File already exists. Skipping generation.")
+        return
+    with open(
+        f"{file_dir}/dyck_sequences_cross_serial_{num_symbols}_{p}.txt", "w"
+    ) as f:
+        for i in trange(n):
             result = []
-            while len(result) < 2048:
-                result.extend(generate_dyck_isabel(0, 60))
-            dyck_str = " ".join([str(x) for x in result])
+            while len(result) < target_length:
+                new_seq = generate_dyck_cross_serial(
+                    num_symbols, max_length=target_length - len(result), p=p
+                )
+                if new_seq is None:
+                    continue
+                result.extend(new_seq)
+
+            dyck_str = " ".join(
+                [str(x) for x in result[:target_length]]
+            )  # truncate to target length
             f.write(f"{dyck_str}\n")
 
 
@@ -359,6 +530,8 @@ def main():
             "generate": generate_grammar,
             "eval": eval_txt_file,
             "generate_dyck": generate_dyck_txt_file,
+            "generate_rep": generate_repeated_token_sequences,
+            "generate_cross": generate_dyck_txt_file_cross_serial,
         }
     )
 

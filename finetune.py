@@ -59,12 +59,13 @@ def main(
     lr=5e-5,
     min_lr_rate=0.1,
     override_packing=False,
+    use_callback=False,
 ):
     print(locals())
     set_seed(seed)
 
     callback = SaveAtStepsCallback(
-        save_steps=list(range(0, 4000, 100)) + [save_steps],
+        save_steps=list(range(0, 4000, 100)) + list(range(4000, 10000, 1000)),
         output_dir=output_dir,
     )
 
@@ -76,6 +77,14 @@ def main(
             data_files=[
                 f"/vast/work/public/ml-datasets/c4/en/c4-train.0000{i}-of-01024.json"
                 for i in range(4)
+            ],
+        )
+    elif data_dir == "c4_2":
+        dataset = datasets.load_dataset(
+            "json",
+            data_files=[
+                f"/vast/work/public/ml-datasets/c4/en/c4-train.0000{i}-of-01024.json"
+                for i in range(4, 8)
             ],
         )
     elif data_dir == "babylm":
@@ -118,7 +127,6 @@ def main(
         max_steps=max_steps,
         logging_steps=logging_steps,
         save_strategy="steps",
-        # save_strategy="no",
         save_steps=save_steps,
         output_dir=output_dir,
         seed=seed,
@@ -137,7 +145,8 @@ def main(
         tokenizer=tokenizer,
         max_seq_length=max_seq_length,
     )
-    trainer.add_callback(callback)
+    if use_callback:
+        trainer.add_callback(callback)
 
     trainer.train()
 

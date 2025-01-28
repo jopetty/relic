@@ -29,7 +29,7 @@ def main(super_dir):
     alpha_head_stack = np.zeros((12, 12, num_masks))
     for i, dir in enumerate(dirs):
         log_alpha_heads = get_log_alpha_heads(
-            os.path.join(dir, "checkpoint-5000/", "model.safetensors")
+            os.path.join(dir, "checkpoint-1500/", "model.safetensors")
         )
         if log_alpha_heads is not None:
             alpha_head_stack[:, :, i] = log_alpha_heads
