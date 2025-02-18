@@ -36,7 +36,7 @@ def main(
     if isinstance(data_dir, str):
         data_dir = pathlib.Path(data_dir)
 
-    grammar_path = data_dir / grammar_file
+    grammar_path = data_dir / "grammars" / grammar_file
 
     samples_dir = data_dir / "samples"
     grammar_samples_dir = samples_dir / grammar_file.stem
