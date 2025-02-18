@@ -34,7 +34,9 @@ def grammar(
         data_dir=data_dir,
     )["grammar"]
 
-    print(f"Sampled grammar:\n{g.grammar_obj}")
+    print(
+        f"Sampled grammar [n_term: {g.n_terminals}, n_nonterm: {g.n_nonterminals}, n_lex_rules:{g.n_lexical_productions}, n_nonlex_rules: {g.n_non_lexical_productions}]\n{g.grammar_obj}"
+    )
 
 
 if __name__ == "__main__":
