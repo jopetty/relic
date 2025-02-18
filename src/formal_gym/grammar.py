@@ -45,6 +45,32 @@ class Grammar:
         terminals = [r.rhs()[0] for r in lexical_rules]
         return terminals
 
+    @property
+    def nonterminals(self) -> List[str]:
+        non_lexical_rules = [
+            t for t in self.grammar_obj.productions() if not t.is_lexical()
+        ]
+        lhs_list = [r.lhs() for r in non_lexical_rules]
+        rhsa_list = [r.rhs()[0] for r in non_lexical_rules]
+        rhsb_list = [r.rhs()[1] for r in non_lexical_rules]
+        return lhs_list + rhsa_list + rhsb_list
+
+    @property
+    def n_terminals(self) -> int:
+        return len(set(self.terminals))
+
+    @property
+    def n_nonterminals(self) -> int:
+        return len(set(self.nonterminals))
+
+    @property
+    def n_lexical_productions(self) -> int:
+        return len([r for r in self.grammar_obj.productions() if r.is_lexical()])
+
+    @property
+    def n_non_lexical_productions(self) -> int:
+        return len([r for r in self.grammar_obj.productions() if not r.is_lexical()])
+
     @classmethod
     def from_grammar(cls, grammar_file: pathlib.Path | str):
         grammar = cls()
