@@ -11,6 +11,8 @@ import pyrootutils
 import formal_gym.grammar as fg_grammar
 import formal_gym.utils.utils as fg_utils
 
+GType = fg_grammar.Grammar.Type
+
 
 class Terminal(str):
     def __repr__(self):
@@ -154,9 +156,10 @@ def compute_trim_set(
     return trim
 
 
-def save_and_load_grammar(
+def load_grammar(
     productions: Sequence[Production],
     filepath: pathlib.Path,
+    save_grammar: bool = True,
 ) -> dict[str, Any]:
     """
     Save a grammar to a file and load it back.
@@ -181,15 +184,20 @@ def save_and_load_grammar(
     filepath.parent.mkdir(parents=True, exist_ok=True)
 
     grammar_string = "\n".join([f"{p}" for p in sorted_productions])
-    with open(filepath, "w") as f:
-        f.write(grammar_string)
 
-    log.info(f"Grammar saved to {filepath}")
-
-    return {
-        "filepath": filepath,
-        "grammar": fg_grammar.Grammar.from_grammar(filepath),
+    grammar_dict = {
+        "grammar": fg_grammar.Grammar.from_string(
+            grammar_string, grammar_type=GType.CFG
+        ),
     }
+
+    if save_grammar:
+        with open(filepath, "w") as f:
+            f.write(grammar_string)
+        log.info(f"Grammar saved to {filepath}")
+        grammar_dict |= {"filepath": filepath}
+
+    return grammar_dict
 
 
 def sample_cfg_uniform(
@@ -233,7 +241,7 @@ def sample_cfg_uniform(
                     productions.append(Production(lhs=a, rhs=(b, c)))
     filename = f"{name}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.cfg"
     filepath = data_dir / filename
-    sampled_grammar = save_and_load_grammar(productions, filepath)
+    sampled_grammar = load_grammar(productions, filepath)
     return sampled_grammar
 
 
@@ -269,7 +277,7 @@ def sample_cfg_full(
                 productions.append(Production(lhs=a, rhs=(b, c)))
     filename = f"{name}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.cfg"
     filepath = data_dir / filename
-    sampled_grammar = save_and_load_grammar(productions, filepath)
+    sampled_grammar = load_grammar(productions, filepath)
     return sampled_grammar
 
 
@@ -280,6 +288,7 @@ def sample_cfg_raw(
     n_binary_rules: int,
     data_dir: pathlib.Path = PROJECT_ROOT / "data",
     name: str = "sample_raw",
+    save_grammar: bool = True,
 ) -> dict[str, Any]:
     assert n_terminals > 0, "Number of terminals must be greater than 0"
     assert n_nonterminals > 0, "Number of nonterminals must be greater than 0"
@@ -321,7 +330,7 @@ def sample_cfg_raw(
     filename = f"{name}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.cfg"
     filepath = data_dir / filename
 
-    sampled_grammar = save_and_load_grammar(productions, filepath)
+    sampled_grammar = load_grammar(productions, filepath, save_grammar=save_grammar)
     return sampled_grammar | {
         "productions": productions,
         "terminals": terminals,
@@ -334,28 +343,41 @@ def sample_cfg_trim(
     n_nonterminals: int,
     n_lexical_rules: int,
     n_binary_rules: int,
-    data_dir: pathlib.Path = PROJECT_ROOT / "data",
-    name: str = "sample_trim",
+    data_dir: pathlib.Path,
+    name: str = "grammar",
+    save_raw_grammar: bool = False,
+    max_tries: int = 100,
 ) -> dict[str, Any]:
-    raw_grammar = sample_cfg_raw(
-        n_terminals=n_terminals,
-        n_nonterminals=n_nonterminals,
-        n_lexical_rules=n_lexical_rules,
-        n_binary_rules=n_binary_rules,
-        data_dir=data_dir,
-    )
+    has_generated_nonempty_grammar = False
 
-    print(raw_grammar["grammar"].grammar_obj)
+    while not has_generated_nonempty_grammar and max_tries > 0:
+        raw_grammar = sample_cfg_raw(
+            n_terminals=n_terminals,
+            n_nonterminals=n_nonterminals,
+            n_lexical_rules=n_lexical_rules,
+            n_binary_rules=n_binary_rules,
+            data_dir=data_dir,
+            save_grammar=save_raw_grammar,
+        )
 
-    trim_set = compute_trim_set(
-        productions=raw_grammar["productions"],
-        nonterminals=raw_grammar["nonterminals"],
-        terminals=raw_grammar["terminals"],
-    )
+        trim_set = compute_trim_set(
+            productions=raw_grammar["productions"],
+            nonterminals=raw_grammar["nonterminals"],
+            terminals=raw_grammar["terminals"],
+        )
 
-    if len(trim_set) == 0:
-        log.error("Empty language!")
-        raise ValueError("Empty language!")
+        if len(trim_set) != 0:
+            has_generated_nonempty_grammar = True
+        else:
+            log.warning("Empty language!")
+            max_tries -= 1
+
+        if max_tries == 0:
+            log.error(
+                "Max tries exceeded! Unable to generate grammar with "
+                "provided hyperparameters."
+            )
+            raise SystemExit
 
     prods = compute_usable_prods(
         trim_set=trim_set, productions=raw_grammar["productions"]
@@ -366,22 +388,16 @@ def sample_cfg_trim(
         if prod.is_lexical:
             terminals.add(prod.rhs[0])
 
-    filename = f"{name}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.cfg"
-    filepath = data_dir / filename
+    grammar_name = f"{name}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
+    grammar_path = data_dir / grammar_name
+    grammar_path.mkdir(parents=True, exist_ok=True)
+    filename = f"{grammar_name}.cfg"
+    filepath = grammar_path / filename
 
-    sampled_grammar = save_and_load_grammar(productions=prods, filepath=filepath)
-    return sampled_grammar
-
-
-if __name__ == "__main__":
-    terminal1 = Terminal("t1")
-    terminal2 = Terminal("t2")
-    nonterminal = Nonterminal("NT")
-
-    prod1 = Production(lhs=nonterminal, rhs=(terminal1, terminal2))
-
-    print(terminal1)
-    print(terminal2)
-    print(nonterminal)
-    print(prod1)
-    print(prod1.length)
+    sampled_grammar = load_grammar(
+        productions=prods, filepath=filepath, save_grammar=True
+    )
+    return sampled_grammar | {
+        "grammar_path": grammar_path,
+        "grammar_name": grammar_name,
+    }

@@ -7,6 +7,7 @@
 
 import pathlib
 import random
+import statistics
 from collections import defaultdict
 from enum import Enum
 from typing import Iterator, List, Optional, Set, Tuple
@@ -68,11 +69,11 @@ class Grammar:
         return len([r for r in self.grammar_obj.productions() if r.is_lexical()])
 
     @property
-    def n_non_lexical_productions(self) -> int:
+    def n_nonlexical_productions(self) -> int:
         return len([r for r in self.grammar_obj.productions() if not r.is_lexical()])
 
     @classmethod
-    def from_grammar(cls, grammar_file: pathlib.Path | str):
+    def from_file(cls, grammar_file: pathlib.Path | str):
         grammar = cls()
 
         if isinstance(grammar_file, str):
@@ -97,6 +98,19 @@ class Grammar:
             else:
                 raise ValueError(f"Unknown grammar type: {ext}")
 
+        grammar.parser = nltk.ChartParser(grammar.grammar_obj)
+        return grammar
+
+    @classmethod
+    def from_string(cls, grammar_str: str, grammar_type: Type):
+        grammar = cls()
+        if grammar_type == cls.Type.CFG:
+            grammar.type = cls.Type.CFG
+        else:
+            raise ValueError("Only CFGs are supported for now.")
+
+        grammar.grammar_obj = nltk.CFG.fromstring(grammar_str)
+        grammar.parser = nltk.ChartParser(grammar.grammar_obj)
         return grammar
 
     def generate(self, n_samples: int, sep: str = "") -> Iterator[str]:
@@ -173,12 +187,21 @@ class Grammar:
         return list(unique_negative_samples)
 
     def test_sample(self, sample: str) -> bool:
-        if self.type != self.Type.CFG:
-            raise ValueError("Testing samples is only supported for CFGs.")
+        return self.num_parses(sample) > 0
 
-        parser = nltk.ChartParser(self.grammar_obj)
-        parses = list(parser.parse(sample.split(" ")))
-        return len(parses) > 0
+    def mean_sample_parse_depth(self, sample: str) -> int | None:
+        parses = list(self.parser.parse(sample.split(" ")))
+        if len(parses) == 0:
+            return None
+        else:
+            return statistics.mean([p.height() for p in parses])
+
+    def num_parses(self, sample: str) -> int:
+        parses = list(self.parser.parse(sample.split(" ")))
+        return len(parses)
+
+    def parse(self, sample: str) -> list[nltk.Tree]:
+        return list(self.parser.parse(sample.split(" ")))
 
     def _generate_derivation(self, nonterminal: Nonterminal, sep: str) -> str:
         sentence: List[str] = []
@@ -380,6 +403,19 @@ class ContextFreeGrammar(Grammar):
         parser = nltk.ChartParser(self.as_cfg)
         parses = list(parser.parse(sample.split(" ")))
         return len(parses) > 0
+
+    def generate_negative_sample_of_length(
+        self,
+        length: int,
+        max_trials: int = 20,
+        sep: str = " ",
+    ):
+        while max_trials > 0:
+            max_trials -= 1
+            sample = sep.join(random.choices(list(self.terminals), k=length))
+            if not self.test_sample(sample):
+                return sample
+        return None
 
     def generate_negative_sample(
         self,
