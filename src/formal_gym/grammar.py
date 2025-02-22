@@ -313,6 +313,8 @@ class ContextFreeGrammar(Grammar):
 
         self.can_terminate = self._find_terminating_nts()
 
+        self.parser = nltk.ChartParser(self.as_cfg)
+
     def _find_terminating_nts(self) -> Set[Nonterminal]:
         can_terminate = set()
 
@@ -397,12 +399,6 @@ class ContextFreeGrammar(Grammar):
             return self.generate(sep=sep, max_depth=max_depth)
         else:
             return sep.join(result)
-
-    def test_sample(self, sample: str) -> bool:
-        """Returns true if the sample is parsable by the grammar."""
-        parser = nltk.ChartParser(self.as_cfg)
-        parses = list(parser.parse(sample.split(" ")))
-        return len(parses) > 0
 
     def generate_negative_sample_of_length(
         self,

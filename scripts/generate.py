@@ -34,15 +34,30 @@ def grammar(
     n_nonterminals=10,
     n_lexical_rules=10,
     n_nonlexical_rules=10,
+    type: str = "cfg",
 ):
     grammars_dir = PROJECT_ROOT / "data" / "grammars"
-    grammar_dict = fg_metagrammar.sample_cfg_trim(
-        n_terminals=n_terminals,
-        n_nonterminals=n_nonterminals,
-        n_lexical_rules=n_lexical_rules,
-        n_binary_rules=n_nonlexical_rules,
-        data_dir=grammars_dir,
-    )
+
+    if type == "cfg":
+        grammar_dict = fg_metagrammar.sample_cfg_trim(
+            n_terminals=n_terminals,
+            n_nonterminals=n_nonterminals,
+            n_lexical_rules=n_lexical_rules,
+            n_binary_rules=n_nonlexical_rules,
+            data_dir=grammars_dir,
+        )
+    elif type == "reg":
+        grammar_dict = fg_metagrammar.sample_reg_trim(
+            n_terminals=n_terminals,
+            n_nonterminals=n_nonterminals,
+            n_lexical_rules=n_lexical_rules,
+            n_binary_rules=n_nonlexical_rules,
+            data_dir=grammars_dir,
+        )
+    else:
+        raise ValueError(
+            f"Unknown grammar type: `{type}`; valid types are `cfg` and `reg`"
+        )
     g = grammar_dict["grammar"]
     grammar_stats = {
         "n_terminals": g.n_terminals,
@@ -60,6 +75,8 @@ def grammar(
     print(g.grammar_obj)
 
     pprint.pprint(grammar_stats)
+
+    return grammar_dict
 
 
 def samples(
@@ -160,14 +177,19 @@ def samples(
             possible_strings = n_terminals**possible_string_exp
 
         log.info("Generating longer samples")
-        for _ in tqdm.tqdm(
-            range(
-                samples_per_length * max_length * max_tries_per_sample * pos_multiplier
-            )
-        ):
-            sample = g.generate(max_depth=max_recursion_depth)
-            if sample is not None:
-                pos_samples.add(sample)
+        total_iterations = (
+            samples_per_length * max_length * max_tries_per_sample * pos_multiplier
+        )
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            results = []
+            futures = [
+                executor.submit(g.generate, max_depth=max_recursion_depth)
+                for _ in range(total_iterations)
+            ]
+            for future in tqdm.tqdm(as_completed(futures), total=total_iterations):
+                sample = future.result()
+                results.append(sample)
+        pos_samples |= set(results)
         ending_count = len(pos_samples)
         log.info(
             f"Generated {ending_count - starting_count} new positive samples"
@@ -238,7 +260,6 @@ def filtered_samples(
 
     log.info("Annotating positive samples with parse information")
     with ThreadPoolExecutor(max_workers=8) as executor:
-        # Submit all tasks
         futures = {executor.submit(annotate_sample, s): s for s in pos_samples}
         sample_dicts = []
         for future in tqdm.tqdm(as_completed(futures), total=len(pos_samples)):
@@ -321,10 +342,17 @@ def filtered_samples(
     compressed_size = compressed_path.stat().st_size
     compression_ratio = uncompressed_size / compressed_size
 
+    pos_parses = sample_df[sample_df["type"] == "positive"]["num_parses"]
+    pos_depths = sample_df[sample_df["type"] == "positive"]["mean_parse_height"]
+
     samples_stats = {
         "uncompressed_size": uncompressed_size,
         "compressed_size": compressed_size,
         "compression_ratio": compression_ratio,
+        "mean_positive_parses": pos_parses.mean().item(),
+        "median_positive_parses": pos_parses.median().item(),
+        "mean_positive_depth": pos_depths.mean().item(),
+        "median_positive_depth": pos_depths.median().item(),
     }
 
     samples_stats_file = grammar_path / "filtered_samples_stats.json"
@@ -332,6 +360,46 @@ def filtered_samples(
         json.dump(samples_stats, f, indent=4)
 
     pprint.pprint(samples_stats)
+
+
+def all(
+    # Grammar params
+    n_terminals=100,
+    n_nonterminals=100,
+    n_lexical_rules=100,
+    n_nonlexical_rules=100,
+    # Sample params
+    max_length: int = 50,
+    samples_per_length: int = 10,
+    gen_positive: bool = True,
+    gen_negative: bool = True,
+    max_tries_per_sample: int = 10,
+    max_recursion_depth: int = 100,
+    pos_multiplier: int = 10000,
+):
+    grammar_dict = grammar(
+        n_terminals=n_terminals,
+        n_nonterminals=n_nonterminals,
+        n_lexical_rules=n_lexical_rules,
+        n_nonlexical_rules=n_nonlexical_rules,
+    )
+
+    samples(
+        grammar_name=grammar_dict["grammar_name"],
+        max_length=max_length,
+        samples_per_length=samples_per_length,
+        gen_positive=gen_positive,
+        gen_negative=gen_negative,
+        max_tries_per_sample=max_tries_per_sample,
+        max_recursion_depth=max_recursion_depth,
+        pos_multiplier=pos_multiplier,
+    )
+
+    filtered_samples(
+        grammar_name=grammar_dict["grammar_name"],
+        max_length=max_length,
+        samples_per_length=samples_per_length,
+    )
 
 
 if __name__ == "__main__":

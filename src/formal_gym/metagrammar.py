@@ -338,6 +338,69 @@ def sample_cfg_raw(
     }
 
 
+def sample_reg_raw(
+    n_terminals: int,
+    n_nonterminals: int,
+    n_lexical_rules: int,
+    n_binary_rules: int,
+    data_dir: pathlib.Path = PROJECT_ROOT / "data",
+    name: str = "sample_raw",
+    save_grammar: bool = True,
+) -> dict[str, Any]:
+    assert n_terminals > 0, "Number of terminals must be greater than 0"
+    assert n_nonterminals > 0, "Number of nonterminals must be greater than 0"
+    assert n_lexical_rules > 0, "Number of lexical rules must be greater than 0"
+    assert n_binary_rules > 0, "Number of binary rules must be greater than 0"
+
+    symbol_dict = get_symbols(n_terminals, n_nonterminals)
+    terminals = symbol_dict["terminals"]
+    nonterminals = symbol_dict["nonterminals"]
+
+    lprods = set()
+    bprods = set()
+
+    if n_lexical_rules > n_terminals * n_nonterminals:
+        log.warning(
+            f"{n_lexical_rules} lexical rules requested, but only",
+            f" {n_terminals * n_nonterminals} possible",
+        )
+        n_lexical_rules = n_terminals * n_nonterminals
+
+    while len(lprods) < n_lexical_rules:
+        a = random.choice(nonterminals[1:])
+        b = random.choice(terminals)
+        lprods.add(Production(lhs=a, rhs=(b,)))
+
+    if n_binary_rules > n_nonterminals * (n_nonterminals - 1) * (n_nonterminals - 1):
+        log.warning(
+            f"{n_binary_rules} binary rules requested, but only ",
+            f"{n_nonterminals * (n_nonterminals - 1) * (n_nonterminals - 1)} possible",
+        )
+        n_binary_rules = n_nonterminals * (n_nonterminals - 1) * (n_nonterminals - 1)
+
+    while len(bprods) < n_binary_rules:
+        a = random.choice(nonterminals)
+        b = random.choice(nonterminals[1:])
+        c = random.choice(terminals)
+
+        print(a)
+        print(b)
+        print(c)
+
+        bprods.add(Production(lhs=a, rhs=(b, c)))
+
+    productions = list(lprods) + list(bprods)
+    filename = f"{name}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}.cfg"
+    filepath = data_dir / filename
+
+    sampled_grammar = load_grammar(productions, filepath, save_grammar=save_grammar)
+    return sampled_grammar | {
+        "productions": productions,
+        "terminals": terminals,
+        "nonterminals": nonterminals,
+    }
+
+
 def sample_cfg_trim(
     n_terminals: int,
     n_nonterminals: int,
@@ -392,6 +455,71 @@ def sample_cfg_trim(
     grammar_path = data_dir / grammar_name
     grammar_path.mkdir(parents=True, exist_ok=True)
     filename = f"{grammar_name}.cfg"
+    filepath = grammar_path / filename
+
+    sampled_grammar = load_grammar(
+        productions=prods, filepath=filepath, save_grammar=True
+    )
+    return sampled_grammar | {
+        "grammar_path": grammar_path,
+        "grammar_name": grammar_name,
+    }
+
+
+def sample_reg_trim(
+    n_terminals: int,
+    n_nonterminals: int,
+    n_lexical_rules: int,
+    n_binary_rules: int,
+    data_dir: pathlib.Path,
+    name: str = "grammar",
+    save_raw_grammar: bool = False,
+    max_tries: int = 100,
+) -> dict[str, Any]:
+    has_generated_nonempty_grammar = False
+
+    while not has_generated_nonempty_grammar and max_tries > 0:
+        raw_grammar = sample_reg_raw(
+            n_terminals=n_terminals,
+            n_nonterminals=n_nonterminals,
+            n_lexical_rules=n_lexical_rules,
+            n_binary_rules=n_binary_rules,
+            data_dir=data_dir,
+            save_grammar=save_raw_grammar,
+        )
+
+        trim_set = compute_trim_set(
+            productions=raw_grammar["productions"],
+            nonterminals=raw_grammar["nonterminals"],
+            terminals=raw_grammar["terminals"],
+        )
+
+        if len(trim_set) != 0:
+            has_generated_nonempty_grammar = True
+        else:
+            log.warning("Empty language!")
+            max_tries -= 1
+
+        if max_tries == 0:
+            log.error(
+                "Max tries exceeded! Unable to generate grammar with "
+                "provided hyperparameters."
+            )
+            raise SystemExit
+
+    prods = compute_usable_prods(
+        trim_set=trim_set, productions=raw_grammar["productions"]
+    )
+
+    terminals = set()
+    for prod in prods:
+        if prod.is_lexical:
+            terminals.add(prod.rhs[0])
+
+    grammar_name = f"{name}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
+    grammar_path = data_dir / grammar_name
+    grammar_path.mkdir(parents=True, exist_ok=True)
+    filename = f"{grammar_name}.reg"
     filepath = grammar_path / filename
 
     sampled_grammar = load_grammar(
