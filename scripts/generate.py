@@ -30,10 +30,10 @@ PROJECT_ROOT = path = pyrootutils.find_root(
 
 
 def grammar(
-    n_terminals=10,
-    n_nonterminals=10,
-    n_lexical_rules=10,
-    n_nonlexical_rules=10,
+    n_terminals=1000,
+    n_nonterminals=1000,
+    n_lexical_rules=1000,
+    n_nonlexical_rules=1000,
     type: str = "cfg",
 ):
     grammars_dir = PROJECT_ROOT / "data" / "grammars"
@@ -72,7 +72,7 @@ def grammar(
         json.dump(grammar_stats, f, indent=4)
 
     print("Grammar:")
-    print(g.grammar_obj)
+    print(g.as_cfg)
 
     pprint.pprint(grammar_stats)
 
@@ -87,7 +87,7 @@ def samples(
     gen_negative: bool = True,
     max_tries_per_sample: int = 10,
     max_recursion_depth: int = 100,
-    pos_multiplier: int = 10000,
+    pos_multiplier: int = 1000,
 ):
     grammars_dir = PROJECT_ROOT / "data" / "grammars"
 
@@ -96,7 +96,7 @@ def samples(
     if not grammar_path.exists():
         raise FileNotFoundError(f"Grammar director `{grammar_name}` not found")
 
-    g = fg_grammar.ContextFreeGrammar.from_file(grammar_file)
+    g = fg_grammar.Grammar.from_file(grammar_file)
 
     if gen_negative:
         neg_sample_file = grammar_path / "negative_samples.txt"
@@ -115,7 +115,7 @@ def samples(
         terminals: list[str] = list(set(g.terminals))
         possible_strings: int = n_terminals**possible_string_exp
 
-        while possible_string_exp < 3:
+        while possible_strings < 100_000:
             log.info(f"Testing short strings of length {possible_string_exp}")
             # generate all possible strings of length `length`
             for possible_sample in itertools.product(
@@ -180,16 +180,10 @@ def samples(
         total_iterations = (
             samples_per_length * max_length * max_tries_per_sample * pos_multiplier
         )
-        with ThreadPoolExecutor(max_workers=8) as executor:
-            results = []
-            futures = [
-                executor.submit(g.generate, max_depth=max_recursion_depth)
-                for _ in range(total_iterations)
-            ]
-            for future in tqdm.tqdm(as_completed(futures), total=total_iterations):
-                sample = future.result()
-                results.append(sample)
-        pos_samples |= set(results)
+
+        for _ in tqdm.tqdm(range(total_iterations)):
+            sample = g.generate(max_depth=max_recursion_depth)
+            pos_samples.add(sample)
         ending_count = len(pos_samples)
         log.info(
             f"Generated {ending_count - starting_count} new positive samples"
@@ -364,10 +358,10 @@ def filtered_samples(
 
 def all(
     # Grammar params
-    n_terminals=100,
-    n_nonterminals=100,
-    n_lexical_rules=100,
-    n_nonlexical_rules=100,
+    n_terminals=1000,
+    n_nonterminals=1000,
+    n_lexical_rules=1000,
+    n_nonlexical_rules=1000,
     # Sample params
     max_length: int = 50,
     samples_per_length: int = 10,
@@ -375,7 +369,7 @@ def all(
     gen_negative: bool = True,
     max_tries_per_sample: int = 10,
     max_recursion_depth: int = 100,
-    pos_multiplier: int = 10000,
+    pos_multiplier: int = 1000,
 ):
     grammar_dict = grammar(
         n_terminals=n_terminals,
