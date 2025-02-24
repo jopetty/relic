@@ -37,28 +37,31 @@ def openai_batch(
     else:
         batch_ids = [batch_id]
 
-    client = openai.OpenAI()
-    for batch_id in batch_ids:
-        input_path = grammar_path / f"{batch_id}_inputs.jsonl"
-        output_path = grammar_path / f"{batch_id}_results.jsonl"
+    if not batch_ids:
+        log.info("No undownloaded batch jobs found.")
+    else:
+        client = openai.OpenAI()
+        for batch_id in batch_ids:
+            input_path = grammar_path / f"{batch_id}_inputs.jsonl"
+            output_path = grammar_path / f"{batch_id}_results.jsonl"
 
-        if not (input_path.exists() and output_path.exists()):
-            batch_results = client.batches.retrieve(batch_id)
+            if not (input_path.exists() and output_path.exists()):
+                batch_results = client.batches.retrieve(batch_id)
 
-            if batch_results.status == "completed":
-                log.info(batch_results)
+                if batch_results.status == "completed":
+                    log.info(batch_results)
 
-                input_file = client.files.content(batch_results.input_file_id)
-                output_file = client.files.content(batch_results.output_file_id)
+                    input_file = client.files.content(batch_results.input_file_id)
+                    output_file = client.files.content(batch_results.output_file_id)
 
-                log.info(f"Writing batch inputs to {input_path}")
-                with open(input_path, "w") as f:
-                    f.write(input_file.text)
-                log.info(f"Writing batch results to {output_path}")
-                with open(output_path, "w") as f:
-                    f.write(output_file.text)
-            else:
-                log.warning("Batch job not completed yet.")
+                    log.info(f"Writing batch inputs to {input_path}")
+                    with open(input_path, "w") as f:
+                        f.write(input_file.text)
+                    log.info(f"Writing batch results to {output_path}")
+                    with open(output_path, "w") as f:
+                        f.write(output_file.text)
+                else:
+                    log.warning("Batch job not completed yet.")
 
 
 if __name__ == "__main__":
