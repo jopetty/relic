@@ -3,6 +3,7 @@ import itertools
 import json
 import logging
 import pprint
+import random
 import shutil
 import statistics
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -14,6 +15,7 @@ import tqdm
 
 import formal_gym.grammar as fg_grammar
 import formal_gym.metagrammar as fg_metagrammar
+import formal_gym.prompt as fg_prompt
 import formal_gym.utils.utils as fg_utils
 
 logging.basicConfig(
@@ -28,12 +30,18 @@ PROJECT_ROOT = path = pyrootutils.find_root(
     search_from=__file__, indicator=".project-root"
 )
 
+# Define some starting constants for grammar hyperparams.
+N_TERMINALS = 1000
+N_NONTERMINALS = 2000
+N_LEXICAL_RULES = 2000
+N_NONLEXICAL_RULES = 2000
+
 
 def grammar(
-    n_terminals=1000,
-    n_nonterminals=1000,
-    n_lexical_rules=1000,
-    n_nonlexical_rules=1000,
+    n_terminals=N_TERMINALS,
+    n_nonterminals=N_NONTERMINALS,
+    n_lexical_rules=N_LEXICAL_RULES,
+    n_nonlexical_rules=N_NONLEXICAL_RULES,
     type: str = "cfg",
 ):
     grammars_dir = PROJECT_ROOT / "data" / "grammars"
@@ -87,7 +95,7 @@ def samples(
     gen_negative: bool = True,
     max_tries_per_sample: int = 10,
     max_recursion_depth: int = 100,
-    pos_multiplier: int = 1000,
+    pos_multiplier: int = 100,
 ):
     grammars_dir = PROJECT_ROOT / "data" / "grammars"
 
@@ -237,6 +245,16 @@ def filtered_samples(
     pos_samples = [s for s in pos_samples if len(s.split(" ")) <= max_length]
     neg_samples = [s for s in neg_samples if len(s.split(" ")) <= max_length]
 
+    # Keep only 2*samples_per_length samples of each length to speed up parsing
+    pos_samples_df = pd.DataFrame(pos_samples, columns=["sample"])
+    pos_samples_df["length"] = pos_samples_df["sample"].apply(
+        lambda x: len(x.split(" "))
+    )
+    pos_samples_df = pos_samples_df.groupby(["length"], group_keys=False).apply(
+        lambda x: x.sample(min(len(x), 2 * samples_per_length))
+    )
+    pos_samples = pos_samples_df["sample"].tolist()
+
     log.info(f"Read in {len(pos_samples)} positive samples")
     log.info(f"Read in {len(neg_samples)} negative samples")
 
@@ -287,6 +305,11 @@ def filtered_samples(
     counts_df = (
         sample_df.groupby(["length"], group_keys=False)["sample"].count().to_frame()
     )
+
+    total_samples = int(counts_df["sample"].sum())
+    total_possible_samples = 2 * samples_per_length * max_length
+    coverage = total_samples / float(total_possible_samples)
+
     counts_df["num_strings_of_length"] = (
         n_terminals ** counts_df.index.get_level_values("length")
     )
@@ -347,6 +370,9 @@ def filtered_samples(
         "median_positive_parses": pos_parses.median().item(),
         "mean_positive_depth": pos_depths.mean().item(),
         "median_positive_depth": pos_depths.median().item(),
+        "coverage": coverage,
+        "total_samples": total_samples,
+        "total_possible_samples": total_possible_samples,
     }
 
     samples_stats_file = grammar_path / "filtered_samples_stats.json"
@@ -356,19 +382,105 @@ def filtered_samples(
     pprint.pprint(samples_stats)
 
 
+def openai_batch(
+    grammar_name: str,
+    model: str = "gpt-4o-mini",
+    n_shots: int = 0,
+):
+    assert n_shots >= 0
+
+    grammars_dir = PROJECT_ROOT / "data" / "grammars"
+    grammar_path = grammars_dir / f"{grammar_name}"
+    grammar_file = grammar_path / f"{grammar_name}.cfg"
+    if not grammar_path.exists():
+        raise FileNotFoundError(f"Grammar director `{grammar_name}` not found")
+
+    grammar_str: str
+    with open(grammar_file, "r") as f:
+        grammar_str = f.read()
+
+    samples_file = grammar_path / "filtered_samples.csv"
+    samples_df = pd.read_csv(samples_file)
+
+    pos_samples = samples_df[samples_df["type"] == "positive"].reset_index(drop=True)
+    neg_samples = samples_df[samples_df["type"] == "negative"].reset_index(drop=True)
+
+    samples_df["prompt"] = ""
+
+    for idx, row in tqdm.tqdm(samples_df.iterrows(), total=len(samples_df)):
+        if row["type"] == "positive":
+            id_type = "positive"
+            od_type = "negative"
+            id_samples = pos_samples
+            od_samples = neg_samples
+        else:
+            id_type = "negative"
+            od_type = "positive"
+            id_samples = neg_samples
+            od_samples = pos_samples
+
+        in_domain_idxs = [
+            i
+            for i in id_samples.index.values
+            if id_samples.iloc[i]["sample"] != row["sample"]
+        ]
+        max_ood = max(od_samples.index.values)
+        possible_idxs = [i for i in in_domain_idxs if i < max_ood]
+
+        alt_ilocs = random.choices(possible_idxs, k=n_shots)
+        id_alts = []
+        od_alts = []
+        for i in alt_ilocs:
+            id_alts.append(id_samples.iloc[i]["sample"])
+            od_alts.append(od_samples.iloc[i]["sample"])
+        alt_samples = {
+            id_type: id_alts,
+            od_type: od_alts,
+        }
+
+        samples_df.at[idx, "prompt"] = fg_prompt.basic_prompt(
+            grammar_str=grammar_str,
+            sample=row["sample"],
+            shots=alt_samples,
+        )
+
+    samples_df[f"{model}_batched_json"] = samples_df.apply(
+        lambda row: fg_prompt.ChatCompletionResponse(
+            user_prompt=row["prompt"],
+            metadata={
+                "sample_type": row["type"],
+                "sample": row["sample"],
+                "grammar_file": grammar_name,
+                "model": model,
+                "n_shots": str(2 * n_shots),
+            },
+        ).to_openai_batched_json(model=model, custom_id=f"request-{row.name}"),
+        axis=1,
+    )
+
+    batch_jsonl_filename = f"{grammar_name}_{model}_batched_{2*n_shots}-shot.jsonl"
+    batch_jsonl_path = grammar_path / batch_jsonl_filename
+    log.info(f"Writing batch job to {batch_jsonl_path}")
+    with open(batch_jsonl_path, "w") as f:
+        for j in samples_df[f"{model}_batched_json"]:
+            f.write(f"{j}\n")
+
+    print(samples_df)
+
+
 def all(
     # Grammar params
-    n_terminals=1000,
-    n_nonterminals=1000,
-    n_lexical_rules=1000,
-    n_nonlexical_rules=1000,
+    n_terminals=N_TERMINALS,
+    n_nonterminals=N_NONTERMINALS,
+    n_lexical_rules=N_LEXICAL_RULES,
+    n_nonlexical_rules=N_NONLEXICAL_RULES,
     # Sample params
     max_length: int = 50,
     samples_per_length: int = 10,
     gen_positive: bool = True,
     gen_negative: bool = True,
     max_tries_per_sample: int = 10,
-    max_recursion_depth: int = 100,
+    max_recursion_depth: int = 10000,
     pos_multiplier: int = 1000,
 ):
     grammar_dict = grammar(
