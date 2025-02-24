@@ -27,7 +27,7 @@ PROJECT_ROOT = path = pyrootutils.find_root(
 dotenv.load_dotenv(PROJECT_ROOT / ".env")
 
 
-def get_batch_results(
+def openai_batch(
     grammar_name: str,
     batch_id: str | None = None,
 ):
@@ -66,4 +66,4 @@ def get_batch_results(
 
 
 if __name__ == "__main__":
-    fire.Fire(get_batch_results)
+    fire.Fire()
