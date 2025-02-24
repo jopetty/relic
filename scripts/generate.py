@@ -465,8 +465,6 @@ def openai_batch(
         for j in samples_df[f"{model}_batched_json"]:
             f.write(f"{j}\n")
 
-    print(samples_df)
-
 
 def all(
     # Grammar params
@@ -482,6 +480,9 @@ def all(
     max_tries_per_sample: int = 10,
     max_recursion_depth: int = 10000,
     pos_multiplier: int = 1000,
+    # Batch params
+    models: list[str] = ["gpt-4o-mini", "gpt-4o", "o3-mini"],
+    n_shots: list[int] = [0, 1, 2, 4, 8, 16],
 ):
     grammar_dict = grammar(
         n_terminals=n_terminals,
@@ -506,6 +507,14 @@ def all(
         max_length=max_length,
         samples_per_length=samples_per_length,
     )
+
+    for model in models:
+        for n_shot in n_shots:
+            openai_batch(
+                grammar_name=grammar_dict["grammar_name"],
+                model=model,
+                n_shots=n_shot,
+            )
 
 
 if __name__ == "__main__":
