@@ -251,7 +251,8 @@ def filtered_samples(
         lambda x: len(x.split(" "))
     )
     pos_samples_df = pos_samples_df.groupby(["length"], group_keys=False).apply(
-        lambda x: x.sample(min(len(x), 2 * samples_per_length))
+        lambda x: x.sample(min(len(x), 2 * samples_per_length)),
+        include_groups=False,
     )
     pos_samples = pos_samples_df["sample"].tolist()
 
@@ -296,8 +297,11 @@ def filtered_samples(
     sample_df["length_cat"] = pd.Categorical(sample_df["length"])
 
     # group samples by length, select `samples_per_length` many per length
-    sample_df = sample_df.groupby(["length", "type"], group_keys=False).apply(
-        lambda x: x.sample(min(len(x), samples_per_length))
+    sample_df = sample_df.groupby(
+        ["length", "type"], group_keys=False, observed=True
+    ).apply(
+        lambda x: x.sample(min(len(x), samples_per_length)),
+        include_groups=True,
     )
 
     # First, we exclude any lengths which have the maximum number of samples
@@ -320,7 +324,7 @@ def filtered_samples(
     )
 
     counts_df = (
-        sample_df.groupby(["length", "type"], group_keys=False)["sample"]
+        sample_df.groupby(["length", "type"], group_keys=False, observed=True)["sample"]
         .count()
         .to_frame()
         .reset_index()
