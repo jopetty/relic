@@ -471,7 +471,10 @@ def openai_batch(
         axis=1,
     )
 
-    batch_jsonl_filename = f"{grammar_name}_{model}_batched_{2*n_shots}-shot.jsonl"
+    model_pathsafe_name = model.replace("/", "_")
+    batch_jsonl_filename = (
+        f"{grammar_name}_{model_pathsafe_name}_batched_{2*n_shots}-shot.jsonl"
+    )
     batch_jsonl_path = grammar_path / batch_jsonl_filename
     log.info(f"Writing batch job to {batch_jsonl_path}")
     with open(batch_jsonl_path, "w") as f:
