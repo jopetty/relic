@@ -1,3 +1,7 @@
+# upload.py
+#
+# Uploads a batch job to an LLM API for evaluation.
+
 import datetime as dt
 import logging
 

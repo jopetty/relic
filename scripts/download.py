@@ -1,3 +1,7 @@
+# download.py
+#
+# Downloads a batch job from an LLM API for analysis.
+
 import logging
 import re
 

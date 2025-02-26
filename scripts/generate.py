@@ -1,3 +1,12 @@
+# generate.py
+#
+# Generates data for grammar evaluation, including:
+#   - sampling grammars
+#   - generating positive and negative samples from a grammar
+#   - filtering samples by length
+#   - generating batch job files for LLM APIs
+#   - calculating statistics on grammars and their samples
+
 import gzip
 import itertools
 import json
