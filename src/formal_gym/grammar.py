@@ -7,11 +7,11 @@
 
 import pathlib
 import random
+import statistics
 from collections import defaultdict
 from enum import Enum
-from typing import Iterator, List, Optional, Set, Tuple
+from typing import List, Optional, Set
 
-import exrex
 import nltk
 import pyrootutils
 
@@ -27,168 +27,11 @@ PROJECT_ROOT = path = pyrootutils.find_root(
 
 
 class Grammar:
-    """Wrapper for various kinds of generative grammars.
-
-    Implementation for the `generate()` method is dependent on the type of the grammar,
-    which is inferred at creation from the suffix of the grammar file.
-
-    CFG generation is based on Thomas Breydo's PCFG package `pcfg`: https://github.com/thomasbreydo/pcfg/blob/master/pcfg/pcfg.py
-    """
+    """Context-free-grammar."""
 
     class Type(Enum):
         CFG = "cfg"
         Regular = "regular"
-
-    @property
-    def terminals(self) -> List[str]:
-        lexical_rules = [t for t in self.grammar_obj.productions() if t.is_lexical()]
-        terminals = [r.rhs()[0] for r in lexical_rules]
-        return terminals
-
-    @classmethod
-    def from_grammar(cls, grammar_file: pathlib.Path | str):
-        grammar = cls()
-
-        if isinstance(grammar_file, str):
-            grammar_file = pathlib.Path(grammar_file)
-
-        # Load grammar and set type
-        ext: str = grammar_file.suffix
-        if (ext == ".cfg") or (ext == ".pcfg"):
-            grammar.type = cls.Type.CFG
-        elif ext == ".regex":
-            grammar.type = cls.Type.Regular
-        else:
-            raise ValueError(f"Unknown grammar type: {ext}")
-
-        with open(grammar_file, "r") as f:
-            if ext == ".cfg":
-                grammar.grammar_obj = nltk.CFG.fromstring(f.read())
-            elif ext == ".pcfg":
-                grammar.grammar_obj = nltk.PCFG.fromstring(f.read())
-            elif ext == ".regex":
-                grammar.grammar_obj = f.read()
-            else:
-                raise ValueError(f"Unknown grammar type: {ext}")
-
-        return grammar
-
-    def generate(self, n_samples: int, sep: str = "") -> Iterator[str]:
-        if self.type == self.Type.CFG:
-            for _ in range(n_samples):
-                yield self._generate_derivation(self.grammar_obj.start(), sep=sep)
-        elif self.type == self.Type.Regular:
-            for _ in range(n_samples):
-                yield exrex.getone(self.grammar_obj)
-
-    def generate_negative_sample(
-        self, s_max_length: int = 10, random_length: bool = True
-    ) -> Optional[str]:
-        if self.type != self.Type.CFG:
-            raise ValueError("Negative examples are only supported for CFGs.")
-
-        parser = nltk.parse.ChartParser(self.grammar_obj)
-
-        if random_length:
-            str_len = random.randint(1, s_max_length)
-        else:
-            str_len = s_max_length
-        is_parsable = True
-        max_trials = 20
-        while is_parsable and max_trials > 0:
-            max_trials -= 1
-            # print(max_trials)
-            ex = [random.choice(self.terminals) for _ in range(str_len)]
-            parses = list(parser.parse(ex))
-            if len(parses) == 0:
-                is_parsable = False
-
-        if not is_parsable:
-            return " ".join(ex)
-        else:
-            return None
-
-    def generate_negative_samples(
-        self, n_samples: int, s_max_length: int = 10
-    ) -> List[str]:
-        uniuqe_samples = set()
-        while len(uniuqe_samples) < n_samples:
-            uniuqe_samples.add(self.generate_negative_sample(s_max_length=s_max_length))
-
-        return list(uniuqe_samples)
-
-    def generate_negative_samples_matching_lengths(
-        self,
-        positive_sample_path: pathlib.Path | str,
-    ):
-        if isinstance(positive_sample_path, str):
-            positive_sample_path = pathlib.Path(positive_sample_path)
-
-        with open(positive_sample_path, "r") as f:
-            positive_samples = f.readlines()
-
-        lengths = [len(s.split(" ")) for s in positive_samples]
-        unique_negative_samples = set()
-
-        for length in lengths:
-            max_trials = 20
-            neg_sample = self.generate_negative_sample(
-                s_max_length=length, random_length=False
-            )
-            if neg_sample is None:
-                continue
-            while neg_sample in unique_negative_samples and max_trials > 0:
-                max_trials -= 1
-                neg_sample = self.generate_negative_sample(
-                    s_max_length=length, random_length=False
-                )
-            unique_negative_samples.add(neg_sample)
-
-        return list(unique_negative_samples)
-
-    def test_sample(self, sample: str) -> bool:
-        if self.type != self.Type.CFG:
-            raise ValueError("Testing samples is only supported for CFGs.")
-
-        parser = nltk.ChartParser(self.grammar_obj)
-        parses = list(parser.parse(sample.split(" ")))
-        return len(parses) > 0
-
-    def _generate_derivation(self, nonterminal: Nonterminal, sep: str) -> str:
-        sentence: List[str] = []
-        symbol: Symbol
-        derivation: str
-        for symbol in self._reduce_once(nonterminal):
-            if isinstance(symbol, str):
-                derivation = symbol
-            else:
-                derivation = self._generate_derivation(symbol, sep=sep)
-            if derivation != "":
-                sentence.append(derivation)
-        return sep.join(sentence)
-
-    def _reduce_once(self, nonterminal: Nonterminal) -> Tuple[Symbol]:
-        return self._choose_production_reducing(nonterminal).rhs()
-
-    def _choose_production_reducing(
-        self, nonterminal: Nonterminal
-    ) -> ProbabalisticProduction:
-        productions: List[ProbabalisticProduction] = self.grammar_obj._lhs_index[
-            nonterminal
-        ]
-        probabilities: List[float]
-
-        if isinstance(self.grammar_obj, nltk.PCFG):
-            probabilities = [p.prob() for p in productions]
-        else:
-            p = 1.0 / len(productions)
-            probabilities = [p for _ in productions]
-
-        return random.choices(productions, weights=probabilities)[0]
-
-
-class ContextFreeGrammar(Grammar):
-    """Context-free-grammar."""
 
     @property
     def is_pcfg(self) -> bool:
@@ -208,8 +51,36 @@ class ContextFreeGrammar(Grammar):
         terminals = set([r.rhs()[0] for r in lexical_rules])
         return terminals
 
+    @property
+    def nonterminals(self) -> Set[str]:
+        non_lexical_rules = [t for t in self.as_cfg.productions() if not t.is_lexical()]
+        lhs_list = [r.lhs() for r in non_lexical_rules]
+        rhsa_list = [r.rhs()[0] for r in non_lexical_rules]
+        rhsb_list = [r.rhs()[1] for r in non_lexical_rules]
+        return set(lhs_list + rhsa_list + rhsb_list)
+
+    @property
+    def n_terminals(self) -> int:
+        return len(self.terminals)
+
+    @property
+    def n_nonterminals(self) -> int:
+        return len(self.nonterminals)
+
+    @property
+    def n_lexical_productions(self) -> int:
+        return len([r for r in self.as_cfg.productions() if r.is_lexical()])
+
+    @property
+    def n_nonlexical_productions(self) -> int:
+        return len([r for r in self.as_cfg.productions() if not r.is_lexical()])
+
+    @property
+    def parser(self) -> nltk.ChartParser:
+        return self._parser
+
     @classmethod
-    def from_file(cls, grammar_file: pathlib.Path | str) -> "ContextFreeGrammar":
+    def from_file(cls, grammar_file: pathlib.Path | str):
         if isinstance(grammar_file, str):
             grammar_file = pathlib.Path(grammar_file)
 
@@ -217,11 +88,18 @@ class ContextFreeGrammar(Grammar):
             grammar_str = f.read()
 
         if grammar_file.suffix == ".cfg":
-            return ContextFreeGrammar(grammar_str, is_pcfg=False)
+            return cls(grammar_str, is_pcfg=False)
         elif grammar_file.suffix == ".pcfg":
-            return ContextFreeGrammar(grammar_str, is_pcfg=True)
+            return cls(grammar_str, is_pcfg=True)
         else:
             raise ValueError("You must provide a CFG (*.cfg) or PCFG (*.pcfg) file.")
+
+    @classmethod
+    def from_string(cls, grammar_str: str, grammar_type: Type):
+        if grammar_type == cls.Type.CFG:
+            return cls(grammar_str, is_pcfg=False)
+        else:
+            raise ValueError("Only CFGs are supported for now.")
 
     def __init__(self, grammar_str: str, is_pcfg: bool = False):
         self._is_pcfg = is_pcfg
@@ -263,6 +141,8 @@ class ContextFreeGrammar(Grammar):
             self.probs_by_lhs[prod.lhs()].append(prod.prob())
 
         self.can_terminate = self._find_terminating_nts()
+
+        self._parser = nltk.ChartParser(self.as_cfg)
 
     def _find_terminating_nts(self) -> Set[Nonterminal]:
         can_terminate = set()
@@ -349,11 +229,18 @@ class ContextFreeGrammar(Grammar):
         else:
             return sep.join(result)
 
-    def test_sample(self, sample: str) -> bool:
-        """Returns true if the sample is parsable by the grammar."""
-        parser = nltk.ChartParser(self.as_cfg)
-        parses = list(parser.parse(sample.split(" ")))
-        return len(parses) > 0
+    def generate_negative_sample_of_length(
+        self,
+        length: int,
+        max_trials: int = 20,
+        sep: str = " ",
+    ) -> Optional[str]:
+        while max_trials > 0:
+            max_trials -= 1
+            sample = sep.join(random.choices(list(self.terminals), k=length))
+            if not self.test_sample(sample):
+                return sample
+        return None
 
     def generate_negative_sample(
         self,
@@ -369,3 +256,20 @@ class ContextFreeGrammar(Grammar):
             if not self.test_sample(sample):
                 return sample
         return None
+
+    def test_sample(self, sample: str) -> bool:
+        return self.num_parses(sample) > 0
+
+    def mean_sample_parse_depth(self, sample: str) -> int | None:
+        parses = list(self.parser.parse(sample.split(" ")))
+        if len(parses) == 0:
+            return None
+        else:
+            return statistics.mean([p.height() for p in parses])
+
+    def num_parses(self, sample: str) -> int:
+        parses = list(self.parser.parse(sample.split(" ")))
+        return len(parses)
+
+    def parse(self, sample: str) -> list[nltk.Tree]:
+        return list(self.parser.parse(sample.split(" ")))

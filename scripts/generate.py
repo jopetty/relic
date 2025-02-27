@@ -1,0 +1,537 @@
+# generate.py
+#
+# Generates data for grammar evaluation, including:
+#   - sampling grammars
+#   - generating positive and negative samples from a grammar
+#   - filtering samples by length
+#   - generating batch job files for LLM APIs
+#   - calculating statistics on grammars and their samples
+
+import gzip
+import itertools
+import json
+import logging
+import pprint
+import random
+import shutil
+import statistics
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+import fire
+import pandas as pd
+import pyrootutils
+import tqdm
+
+import formal_gym.grammar as fg_grammar
+import formal_gym.metagrammar as fg_metagrammar
+import formal_gym.prompt as fg_prompt
+import formal_gym.utils.utils as fg_utils
+
+logging.basicConfig(
+    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+    datefmt="%Y-%d-%m %H:%M:%S",
+    level=logging.INFO,
+)
+
+log = fg_utils.get_logger(__name__)
+
+PROJECT_ROOT = path = pyrootutils.find_root(
+    search_from=__file__, indicator=".project-root"
+)
+
+# Define some starting constants for grammar hyperparams.
+N_TERMINALS = 1000
+N_NONTERMINALS = 2000
+N_LEXICAL_RULES = 2000
+N_NONLEXICAL_RULES = 2000
+
+
+def grammar(
+    n_terminals=N_TERMINALS,
+    n_nonterminals=N_NONTERMINALS,
+    n_lexical_rules=N_LEXICAL_RULES,
+    n_nonlexical_rules=N_NONLEXICAL_RULES,
+    type: str = "cfg",
+):
+    grammars_dir = PROJECT_ROOT / "data" / "grammars"
+
+    if type == "cfg":
+        grammar_dict = fg_metagrammar.sample_cfg_trim(
+            n_terminals=n_terminals,
+            n_nonterminals=n_nonterminals,
+            n_lexical_rules=n_lexical_rules,
+            n_binary_rules=n_nonlexical_rules,
+            data_dir=grammars_dir,
+        )
+    elif type == "reg":
+        grammar_dict = fg_metagrammar.sample_reg_trim(
+            n_terminals=n_terminals,
+            n_nonterminals=n_nonterminals,
+            n_lexical_rules=n_lexical_rules,
+            n_binary_rules=n_nonlexical_rules,
+            data_dir=grammars_dir,
+        )
+    else:
+        raise ValueError(
+            f"Unknown grammar type: `{type}`; valid types are `cfg` and `reg`"
+        )
+    g = grammar_dict["grammar"]
+    grammar_stats = {
+        "n_terminals": g.n_terminals,
+        "n_nonterminals": g.n_nonterminals,
+        "n_lexical_productions": g.n_lexical_productions,
+        "n_nonlexical_productions": g.n_nonlexical_productions,
+        "grammar_name": grammar_dict["grammar_name"],
+    }
+
+    grammar_stats_file = grammar_dict["grammar_path"] / "grammar_stats.json"
+    with open(grammar_stats_file, "w") as f:
+        json.dump(grammar_stats, f, indent=4)
+
+    print("Grammar:")
+    print(g.as_cfg)
+
+    pprint.pprint(grammar_stats)
+
+    return grammar_dict
+
+
+def samples(
+    grammar_name: str,
+    max_length: int = 50,
+    samples_per_length: int = 10,
+    gen_positive: bool = True,
+    gen_negative: bool = True,
+    max_tries_per_sample: int = 10,
+    max_recursion_depth: int = 100,
+    pos_multiplier: int = 100,
+):
+    grammars_dir = PROJECT_ROOT / "data" / "grammars"
+
+    grammar_path = grammars_dir / f"{grammar_name}"
+    grammar_file = grammar_path / f"{grammar_name}.cfg"
+    if not grammar_path.exists():
+        raise FileNotFoundError(f"Grammar director `{grammar_name}` not found")
+
+    g = fg_grammar.Grammar.from_file(grammar_file)
+
+    if gen_negative:
+        neg_sample_file = grammar_path / "negative_samples.txt"
+        if neg_sample_file.exists():
+            with open(neg_sample_file, "r") as f:
+                neg_samples = set(f.read().splitlines())
+        else:
+            neg_samples = set()
+        starting_count = len(neg_samples)
+
+        log.info(f"Generating negative samples for {grammar_file}")
+
+        # procedurally-generate negative samples for "short-enough" lengths
+        n_terminals: int = g.n_terminals
+        possible_string_exp: int = 1
+        terminals: list[str] = list(set(g.terminals))
+        possible_strings: int = n_terminals**possible_string_exp
+
+        while possible_strings < 100_000:
+            log.info(f"Testing short strings of length {possible_string_exp}")
+            # generate all possible strings of length `length`
+            for possible_sample in itertools.product(
+                terminals, repeat=possible_string_exp
+            ):
+                sample = " ".join(possible_sample)
+
+                if not g.test_sample(sample):
+                    neg_samples.add(sample)
+            possible_string_exp += 1
+            possible_strings = n_terminals**possible_string_exp
+
+        log.info("Generating longer samples")
+        for length in tqdm.tqdm(range(possible_string_exp - 1, max_length + 1)):
+            for _ in range(samples_per_length):
+                sample = g.generate_negative_sample_of_length(
+                    length=length, max_trials=max_tries_per_sample
+                )
+                neg_samples.add(sample)
+        ending_count = len(neg_samples)
+        log.info(
+            f"Generated {ending_count - starting_count} new negative samples"
+            f" ({len(neg_samples)} total)"
+        )
+
+        # sort neg_samples by length
+        neg_samples = sorted(neg_samples, key=lambda x: len(x.split(" ")))
+
+        with open(neg_sample_file, "w") as f:
+            for sample in neg_samples:
+                f.write(f"{sample}\n")
+
+    if gen_positive:
+        pos_sample_file = grammar_path / "positive_samples.txt"
+        if pos_sample_file.exists():
+            with open(pos_sample_file, "r") as f:
+                pos_samples = set(f.read().splitlines())
+        else:
+            pos_samples = set()
+        starting_count = len(pos_samples)
+        log.info(f"Generating positive samples for {grammar_file}")
+
+        # procedurally-generate positive samples for "short-enough" lengths
+        n_terminals: int = g.n_terminals
+        possible_string_exp: int = 1
+        terminals: list[str] = list(set(g.terminals))
+        possible_strings: int = n_terminals**possible_string_exp
+
+        while possible_strings < 100_000:
+            log.info(f"Testing short strings of length {possible_string_exp}")
+            # generate all possible strings of length `length`
+            for possible_sample in itertools.product(
+                terminals, repeat=possible_string_exp
+            ):
+                sample = " ".join(possible_sample)
+                if g.test_sample(sample):
+                    pos_samples.add(sample)
+            possible_string_exp += 1
+            possible_strings = n_terminals**possible_string_exp
+
+        log.info("Generating longer samples")
+        total_iterations = (
+            samples_per_length * max_length * max_tries_per_sample * pos_multiplier
+        )
+
+        for _ in tqdm.tqdm(range(total_iterations)):
+            sample = g.generate(max_depth=max_recursion_depth)
+            pos_samples.add(sample)
+        ending_count = len(pos_samples)
+        log.info(
+            f"Generated {ending_count - starting_count} new positive samples"
+            f" ({len(pos_samples)} total)"
+        )
+
+        pos_samples = sorted(pos_samples, key=lambda x: len(x.split(" ")))
+
+        with open(pos_sample_file, "w") as f:
+            for sample in pos_samples:
+                f.write(f"{sample}\n")
+
+
+def filtered_samples(
+    grammar_name: str,
+    max_length: int = 50,
+    samples_per_length: int = 10,
+):
+    def read_lines_up_to_length(filename, length):
+        with open(filename, "r") as f:
+            lines = []
+            for line in f:
+                line = line.strip()
+                if len(line.split(" ")) > length:
+                    break
+                lines.append(line)
+        return lines
+
+    grammars_dir = PROJECT_ROOT / "data" / "grammars"
+
+    grammar_path = grammars_dir / f"{grammar_name}"
+    grammar_file = grammar_path / f"{grammar_name}.cfg"
+    if not grammar_path.exists():
+        raise FileNotFoundError(f"Grammar director `{grammar_name}` not found")
+
+    g = fg_grammar.Grammar.from_file(grammar_file)
+
+    # assert that positive and negative samples have been generated
+    pos_sample_file = grammar_path / "positive_samples.txt"
+    neg_sample_file = grammar_path / "negative_samples.txt"
+    if not pos_sample_file.exists():
+        raise FileNotFoundError(f"Positive samples not found for {grammar_name}")
+    if not neg_sample_file.exists():
+        raise FileNotFoundError(f"Negative samples not found for {grammar_name}")
+
+    # Read in only the first samples_per_length*max_length lines for each
+    # sample file
+    pos_samples = read_lines_up_to_length(pos_sample_file, max_length)
+    neg_samples = read_lines_up_to_length(neg_sample_file, max_length)
+
+    pos_samples = [s for s in pos_samples if len(s.split(" ")) <= max_length]
+    neg_samples = [s for s in neg_samples if len(s.split(" ")) <= max_length]
+
+    # Keep only 2*samples_per_length samples of each length to speed up parsing
+    pos_samples_df = pd.DataFrame(pos_samples, columns=["sample"])
+    pos_samples_df["length"] = pos_samples_df["sample"].apply(
+        lambda x: len(x.split(" "))
+    )
+    pos_samples_df = pos_samples_df.groupby(["length"], group_keys=False).apply(
+        lambda x: x.sample(min(len(x), 2 * samples_per_length)),
+        include_groups=False,
+    )
+    pos_samples = pos_samples_df["sample"].tolist()
+
+    log.info(f"Read in {len(pos_samples)} positive samples")
+    log.info(f"Read in {len(neg_samples)} negative samples")
+
+    def annotate_sample(s):
+        parses = g.parse(s)
+        num_parses = len(parses)
+        mean_parse_depth = statistics.mean(p.height() for p in parses)
+        return {
+            "sample": s,
+            "mean_parse_height": mean_parse_depth,
+            "num_parses": num_parses,
+            "type": "positive",
+            "length": len(s.split(" ")),
+        }
+
+    log.info("Annotating positive samples with parse information")
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        futures = {executor.submit(annotate_sample, s): s for s in pos_samples}
+        sample_dicts = []
+        for future in tqdm.tqdm(as_completed(futures), total=len(pos_samples)):
+            sample_dicts.append(future.result())
+
+    for s in neg_samples:
+        sample_dicts.append(
+            {
+                "sample": s,
+                "mean_parse_height": None,
+                "num_parses": None,
+                "type": "negative",
+                "length": len(s.split(" ")),
+            }
+        )
+
+    sample_df = pd.DataFrame(sample_dicts)
+
+    sample_df["type"] = pd.Categorical(
+        sample_df["type"], categories=["positive", "negative"]
+    )
+    sample_df["length_cat"] = pd.Categorical(sample_df["length"])
+
+    # group samples by length, select `samples_per_length` many per length
+    sample_df = sample_df.groupby(
+        ["length", "type"], group_keys=False, observed=True
+    ).apply(
+        lambda x: x.sample(min(len(x), samples_per_length)),
+        include_groups=True,
+    )
+
+    # First, we exclude any lengths which have the maximum number of samples
+    n_terminals = g.n_terminals
+    counts_df = (
+        sample_df.groupby(["length"], group_keys=False)["sample"].count().to_frame()
+    )
+
+    total_samples = int(counts_df["sample"].sum())
+    total_possible_samples = 2 * samples_per_length * max_length
+    coverage = total_samples / float(total_possible_samples)
+
+    counts_df["num_strings_of_length"] = (
+        n_terminals ** counts_df.index.get_level_values("length")
+    )
+    counts_df["maxed_out"] = counts_df["sample"] == counts_df["num_strings_of_length"]
+
+    maxed_out_lengths: list[int] = (
+        counts_df[counts_df["maxed_out"]].index.get_level_values("length").tolist()
+    )
+
+    counts_df = (
+        sample_df.groupby(["length", "type"], group_keys=False, observed=True)["sample"]
+        .count()
+        .to_frame()
+        .reset_index()
+    )
+    counts_df = counts_df[counts_df["sample"] < samples_per_length]
+    counts_df = counts_df[~counts_df["length"].isin(maxed_out_lengths)]
+
+    if len(counts_df) > 0:
+        log.info("The following lengths/types need more samples:")
+        counts_df["missing_samples"] = samples_per_length - counts_df["sample"]
+        counts_df["%"] = counts_df["missing_samples"] / samples_per_length * 100
+        counts_df = counts_df.reset_index(drop=True)
+        counts_df = counts_df.drop(columns=["sample"])
+        print(counts_df)
+
+    # the `length_cat` column is only needed for the missing samples report,
+    # and is duplicated from the `length` column, so we drop it
+    sample_df_no_cat = sample_df.drop(columns=["length_cat"])
+    sample_df_no_cat.to_csv(grammar_path / "filtered_samples.csv", index=False)
+
+    # write positive samples to file
+    uncompressed_path = grammar_path / "filtered_positive_samples.txt"
+    compressed_path = grammar_path / "filtered_positive_samples.txt.gz"
+    pos_samples = sample_df[sample_df["type"] == "positive"]["sample"]
+    with open(uncompressed_path, "w") as f:
+        for s in pos_samples:
+            f.write(f"{s}\n")
+
+    # compress the positive samples using gzip
+    with open(uncompressed_path, "rb") as f_in:
+        with gzip.open(compressed_path, "wb") as f_out:
+            shutil.copyfileobj(f_in, f_out)
+
+    # calculate the compression ratio
+    uncompressed_size = uncompressed_path.stat().st_size
+    compressed_size = compressed_path.stat().st_size
+    compression_ratio = uncompressed_size / compressed_size
+
+    pos_parses = sample_df[sample_df["type"] == "positive"]["num_parses"]
+    pos_depths = sample_df[sample_df["type"] == "positive"]["mean_parse_height"]
+
+    samples_stats = {
+        "uncompressed_size": uncompressed_size,
+        "compressed_size": compressed_size,
+        "compression_ratio": compression_ratio,
+        "mean_positive_parses": pos_parses.mean().item(),
+        "median_positive_parses": pos_parses.median().item(),
+        "mean_positive_depth": pos_depths.mean().item(),
+        "median_positive_depth": pos_depths.median().item(),
+        "coverage": coverage,
+        "total_samples": total_samples,
+        "total_possible_samples": total_possible_samples,
+    }
+
+    samples_stats_file = grammar_path / "filtered_samples_stats.json"
+    with open(samples_stats_file, "w") as f:
+        json.dump(samples_stats, f, indent=4)
+
+    pprint.pprint(samples_stats)
+
+
+def openai_batch(
+    grammar_name: str,
+    model: str = "gpt-4o-mini",
+    n_shots: int = 0,
+):
+    assert n_shots >= 0
+
+    grammars_dir = PROJECT_ROOT / "data" / "grammars"
+    grammar_path = grammars_dir / f"{grammar_name}"
+    grammar_file = grammar_path / f"{grammar_name}.cfg"
+    if not grammar_path.exists():
+        raise FileNotFoundError(f"Grammar director `{grammar_name}` not found")
+
+    grammar_str: str
+    with open(grammar_file, "r") as f:
+        grammar_str = f.read()
+
+    samples_file = grammar_path / "filtered_samples.csv"
+    samples_df = pd.read_csv(samples_file)
+
+    pos_samples = samples_df[samples_df["type"] == "positive"].reset_index(drop=True)
+    neg_samples = samples_df[samples_df["type"] == "negative"].reset_index(drop=True)
+
+    samples_df["prompt"] = ""
+
+    for idx, row in tqdm.tqdm(samples_df.iterrows(), total=len(samples_df)):
+        if row["type"] == "positive":
+            id_type = "positive"
+            od_type = "negative"
+            id_samples = pos_samples
+            od_samples = neg_samples
+        else:
+            id_type = "negative"
+            od_type = "positive"
+            id_samples = neg_samples
+            od_samples = pos_samples
+
+        in_domain_idxs = [
+            i
+            for i in id_samples.index.values
+            if id_samples.iloc[i]["sample"] != row["sample"]
+        ]
+        max_ood = max(od_samples.index.values)
+        possible_idxs = [i for i in in_domain_idxs if i < max_ood]
+
+        alt_ilocs = random.choices(possible_idxs, k=n_shots)
+        id_alts = []
+        od_alts = []
+        for i in alt_ilocs:
+            id_alts.append(id_samples.iloc[i]["sample"])
+            od_alts.append(od_samples.iloc[i]["sample"])
+        alt_samples = {
+            id_type: id_alts,
+            od_type: od_alts,
+        }
+
+        samples_df.at[idx, "prompt"] = fg_prompt.basic_prompt(
+            grammar_str=grammar_str,
+            sample=row["sample"],
+            shots=alt_samples,
+        )
+
+    samples_df[f"{model}_batched_json"] = samples_df.apply(
+        lambda row: fg_prompt.ChatCompletionResponse(
+            user_prompt=row["prompt"],
+            metadata={
+                "sample_type": row["type"],
+                "sample": row["sample"],
+                "grammar_file": grammar_name,
+                "model": model,
+                "n_shots": str(2 * n_shots),
+            },
+        ).to_openai_batched_json(model=model, custom_id=f"request-{row.name}"),
+        axis=1,
+    )
+
+    model_pathsafe_name = model.replace("/", "_")
+    batch_jsonl_filename = (
+        f"{grammar_name}_{model_pathsafe_name}_batched_{2*n_shots}-shot.jsonl"
+    )
+    batch_jsonl_path = grammar_path / batch_jsonl_filename
+    log.info(f"Writing batch job to {batch_jsonl_path}")
+    with open(batch_jsonl_path, "w") as f:
+        for j in samples_df[f"{model}_batched_json"]:
+            f.write(f"{j}\n")
+
+
+def all(
+    # Grammar params
+    n_terminals=N_TERMINALS,
+    n_nonterminals=N_NONTERMINALS,
+    n_lexical_rules=N_LEXICAL_RULES,
+    n_nonlexical_rules=N_NONLEXICAL_RULES,
+    # Sample params
+    max_length: int = 50,
+    samples_per_length: int = 10,
+    gen_positive: bool = True,
+    gen_negative: bool = True,
+    max_tries_per_sample: int = 10,
+    max_recursion_depth: int = 10000,
+    pos_multiplier: int = 1000,
+    # Batch params
+    models: list[str] = ["gpt-4o-mini", "gpt-4o", "o3-mini"],
+    n_shots: list[int] = [0, 1, 2, 4, 8, 16],
+):
+    grammar_dict = grammar(
+        n_terminals=n_terminals,
+        n_nonterminals=n_nonterminals,
+        n_lexical_rules=n_lexical_rules,
+        n_nonlexical_rules=n_nonlexical_rules,
+    )
+
+    samples(
+        grammar_name=grammar_dict["grammar_name"],
+        max_length=max_length,
+        samples_per_length=samples_per_length,
+        gen_positive=gen_positive,
+        gen_negative=gen_negative,
+        max_tries_per_sample=max_tries_per_sample,
+        max_recursion_depth=max_recursion_depth,
+        pos_multiplier=pos_multiplier,
+    )
+
+    filtered_samples(
+        grammar_name=grammar_dict["grammar_name"],
+        max_length=max_length,
+        samples_per_length=samples_per_length,
+    )
+
+    for model in models:
+        for n_shot in n_shots:
+            openai_batch(
+                grammar_name=grammar_dict["grammar_name"],
+                model=model,
+                n_shots=n_shot,
+            )
+
+
+if __name__ == "__main__":
+    fire.Fire()

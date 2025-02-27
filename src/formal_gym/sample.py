@@ -32,7 +32,7 @@ def sample_expression(
 
     log.info(f"Generating {n_samples} samples from {grammar_file}")
 
-    g = fg_grammar.Grammar.from_grammar(grammar_file)
+    g = fg_grammar.Grammar.from_file(grammar_file)
     generations = list(g.generate(n_samples=n_samples, sep=" "))
     for i, gen in enumerate(generations):
         print(f"{i+1}: {gen}")
@@ -53,7 +53,7 @@ def sample_positive_examples(
 
     log.info(f"Generating {n_samples} positive examples from {grammar_file}")
 
-    g = fg_grammar.Grammar.from_grammar(grammar_file)
+    g = fg_grammar.Grammar.from_file(grammar_file)
     generations = list(g.generate(n_samples=n_samples, sep=" "))
 
     log.info(f"Writing to {outfile_path}")
@@ -78,7 +78,7 @@ def sample_negative_examples(
 
     log.info(f"Generating {n_samples} negative examples from {grammar_file}")
 
-    g = fg_grammar.Grammar.from_grammar(grammar_file)
+    g = fg_grammar.Grammar.from_file(grammar_file)
     generations = list(
         g.generate_negative_samples(
             n_samples=n_samples,
@@ -115,7 +115,7 @@ def sample_negative_examples_matching(
         f"matching lengths of {positive_sample_path}",
     )
 
-    g = fg_grammar.Grammar.from_grammar(grammar_file)
+    g = fg_grammar.Grammar.from_file(grammar_file)
     generations = list(
         g.generate_negative_samples_matching_lengths(
             positive_sample_path=positive_sample_path,

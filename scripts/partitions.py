@@ -35,7 +35,7 @@ def count_strings(
 
     grammar_path = data_path / grammar_file
 
-    grammar = fg_grammar.Grammar.from_grammar(grammar_path)
+    grammar = fg_grammar.Grammar.from_file(grammar_path)
     terminals = list(set(grammar.terminals))
 
     counts = []
