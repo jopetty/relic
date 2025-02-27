@@ -2,6 +2,7 @@
 #
 # Runs a local LLM evaluation.
 
+import hashlib
 import logging
 
 import datasets
@@ -47,10 +48,13 @@ def run(
     )
     batch_jsonl_path = grammar_path / batch_jsonl_filename
 
-    response_filename = (
-        f"{grammar_name}_{model_pathsafe_name}_batched_{2*n_shots}-shot_responses.jsonl"
-    )
-    response_path = grammar_path / response_filename
+    batch_id_hash = hashlib.md5(str(batch_jsonl_filename).encode()).hexdigest()
+    batch_id = f"batch_{batch_id_hash}"
+
+    results_filename = f"{batch_id}_results.jsonl"
+    results_path = grammar_path / results_filename
+    inputs_filename = f"{batch_id}_inputs.jsonl"
+    inputs_path = grammar_path / inputs_filename
 
     if not batch_jsonl_path.exists():
         raise ValueError(f"Batch file {batch_jsonl_path} does not exist.")
@@ -67,18 +71,46 @@ def run(
     def flatten_messages(example):
         return example["messages"][0]
 
+    def flatten_metadata(example):
+        example["body"]["metadata"] = example["metadata"]
+        return example
+
     def create_input(example):
         example["prompt"] = [{"role": example["role"], "content": example["content"]}]
+        return example
+
+    def create_response(example):
+        example["response"] = {"body": example["body"]}
         return example
 
     dataset = (
         dataset.map(flatten_body)
         .map(flatten_messages)
+        .map(flatten_metadata)
         .map(create_input)
-        .remove_columns(["body", "method", "url", "store", "messages"])
+        .remove_columns(
+            [
+                "method",
+                "url",
+                "store",
+                "model",
+                "messages",
+                "content",
+                "role",
+                "metadata",
+            ]
+        )
     )
 
+    dataset = dataset.select(range(0, 5))
     log.info(f"Dataset loaded: {dataset}")
+    log.info(f"Writing inputs to {inputs_path}")
+    dataset.to_json(str(inputs_path), lines=True)
+
+    # To match the format of the OpenAI responses, we need to take all the `body`
+    # fields and put them inside a `response` field.
+    dataset = dataset.map(create_response).remove_columns(["body"])
+
     log.info(f"Loading model {model}")
 
     pipe = transformers.pipeline(
@@ -91,13 +123,18 @@ def run(
     )
 
     def get_response(example):
-        outputs = pipe(example["prompt"])
-        example["model_response"] = outputs[0]["generated_text"].strip()
+        output = pipe(example["prompt"])[0]["generated_text"].strip()
+        old_response = example["response"]
+        old_response["body"]["choices"] = [{"message": {"content": output}}]
+        example["response"] = old_response
         return example
 
     dataset = dataset.map(get_response).remove_columns(["prompt"])
-    log.info(f"Writing responses to {response_path}")
-    dataset.to_json(str(response_path), lines=True)
+    log.info(f"Writing responses to {results_path}")
+    dataset.to_json(str(results_path), lines=True)
+
+    del pipe
+    del dataset
 
 
 if __name__ == "__main__":
