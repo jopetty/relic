@@ -102,7 +102,6 @@ def run(
         )
     )
 
-    dataset = dataset.select(range(0, 5))
     log.info(f"Dataset loaded: {dataset}")
     log.info(f"Writing inputs to {inputs_path}")
     dataset.to_json(str(inputs_path), lines=True)
