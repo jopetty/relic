@@ -121,14 +121,16 @@ def run(
         batch_size=batch_size,
     )
 
+    outputs = iter(pipe((_ for _ in dataset["prompt"])))
+
     def get_response(example):
-        output = pipe(example["prompt"])[0]["generated_text"].strip()
+        output = next(outputs)[0]["generated_text"].strip()
         old_response = example["response"]
         old_response["body"]["choices"] = [{"message": {"content": output}}]
         example["response"] = old_response
         return example
 
-    dataset = dataset.map(get_response).remove_columns(["prompt"])
+    dataset = dataset.map(get_response, desc="get_response").remove_columns(["prompt"])
     log.info(f"Writing responses to {results_path}")
     dataset.to_json(str(results_path), lines=True)
 
