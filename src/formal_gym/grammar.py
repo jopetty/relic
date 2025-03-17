@@ -12,6 +12,7 @@ from collections import defaultdict
 from enum import Enum
 from typing import List, Optional, Set
 
+import lark
 import nltk
 import pyrootutils
 
@@ -46,6 +47,34 @@ class Grammar:
         return self._nltk_pcfg
 
     @property
+    def as_lark_ebnf(self) -> str:
+        """Returns the grammar in Lark EBNF format."""
+        rules = defaultdict(set)
+
+        for prod in self.as_cfg.productions():
+            rules[prod.lhs()].add(prod.rhs())
+
+        lark_rules = []
+        for lhs, rhs_set in rules.items():
+            rhs_rules = []
+            for rhs in rhs_set:
+                rhs_syms = []
+                for s in rhs:
+                    if isinstance(s, str):
+                        rhs_syms.append(f'"{s}"')
+                    elif isinstance(s, nltk.grammar.Nonterminal):
+                        rhs_syms.append(f"{str(s).lower()}")
+                rhs_string = " ".join(rhs_syms)
+                rhs_rules.append(rhs_string)
+            lark_rhs = " | ".join(s for s in list(rhs_rules))
+            if str(lhs) == "S":
+                lhs = "start"
+            lark_rules.append(f"{str(lhs).lower()} : {lark_rhs}")
+
+        g_suff = "%import common.WS_INLINE\n%ignore WS_INLINE"
+        return "\n".join(lark_rules) + "\n" + g_suff
+
+    @property
     def terminals(self) -> Set[str]:
         lexical_rules = [t for t in self.as_cfg.productions() if t.is_lexical()]
         terminals = set([r.rhs()[0] for r in lexical_rules])
@@ -76,7 +105,7 @@ class Grammar:
         return len([r for r in self.as_cfg.productions() if not r.is_lexical()])
 
     @property
-    def parser(self) -> nltk.ChartParser:
+    def parser(self) -> lark.Lark:
         return self._parser
 
     @classmethod
@@ -142,7 +171,7 @@ class Grammar:
 
         self.can_terminate = self._find_terminating_nts()
 
-        self._parser = nltk.ChartParser(self.as_cfg)
+        self._parser = lark.Lark(self.as_lark_ebnf)
 
     def _find_terminating_nts(self) -> Set[Nonterminal]:
         can_terminate = set()
@@ -199,6 +228,9 @@ class Grammar:
         Args:
             sep: Separator to use between symbols.
             max_depth: Maximum depth of recursion.
+        Returns:
+            A dictionary with the keys "sample" and "parse" representing the
+            generated sample and its parse tree.
         """
 
         def _sample_recursive(symbol: Nonterminal, depth: int) -> Optional[List[str]]:
@@ -229,6 +261,47 @@ class Grammar:
         else:
             return sep.join(result)
 
+    def generate_tree(self, sep: str = " ", max_depth: int = 50) -> dict:
+        """Generates a single sample from the grammar and returns both the string and its parse tree.
+
+        Args:
+            sep: Separator to use between symbols.
+            max_depth: Maximum depth of recursion.
+        Returns:
+            A dictionary with keys "string" and "parse" representing the sampled string and its parse tree.
+        """
+
+        def _sample_recursive(symbol: Nonterminal, depth: int):
+            if depth > max_depth:
+                return None
+
+            if not isinstance(symbol, Nonterminal):
+                return str(symbol), str(symbol)
+
+            production = self._choose_production(symbol, depth, max_depth)
+            if production is None:
+                return None
+
+            children_strings = []
+            children_parses = []
+            for sym in production.rhs():
+                subsample = _sample_recursive(sym, depth + 1)
+                if subsample is None:
+                    return None
+                children_strings.append(subsample[0])
+                children_parses.append(subsample[1])
+
+            parsed_string = sep.join(children_strings)
+            parsed_tree = f"({symbol} {sep.join(children_parses)})"
+
+            return parsed_string, parsed_tree
+
+        result = _sample_recursive(self.as_cfg.start(), 0)
+        if result is None:
+            return self.generate_tree(sep=sep, max_depth=max_depth)
+        else:
+            return {"string": result[0], "parse": result[1]}
+
     def generate_negative_sample_of_length(
         self,
         length: int,
@@ -257,19 +330,46 @@ class Grammar:
                 return sample
         return None
 
-    def test_sample(self, sample: str) -> bool:
-        return self.num_parses(sample) > 0
+    def parse(self, sample: str) -> str | None:
+        def clean_parse_tree(tree, sample) -> str:
+            labels = sample.split()
 
-    def mean_sample_parse_depth(self, sample: str) -> int | None:
-        parses = list(self.parser.parse(sample.split(" ")))
-        if len(parses) == 0:
+            def recurse(node):
+                children = " ".join(recurse(child) for child in node.children)
+                if children == "":
+                    children = labels.pop(0)
+                node_label = node.data.upper()
+                if node_label == "START":
+                    node_label = "S"
+                return f"({node_label} {children})"
+
+            return recurse(tree)
+
+        try:
+            parse_tree = self.parser.parse(sample)
+            return clean_parse_tree(parse_tree, sample)
+        except lark.exceptions.LarkError:
+            return None
+
+    def test_sample(self, sample: str) -> bool:
+        """Test if a sample is valid in the grammar."""
+
+        if self.parse(sample) is None:
+            return False
+        else:
+            return True
+
+    def sample_parse_depth(self, sample: str) -> int | None:
+        """Count the depth of the dyck string of the sample's parse tree."""
+        parse_tree = self.parse(sample)
+        if parse_tree is None:
             return None
         else:
-            return statistics.mean([p.height() for p in parses])
-
-    def num_parses(self, sample: str) -> int:
-        parses = list(self.parser.parse(sample.split(" ")))
-        return len(parses)
-
-    def parse(self, sample: str) -> list[nltk.Tree]:
-        return list(self.parser.parse(sample.split(" ")))
+            depth = max_depth = 0
+            for char in parse_tree:
+                if char == "(":
+                    depth += 1
+                    max_depth = max(max_depth, depth)
+                elif char == ")":
+                    depth -= 1
+            return max_depth

@@ -19,6 +19,8 @@ dependencies = [
     "google-generativeai>=0.8.3",
     "ipykernel>=6.29.5",
     "ipywidgets>=8.1.5",
+    "lark>=1.2.2",
+    "mlx-lm>=0.21.5",
     "nbstripout>=0.7.1",
     "nltk>=3.9.1",
     "openai>=1.52.0",
@@ -28,6 +30,7 @@ dependencies = [
     "python-dotenv>=1.0.1",
     "scikit-learn>=1.5.2",
     "seaborn>=0.13.2",
+    "sentencepiece>=0.2.0",
     "statsmodels>=0.14.4",
     "torch>=2.6.0",
     "transformers>=4.49.0",
@@ -51,3 +54,6 @@ select = ["E", "F", "I", "N"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
+
+[tool.uv.sources]
+transformers = { git = "https://github.com/huggingface/transformers", rev = "v4.49.0-Gemma-3" }

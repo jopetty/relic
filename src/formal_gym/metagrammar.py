@@ -304,8 +304,8 @@ def sample_cfg_raw(
 
     if n_lexical_rules > n_terminals * n_nonterminals:
         log.warning(
-            f"{n_lexical_rules} lexical rules requested, but only",
-            f" {n_terminals * n_nonterminals} possible",
+            f"{n_lexical_rules} lexical rules requested, but only"
+            f" {n_terminals * n_nonterminals} possible"
         )
         n_lexical_rules = n_terminals * n_nonterminals
 
@@ -316,8 +316,8 @@ def sample_cfg_raw(
 
     if n_binary_rules > n_nonterminals * (n_nonterminals - 1) * (n_nonterminals - 1):
         log.warning(
-            f"{n_binary_rules} binary rules requested, but only ",
-            f"{n_nonterminals * (n_nonterminals - 1) * (n_nonterminals - 1)} possible",
+            f"{n_binary_rules} binary rules requested, but only "
+            f"{n_nonterminals * (n_nonterminals - 1) * (n_nonterminals - 1)} possible"
         )
         n_binary_rules = n_nonterminals * (n_nonterminals - 1) * (n_nonterminals - 1)
 
@@ -440,7 +440,7 @@ def sample_cfg_trim(
                 "Max tries exceeded! Unable to generate grammar with "
                 "provided hyperparameters."
             )
-            raise SystemExit
+            return None
 
     prods = compute_usable_prods(
         trim_set=trim_set, productions=raw_grammar["productions"]
@@ -451,7 +451,10 @@ def sample_cfg_trim(
         if prod.is_lexical:
             terminals.add(prod.rhs[0])
 
-    grammar_name = f"{name}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}"
+    # get a random number to append to the grammar name
+    rnd = random.randint(0, 1_000_000)
+
+    grammar_name = f"{name}_{datetime.datetime.now().strftime('%Y%m%d%H%M%S')}_{rnd}"
     grammar_path = data_dir / grammar_name
     grammar_path.mkdir(parents=True, exist_ok=True)
     filename = f"{grammar_name}.cfg"
@@ -475,7 +478,7 @@ def sample_reg_trim(
     name: str = "grammar",
     save_raw_grammar: bool = False,
     max_tries: int = 100,
-) -> dict[str, Any]:
+) -> dict[str, Any] | None:
     has_generated_nonempty_grammar = False
 
     while not has_generated_nonempty_grammar and max_tries > 0:
@@ -505,7 +508,7 @@ def sample_reg_trim(
                 "Max tries exceeded! Unable to generate grammar with "
                 "provided hyperparameters."
             )
-            raise SystemExit
+            return None
 
     prods = compute_usable_prods(
         trim_set=trim_set, productions=raw_grammar["productions"]
