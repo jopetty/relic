@@ -100,10 +100,10 @@ def grammar(
 
 
 def grammars():
-    n_terminals_range = range(5, 30, 20)
-    n_nonterminals_range = range(5, 30, 20)
-    n_lexical_rules_range = range(5, 30, 20)
-    n_nonlexical_rules_range = range(5, 30, 20)
+    n_terminals_range = range(100, 500, 50)
+    n_nonterminals_range = range(100, 500, 50)
+    n_lexical_rules_range = range(100, 500, 50)
+    n_nonlexical_rules_range = range(100, 500, 50)
 
     new_grammars = []
     for (
@@ -173,33 +173,26 @@ def samples(
         starting_count = len(neg_samples)
 
         log.info(f"Generating negative samples for {grammar_file}")
-
-        # procedurally-generate negative samples for "short-enough" lengths
         n_terminals: int = g.n_terminals
-        possible_string_exp: int = 1
+        test_sample_len: int = 1
         terminals: list[str] = list(set(g.terminals))
-        possible_strings: int = n_terminals**possible_string_exp
 
-        while (possible_strings < 10_000) and (possible_string_exp < 50):
-            log.info(f"Testing short strings of length {possible_string_exp}")
-            # generate all possible strings of length `length`
-            for possible_sample in itertools.product(
-                terminals, repeat=possible_string_exp
-            ):
+        while (n_terminals**test_sample_len < 5_000) and (test_sample_len < 50):
+            log.info(f"Testing short strings of length {test_sample_len}")
+            for possible_sample in itertools.product(terminals, repeat=test_sample_len):
                 sample = " ".join(possible_sample)
-
                 if not g.test_sample(sample):
                     neg_samples.add(sample)
-            possible_string_exp += 1
-            possible_strings = n_terminals**possible_string_exp
+            test_sample_len += 1
 
         log.info("Generating longer samples")
-        for length in tqdm.tqdm(range(possible_string_exp - 1, max_length + 1)):
+        for length in tqdm.tqdm(range(test_sample_len - 1, max_length + 1)):
             for _ in range(samples_per_length):
                 sample = g.generate_negative_sample_of_length(
                     length=length, max_trials=max_tries_per_sample
                 )
-                neg_samples.add(sample)
+                if sample is not None:
+                    neg_samples.add(sample)
         ending_count = len(neg_samples)
         log.info(
             f"Generated {ending_count - starting_count} new negative samples"
@@ -230,7 +223,8 @@ def samples(
         new_samples = []
         for _ in tqdm.tqdm(range(total_iterations)):
             sample = g.generate_tree(max_depth=max_recursion_depth)
-            new_samples.append(sample)
+            if sample is not None:
+                new_samples.append(sample)
 
         # add new_samples to pos_samples_df
         new_samples_df = pd.DataFrame(new_samples, columns=["string", "parse"])
@@ -547,11 +541,11 @@ def openai_batch(
 
 
 def all(
-    # Grammar params
-    n_terminals=N_TERMINALS,
-    n_nonterminals=N_NONTERMINALS,
-    n_lexical_rules=N_LEXICAL_RULES,
-    n_nonlexical_rules=N_NONLEXICAL_RULES,
+    # # Grammar params
+    # n_terminals=N_TERMINALS,
+    # n_nonterminals=N_NONTERMINALS,
+    # n_lexical_rules=N_LEXICAL_RULES,
+    # n_nonlexical_rules=N_NONLEXICAL_RULES,
     # Sample params
     max_length: int = 50,
     samples_per_length: int = 10,
@@ -562,8 +556,13 @@ def all(
     pos_multiplier: int = 1000,
     # Batch params
     models: list[str] = ["gpt-4o-mini", "gpt-4o", "o3-mini"],
-    n_shots: list[int] = [0, 1, 2, 4, 8, 16],
+    n_shots: list[int] = [0],
 ):
+    n_terminals = random.randint(10, 1000)
+    n_nonterminals = random.randint(10, 1000)
+    n_lexical_rules = random.randint(10, 1000)
+    n_nonlexical_rules = random.randint(10, 1000)
+
     grammar_dict = grammar(
         n_terminals=n_terminals,
         n_nonterminals=n_nonterminals,

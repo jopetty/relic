@@ -2,12 +2,10 @@
 
 @TODO: Add support for generating regular expressions.
 @TODO: Make random seed configurable.
-@TODO: Add proper docstrings.
 """
 
 import pathlib
 import random
-import statistics
 from collections import defaultdict
 from enum import Enum
 from typing import List, Optional, Set
@@ -124,13 +122,17 @@ class Grammar:
             raise ValueError("You must provide a CFG (*.cfg) or PCFG (*.pcfg) file.")
 
     @classmethod
-    def from_string(cls, grammar_str: str, grammar_type: Type):
+    def from_string(
+        cls, grammar_str: str, grammar_type: Type, with_parser: bool = True
+    ):
         if grammar_type == cls.Type.CFG:
-            return cls(grammar_str, is_pcfg=False)
+            return cls(grammar_str, is_pcfg=False, with_parser=with_parser)
         else:
             raise ValueError("Only CFGs are supported for now.")
 
-    def __init__(self, grammar_str: str, is_pcfg: bool = False):
+    def __init__(
+        self, grammar_str: str, is_pcfg: bool = False, with_parser: bool = True
+    ):
         self._is_pcfg = is_pcfg
 
         if is_pcfg:
@@ -171,7 +173,8 @@ class Grammar:
 
         self.can_terminate = self._find_terminating_nts()
 
-        self._parser = lark.Lark(self.as_lark_ebnf)
+        if with_parser:
+            self._parser = lark.Lark(self.as_lark_ebnf)
 
     def _find_terminating_nts(self) -> Set[Nonterminal]:
         can_terminate = set()
@@ -296,11 +299,14 @@ class Grammar:
 
             return parsed_string, parsed_tree
 
-        result = _sample_recursive(self.as_cfg.start(), 0)
-        if result is None:
-            return self.generate_tree(sep=sep, max_depth=max_depth)
-        else:
-            return {"string": result[0], "parse": result[1]}
+        try:
+            result = _sample_recursive(self.as_cfg.start(), 0)
+            if result is None:
+                return self.generate_tree(sep=sep, max_depth=max_depth)
+            else:
+                return {"string": result[0], "parse": result[1]}
+        except RecursionError:
+            return None
 
     def generate_negative_sample_of_length(
         self,

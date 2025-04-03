@@ -187,7 +187,7 @@ def load_grammar(
 
     grammar_dict = {
         "grammar": fg_grammar.Grammar.from_string(
-            grammar_string, grammar_type=GType.CFG
+            grammar_string, grammar_type=GType.CFG, with_parser=False
         ),
     }
 
