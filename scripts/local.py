@@ -130,7 +130,7 @@ def run(
     model: str = "google/gemma-2-2b-it",
     # Pipeline parameters
     max_new_tokens: int = None,
-    batch_size: int = 1,
+    batch_size: int = 2,
 ):
     grammars_dir = PROJECT_ROOT / "data" / "grammars"
     grammar_path = grammars_dir / f"{grammar_name}"

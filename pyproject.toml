@@ -33,7 +33,7 @@ dependencies = [
     "sentencepiece>=0.2.0",
     "statsmodels>=0.14.4",
     "torch>=2.6.0",
-    "transformers>=4.49.0",
+    "transformers>=4.51.1",
     "wandb>=0.18.1",
 ]
 
@@ -54,6 +54,3 @@ select = ["E", "F", "I", "N"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
-
-[tool.uv.sources]
-transformers = { git = "https://github.com/huggingface/transformers", rev = "v4.49.0-Gemma-3" }
