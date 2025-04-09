@@ -541,11 +541,10 @@ def openai_batch(
 
 
 def all(
-    # # Grammar params
-    # n_terminals=N_TERMINALS,
-    # n_nonterminals=N_NONTERMINALS,
-    # n_lexical_rules=N_LEXICAL_RULES,
-    # n_nonlexical_rules=N_NONLEXICAL_RULES,
+    # Grammar params
+    h_low: int = 10,
+    h_high: int = 1000,
+    lambda_: float = 0.01,
     # Sample params
     max_length: int = 50,
     samples_per_length: int = 10,
@@ -558,10 +557,10 @@ def all(
     models: list[str] = ["gpt-4o-mini", "gpt-4o", "o3-mini"],
     n_shots: list[int] = [0],
 ):
-    n_terminals = random.randint(10, 1000)
-    n_nonterminals = random.randint(10, 1000)
-    n_lexical_rules = random.randint(10, 1000)
-    n_nonlexical_rules = random.randint(10, 1000)
+    n_terminals = int(min(max(random.expovariate(lambda_), h_low), h_high))
+    n_nonterminals = int(min(max(random.expovariate(lambda_), h_low), h_high))
+    n_lexical_rules = int(min(max(random.expovariate(lambda_), h_low), h_high))
+    n_nonlexical_rules = int(min(max(random.expovariate(lambda_), h_low), h_high))
 
     grammar_dict = grammar(
         n_terminals=n_terminals,
