@@ -494,7 +494,7 @@ requires-dist = [
     { name = "sentencepiece", specifier = ">=0.2.0" },
     { name = "statsmodels", specifier = ">=0.14.4" },
     { name = "torch", specifier = ">=2.6.0" },
-    { name = "transformers", git = "https://github.com/huggingface/transformers?rev=v4.49.0-Gemma-3" },
+    { name = "transformers", specifier = ">=4.51.1" },
     { name = "wandb", specifier = ">=0.18.1" },
 ]
 
@@ -753,7 +753,7 @@ wheels = [
 
 [[package]]
 name = "huggingface-hub"
-version = "0.26.1"
+version = "0.30.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "filelock" },
@@ -764,9 +764,9 @@ dependencies = [
     { name = "tqdm" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/44/99/c8fdef6fe09a1719e5e5de24b012de5824889168c96143f5531cab5af42b/huggingface_hub-0.26.1.tar.gz", hash = "sha256:414c0d9b769eecc86c70f9d939d0f48bb28e8461dd1130021542eff0212db890", size = 375458 }
+sdist = { url = "https://files.pythonhosted.org/packages/df/22/8eb91736b1dcb83d879bd49050a09df29a57cc5cd9f38e48a4b1c45ee890/huggingface_hub-0.30.2.tar.gz", hash = "sha256:9a7897c5b6fd9dad3168a794a8998d6378210f5b9688d0dfc180b1a228dc2466", size = 400868 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d7/4d/017d8d7cff5100092da8ea19139bcb1965bbadcbb5ddd0480e2badc299e8/huggingface_hub-0.26.1-py3-none-any.whl", hash = "sha256:5927a8fc64ae68859cd954b7cc29d1c8390a5e15caba6d3d349c973be8fdacf3", size = 447439 },
+    { url = "https://files.pythonhosted.org/packages/93/27/1fb384a841e9661faad1c31cbfa62864f59632e876df5d795234da51c395/huggingface_hub-0.30.2-py3-none-any.whl", hash = "sha256:68ff05969927058cfa41df4f2155d4bb48f5f54f719dd0390103eefa9b191e28", size = 481433 },
 ]
 
 [[package]]
@@ -2180,8 +2180,8 @@ wheels = [
 
 [[package]]
 name = "transformers"
-version = "4.50.0.dev0"
-source = { git = "https://github.com/huggingface/transformers?rev=v4.49.0-Gemma-3#46350f5eae87ac1d168ddfdc57a0b39b64b9a029" }
+version = "4.51.1"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "filelock" },
     { name = "huggingface-hub" },
@@ -2193,6 +2193,10 @@ dependencies = [
     { name = "safetensors" },
     { name = "tokenizers" },
     { name = "tqdm" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c4/85/9182a14e0cceb6ababd37c9832d99f1c939e89854c80fa676ee0dbb8615b/transformers-4.51.1.tar.gz", hash = "sha256:206ea0b75dfde142ed7495b911da76579dce6ea249cc3695fdd29a544a9e007b", size = 8935230 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/73/e0/f1fce1b2f31da4acfb858732d909209fdb10f65adda1e7af0c7ac74927a5/transformers-4.51.1-py3-none-any.whl", hash = "sha256:c7038e216afb2a3e9b00dd12d87ad5e3af4c30895f70b28e92f65459eded0161", size = 10365727 },
 ]
 
 [package.optional-dependencies]
