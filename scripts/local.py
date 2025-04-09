@@ -227,7 +227,11 @@ def run(
         example["response"] = old_response
         return example
 
-    dataset = dataset.map(get_response, desc="get_response").remove_columns(["prompt"])
+    dataset = dataset.map(
+        get_response,
+        desc="get_response",
+        batch_size=batch_size,
+    ).remove_columns(["prompt"])
     log.info(f"Writing responses to {results_path}")
     dataset.to_json(str(results_path), lines=True)
 
