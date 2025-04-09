@@ -14,8 +14,6 @@ import logging
 import pprint
 import random
 import shutil
-import statistics
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import fire
 import pandas as pd
@@ -75,6 +73,11 @@ def grammar(
         raise ValueError(
             f"Unknown grammar type: `{type}`; valid types are `cfg` and `reg`"
         )
+
+    if grammar_dict is None:
+        log.warning("Unable to generate grammar")
+        return None
+
     g = grammar_dict["grammar"]
     grammar_stats = {
         "n_terminals": g.n_terminals,
@@ -94,6 +97,51 @@ def grammar(
     pprint.pprint(grammar_stats)
 
     return grammar_dict
+
+
+def grammars():
+    n_terminals_range = range(100, 500, 50)
+    n_nonterminals_range = range(100, 500, 50)
+    n_lexical_rules_range = range(100, 500, 50)
+    n_nonlexical_rules_range = range(100, 500, 50)
+
+    new_grammars = []
+    for (
+        n_terminals,
+        n_nonterminals,
+        n_lexical_rules,
+        n_nonlexical_rules,
+    ) in tqdm.tqdm(
+        itertools.product(
+            n_terminals_range,
+            n_nonterminals_range,
+            n_lexical_rules_range,
+            n_nonlexical_rules_range,
+        )
+    ):
+        try:
+            grammar_dict = grammar(
+                n_terminals=n_terminals,
+                n_nonterminals=n_nonterminals,
+                n_lexical_rules=n_lexical_rules,
+                n_nonlexical_rules=n_nonlexical_rules,
+            )
+            if grammar_dict is not None:
+                new_grammars.append(grammar_dict)
+        except Exception as _:
+            log.warning(
+                f"Unable to generate grammar with params: {n_terminals=}, {n_nonterminals=}, {n_lexical_rules=}, {n_nonlexical_rules=}"
+            )
+
+    log.info(f"Generated {len(new_grammars)} new grammars")
+
+    for g_dict in new_grammars:
+        log.info(f"\tGrammar: {g_dict['grammar_name']}")
+
+    for g_dict in new_grammars:
+        # generate samples for each grammar
+        samples(grammar_name=g_dict["grammar_name"])
+        filtered_samples(grammar_name=g_dict["grammar_name"])
 
 
 def samples(
@@ -125,33 +173,26 @@ def samples(
         starting_count = len(neg_samples)
 
         log.info(f"Generating negative samples for {grammar_file}")
-
-        # procedurally-generate negative samples for "short-enough" lengths
         n_terminals: int = g.n_terminals
-        possible_string_exp: int = 1
+        test_sample_len: int = 1
         terminals: list[str] = list(set(g.terminals))
-        possible_strings: int = n_terminals**possible_string_exp
 
-        while possible_strings < 100_000:
-            log.info(f"Testing short strings of length {possible_string_exp}")
-            # generate all possible strings of length `length`
-            for possible_sample in itertools.product(
-                terminals, repeat=possible_string_exp
-            ):
+        while (n_terminals**test_sample_len < 5_000) and (test_sample_len < 50):
+            log.info(f"Testing short strings of length {test_sample_len}")
+            for possible_sample in itertools.product(terminals, repeat=test_sample_len):
                 sample = " ".join(possible_sample)
-
                 if not g.test_sample(sample):
                     neg_samples.add(sample)
-            possible_string_exp += 1
-            possible_strings = n_terminals**possible_string_exp
+            test_sample_len += 1
 
         log.info("Generating longer samples")
-        for length in tqdm.tqdm(range(possible_string_exp - 1, max_length + 1)):
+        for length in tqdm.tqdm(range(test_sample_len - 1, max_length + 1)):
             for _ in range(samples_per_length):
                 sample = g.generate_negative_sample_of_length(
                     length=length, max_trials=max_tries_per_sample
                 )
-                neg_samples.add(sample)
+                if sample is not None:
+                    neg_samples.add(sample)
         ending_count = len(neg_samples)
         log.info(
             f"Generated {ending_count - starting_count} new negative samples"
@@ -166,52 +207,40 @@ def samples(
                 f.write(f"{sample}\n")
 
     if gen_positive:
-        pos_sample_file = grammar_path / "positive_samples.txt"
+        pos_sample_file = grammar_path / "positive_samples.csv"
+
         if pos_sample_file.exists():
-            with open(pos_sample_file, "r") as f:
-                pos_samples = set(f.read().splitlines())
+            pos_samples_df = pd.read_csv(pos_sample_file)
         else:
-            pos_samples = set()
-        starting_count = len(pos_samples)
+            pos_samples_df = pd.DataFrame(columns=["string", "parse"])
+        starting_count = pos_samples_df["string"].nunique()
         log.info(f"Generating positive samples for {grammar_file}")
 
-        # procedurally-generate positive samples for "short-enough" lengths
-        n_terminals: int = g.n_terminals
-        possible_string_exp: int = 1
-        terminals: list[str] = list(set(g.terminals))
-        possible_strings: int = n_terminals**possible_string_exp
-
-        while possible_strings < 100_000:
-            log.info(f"Testing short strings of length {possible_string_exp}")
-            # generate all possible strings of length `length`
-            for possible_sample in itertools.product(
-                terminals, repeat=possible_string_exp
-            ):
-                sample = " ".join(possible_sample)
-                if g.test_sample(sample):
-                    pos_samples.add(sample)
-            possible_string_exp += 1
-            possible_strings = n_terminals**possible_string_exp
-
-        log.info("Generating longer samples")
         total_iterations = (
             samples_per_length * max_length * max_tries_per_sample * pos_multiplier
         )
 
+        new_samples = []
         for _ in tqdm.tqdm(range(total_iterations)):
-            sample = g.generate(max_depth=max_recursion_depth)
-            pos_samples.add(sample)
-        ending_count = len(pos_samples)
+            sample = g.generate_tree(max_depth=max_recursion_depth)
+            if sample is not None:
+                new_samples.append(sample)
+
+        # add new_samples to pos_samples_df
+        new_samples_df = pd.DataFrame(new_samples, columns=["string", "parse"])
+        pos_samples_df = pd.concat([pos_samples_df, new_samples_df])
+
+        ending_count = pos_samples_df["string"].nunique()
+
+        pos_samples_df = pos_samples_df.drop_duplicates(subset=["string"])
         log.info(
             f"Generated {ending_count - starting_count} new positive samples"
-            f" ({len(pos_samples)} total)"
+            f" ({ending_count} total)"
         )
 
-        pos_samples = sorted(pos_samples, key=lambda x: len(x.split(" ")))
-
-        with open(pos_sample_file, "w") as f:
-            for sample in pos_samples:
-                f.write(f"{sample}\n")
+        pos_samples_df.sort_values(by="string", key=lambda x: x.str.len()).to_csv(
+            pos_sample_file, index=False
+        )
 
 
 def filtered_samples(
@@ -239,7 +268,7 @@ def filtered_samples(
     g = fg_grammar.Grammar.from_file(grammar_file)
 
     # assert that positive and negative samples have been generated
-    pos_sample_file = grammar_path / "positive_samples.txt"
+    pos_sample_file = grammar_path / "positive_samples.csv"
     neg_sample_file = grammar_path / "negative_samples.txt"
     if not pos_sample_file.exists():
         raise FileNotFoundError(f"Positive samples not found for {grammar_name}")
@@ -248,17 +277,20 @@ def filtered_samples(
 
     # Read in only the first samples_per_length*max_length lines for each
     # sample file
-    pos_samples = read_lines_up_to_length(pos_sample_file, max_length)
+    # pos_samples = read_lines_up_to_length(pos_sample_file, max_length)
     neg_samples = read_lines_up_to_length(neg_sample_file, max_length)
 
-    pos_samples = [s for s in pos_samples if len(s.split(" ")) <= max_length]
+    # pos_samples = [s for s in pos_samples if len(s.split(" ")) <= max_length]
     neg_samples = [s for s in neg_samples if len(s.split(" ")) <= max_length]
 
     # Keep only 2*samples_per_length samples of each length to speed up parsing
-    pos_samples_df = pd.DataFrame(pos_samples, columns=["sample"])
+    pos_samples_df = pd.read_csv(pos_sample_file)
+    pos_samples_df = pos_samples_df.rename(columns={"string": "sample"})
     pos_samples_df["length"] = pos_samples_df["sample"].apply(
         lambda x: len(x.split(" "))
     )
+    pos_samples_df = pos_samples_df[pos_samples_df["length"] <= max_length]
+
     pos_samples_df = pos_samples_df.groupby(["length"], group_keys=False).apply(
         lambda x: x.sample(min(len(x), 2 * samples_per_length)),
         include_groups=False,
@@ -268,31 +300,61 @@ def filtered_samples(
     log.info(f"Read in {len(pos_samples)} positive samples")
     log.info(f"Read in {len(neg_samples)} negative samples")
 
-    def annotate_sample(s):
-        parses = g.parse(s)
-        num_parses = len(parses)
-        mean_parse_depth = statistics.mean(p.height() for p in parses)
-        return {
-            "sample": s,
-            "mean_parse_height": mean_parse_depth,
-            "num_parses": num_parses,
-            "type": "positive",
-            "length": len(s.split(" ")),
-        }
+    def get_dyck_depth(s):
+        depth = 0
+        max_depth = 0
 
-    log.info("Annotating positive samples with parse information")
-    with ThreadPoolExecutor(max_workers=8) as executor:
-        futures = {executor.submit(annotate_sample, s): s for s in pos_samples}
-        sample_dicts = []
-        for future in tqdm.tqdm(as_completed(futures), total=len(pos_samples)):
-            sample_dicts.append(future.result())
+        for c in s:
+            if c == "(":
+                depth += 1
+                max_depth = max(max_depth, depth)
+            elif c == ")":
+                depth -= 1
+
+        return max_depth
+
+    pos_samples_df["parse_depth"] = pos_samples_df["parse"].apply(get_dyck_depth)
+
+    # def annotate_sample(s):
+    #     parses = g.parse(s)
+    #     num_parses = len(parses)
+    #     mean_parse_depth = statistics.mean(p.height() for p in parses)
+    #     return {
+    #         "sample": s,
+    #         "mean_parse_height": mean_parse_depth,
+    #         "num_parses": num_parses,
+    #         "type": "positive",
+    #         "length": len(s.split(" ")),
+    #     }
+
+    # log.info("Annotating positive samples with parse information")
+    # with ThreadPoolExecutor(max_workers=8) as executor:
+    #     futures = {executor.submit(annotate_sample, s): s for s in pos_samples}
+    #     sample_dicts = []
+    #     for future in tqdm.tqdm(as_completed(futures), total=len(pos_samples)):
+    #         sample_dicts.append(future.result())
+
+    sample_dicts = []
+
+    # convert pos_samples_df to list of dicts
+    for idx, row in pos_samples_df.iterrows():
+        sample_dicts.append(
+            {
+                "sample": row["sample"],
+                "parse_depth": get_dyck_depth(row["parse"]),
+                "type": "positive",
+                "length": len(row["sample"].split(" ")),
+            }
+        )
 
     for s in neg_samples:
         sample_dicts.append(
             {
                 "sample": s,
-                "mean_parse_height": None,
-                "num_parses": None,
+                "parse_depth": None,
+                # "parse_depth": get_dyck_depth(s),
+                # "mean_parse_height": None,
+                # "num_parses": None,
                 "type": "negative",
                 "length": len(s.split(" ")),
             }
@@ -371,16 +433,12 @@ def filtered_samples(
     uncompressed_size = uncompressed_path.stat().st_size
     compressed_size = compressed_path.stat().st_size
     compression_ratio = uncompressed_size / compressed_size
-
-    pos_parses = sample_df[sample_df["type"] == "positive"]["num_parses"]
-    pos_depths = sample_df[sample_df["type"] == "positive"]["mean_parse_height"]
+    pos_depths = sample_df[sample_df["type"] == "positive"]["parse_depth"]
 
     samples_stats = {
         "uncompressed_size": uncompressed_size,
         "compressed_size": compressed_size,
         "compression_ratio": compression_ratio,
-        "mean_positive_parses": pos_parses.mean().item(),
-        "median_positive_parses": pos_parses.median().item(),
         "mean_positive_depth": pos_depths.mean().item(),
         "median_positive_depth": pos_depths.median().item(),
         "coverage": coverage,
@@ -484,10 +542,9 @@ def openai_batch(
 
 def all(
     # Grammar params
-    n_terminals=N_TERMINALS,
-    n_nonterminals=N_NONTERMINALS,
-    n_lexical_rules=N_LEXICAL_RULES,
-    n_nonlexical_rules=N_NONLEXICAL_RULES,
+    h_low: int = 10,
+    h_high: int = 1000,
+    lambda_: float = 0.01,
     # Sample params
     max_length: int = 50,
     samples_per_length: int = 10,
@@ -498,8 +555,13 @@ def all(
     pos_multiplier: int = 1000,
     # Batch params
     models: list[str] = ["gpt-4o-mini", "gpt-4o", "o3-mini"],
-    n_shots: list[int] = [0, 1, 2, 4, 8, 16],
+    n_shots: list[int] = [0],
 ):
+    n_terminals = int(min(max(random.expovariate(lambda_), h_low), h_high))
+    n_nonterminals = int(min(max(random.expovariate(lambda_), h_low), h_high))
+    n_lexical_rules = int(min(max(random.expovariate(lambda_), h_low), h_high))
+    n_nonlexical_rules = int(min(max(random.expovariate(lambda_), h_low), h_high))
+
     grammar_dict = grammar(
         n_terminals=n_terminals,
         n_nonterminals=n_nonterminals,
