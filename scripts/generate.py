@@ -172,10 +172,35 @@ def samples(
             neg_samples = set()
         starting_count = len(neg_samples)
 
+        # Rejection sampling
+        # Generate twenty random strings of varying lengths between 1 and
+        # max_length; if none of them are negative samples, then the grammar
+        # probably overgenerates and isn't good.
+
+        terminals: list[str] = list(set(g.terminals))
+
+        log.info("Performing rejection sampling check...")
+        found_negative_in_rejection = False
+        for _ in range(20):  # Generate 20 random strings
+            length = random.randint(1, max_length)
+            random_terminals = random.choices(terminals, k=length)
+            sample = " ".join(random_terminals)
+            if not g.test_sample(sample):
+                neg_samples.add(sample)
+                found_negative_in_rejection = True
+                # Optionally break early if one is found, or continue to find more
+                # break
+
+        if not found_negative_in_rejection:
+            log.warning(
+                f"Grammar {grammar_name} might overgenerate: "
+                "No negative samples found in 20 random strings."
+            )
+            raise SystemExit
+
         log.info(f"Generating negative samples for {grammar_file}")
         n_terminals: int = g.n_terminals
         test_sample_len: int = 1
-        terminals: list[str] = list(set(g.terminals))
 
         while (n_terminals**test_sample_len < 5_000) and (test_sample_len < 50):
             log.info(f"Testing short strings of length {test_sample_len}")
@@ -187,12 +212,18 @@ def samples(
 
         log.info("Generating longer samples")
         for length in tqdm.tqdm(range(test_sample_len - 1, max_length + 1)):
+            bad_tries = 0
             for _ in range(samples_per_length):
                 sample = g.generate_negative_sample_of_length(
                     length=length, max_trials=max_tries_per_sample
                 )
                 if sample is not None:
                     neg_samples.add(sample)
+                else:
+                    bad_tries += 1
+                    if bad_tries > max_tries_per_sample:
+                        print(f"failed {bad_tries} times")
+                        break
         ending_count = len(neg_samples)
         log.info(
             f"Generated {ending_count - starting_count} new negative samples"
@@ -552,7 +583,7 @@ def all(
     gen_negative: bool = True,
     max_tries_per_sample: int = 10,
     max_recursion_depth: int = 10000,
-    pos_multiplier: int = 1000,
+    pos_multiplier: int = 100,
     # Batch params
     models: list[str] = ["gpt-4o-mini", "gpt-4o", "o3-mini"],
     n_shots: list[int] = [0],
@@ -593,6 +624,57 @@ def all(
                 model=model,
                 n_shots=n_shot,
             )
+
+
+def grid(
+    max_length: int = 50,
+    samples_per_length: int = 10,
+    gen_positive: bool = True,
+    gen_negative: bool = True,
+    max_tries_per_sample: int = 10,
+    max_recursion_depth: int = 10000,
+    pos_multiplier: int = 100,
+    # Batch params
+    models: list[str] = ["gpt-4o-mini", "gpt-4o", "o3-mini"],
+    n_shots: list[int] = [0],
+):
+    hparams = range(5, 100, 30)
+
+    for n_terminals in random.choice(hparams):
+        for n_nonterminals in random.choice(hparams):
+            for n_lexical_rules in random.choice(hparams):
+                for n_nonlexical_rules in random.choice(hparams):
+                    grammar_dict = grammar(
+                        n_terminals=n_terminals,
+                        n_nonterminals=n_nonterminals,
+                        n_lexical_rules=n_lexical_rules,
+                        n_nonlexical_rules=n_nonlexical_rules,
+                    )
+
+                    samples(
+                        grammar_name=grammar_dict["grammar_name"],
+                        max_length=max_length,
+                        samples_per_length=samples_per_length,
+                        gen_positive=gen_positive,
+                        gen_negative=gen_negative,
+                        max_tries_per_sample=max_tries_per_sample,
+                        max_recursion_depth=max_recursion_depth,
+                        pos_multiplier=pos_multiplier,
+                    )
+
+                    filtered_samples(
+                        grammar_name=grammar_dict["grammar_name"],
+                        max_length=max_length,
+                        samples_per_length=samples_per_length,
+                    )
+
+                    for model in models:
+                        for n_shot in n_shots:
+                            openai_batch(
+                                grammar_name=grammar_dict["grammar_name"],
+                                model=model,
+                                n_shots=n_shot,
+                            )
 
 
 if __name__ == "__main__":
