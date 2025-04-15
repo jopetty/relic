@@ -593,7 +593,9 @@ def all_rand(
     n_lexical_rules = int(min(max(random.expovariate(lambda_), h_low), h_high))
     n_nonlexical_rules = int(min(max(random.expovariate(lambda_), h_low), h_high))
 
-    log.info(f"Generating grammar with params: {n_terminals=}, {n_nonterminals=}, {n_lexical_rules=}, {n_nonlexical_rules=}")
+    log.info(
+        f"Generating grammar with params: {n_terminals=}, {n_nonterminals=}, {n_lexical_rules=}, {n_nonlexical_rules=}"
+    )
 
     grammar_dict = grammar(
         n_terminals=n_terminals,
@@ -655,14 +657,15 @@ def all_grid(
     hp_space = list(itertools.product(*hp_space))
     HPSPACE_LEN = len(hp_space)
 
-    hp_space = hp_space[sweep_id::len(hp_space)]
+    hp_space = hp_space[sweep_id :: len(hp_space)]
     n_terminals, n_nonterminals, n_lexical_rules, n_nonlexical_rules = hp_space[0]
 
     log.info(f"Hyperparameter space: {hp_space}")
     log.info(f"Running sweep {sweep_id+1} of {HPSPACE_LEN}")
-    log.info(f"Running with params: {n_terminals=}, {n_nonterminals=}, {n_lexical_rules=}, {n_nonlexical_rules=}")
 
-    log.info(f"Generating grammar with params: {n_terminals=}, {n_nonterminals=}, {n_lexical_rules=}, {n_nonlexical_rules=}")
+    log.info(
+        f"Generating grammar with params: {n_terminals=}, {n_nonterminals=}, {n_lexical_rules=}, {n_nonlexical_rules=}"
+    )
 
     grammar_dict = grammar(
         n_terminals=n_terminals,
