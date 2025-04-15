@@ -640,41 +640,44 @@ def grid(
 ):
     hparams = range(5, 100, 30)
 
-    for n_terminals in random.choice(hparams):
-        for n_nonterminals in random.choice(hparams):
-            for n_lexical_rules in random.choice(hparams):
-                for n_nonlexical_rules in random.choice(hparams):
-                    grammar_dict = grammar(
-                        n_terminals=n_terminals,
-                        n_nonterminals=n_nonterminals,
-                        n_lexical_rules=n_lexical_rules,
-                        n_nonlexical_rules=n_nonlexical_rules,
-                    )
+    n_terminals  = random.choice(hparams)
+    n_nonterminals = random.choice(hparams)
+    n_lexical_rules = random.choice(hparams)
+    n_nonlexical_rules = random.choice(hparams)
 
-                    samples(
-                        grammar_name=grammar_dict["grammar_name"],
-                        max_length=max_length,
-                        samples_per_length=samples_per_length,
-                        gen_positive=gen_positive,
-                        gen_negative=gen_negative,
-                        max_tries_per_sample=max_tries_per_sample,
-                        max_recursion_depth=max_recursion_depth,
-                        pos_multiplier=pos_multiplier,
-                    )
+    log.info(f"Generating grammar with params: {n_terminals=}, {n_nonterminals=}, {n_lexical_rules=}, {n_nonlexical_rules=}")
 
-                    filtered_samples(
-                        grammar_name=grammar_dict["grammar_name"],
-                        max_length=max_length,
-                        samples_per_length=samples_per_length,
-                    )
+    grammar_dict = grammar(
+        n_terminals=n_terminals,
+        n_nonterminals=n_nonterminals,
+        n_lexical_rules=n_lexical_rules,
+        n_nonlexical_rules=n_nonlexical_rules,
+    )
 
-                    for model in models:
-                        for n_shot in n_shots:
-                            openai_batch(
-                                grammar_name=grammar_dict["grammar_name"],
-                                model=model,
-                                n_shots=n_shot,
-                            )
+    samples(
+        grammar_name=grammar_dict["grammar_name"],
+        max_length=max_length,
+        samples_per_length=samples_per_length,
+        gen_positive=gen_positive,
+        gen_negative=gen_negative,
+        max_tries_per_sample=max_tries_per_sample,
+        max_recursion_depth=max_recursion_depth,
+        pos_multiplier=pos_multiplier,
+    )
+
+    filtered_samples(
+        grammar_name=grammar_dict["grammar_name"],
+        max_length=max_length,
+        samples_per_length=samples_per_length,
+    )
+
+    for model in models:
+        for n_shot in n_shots:
+            openai_batch(
+                grammar_name=grammar_dict["grammar_name"],
+                model=model,
+                n_shots=n_shot,
+            )
 
 
 if __name__ == "__main__":
