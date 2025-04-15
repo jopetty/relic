@@ -75,7 +75,7 @@ def grammar(
         )
 
     if grammar_dict is None:
-        log.warning("Unable to generate grammar")
+        log.warning("Failed to generate grammar")
         return None
 
     g = grammar_dict["grammar"]
@@ -600,6 +600,10 @@ def all(
         n_nonlexical_rules=n_nonlexical_rules,
     )
 
+    if grammar_dict is None:
+        log.warning("Failed to generate grammar")
+        return None
+
     samples(
         grammar_name=grammar_dict["grammar_name"],
         max_length=max_length,
@@ -653,6 +657,10 @@ def grid(
         n_lexical_rules=n_lexical_rules,
         n_nonlexical_rules=n_nonlexical_rules,
     )
+
+    if grammar_dict is None:
+        log.warning("Failed to generate grammar")
+        return None
 
     samples(
         grammar_name=grammar_dict["grammar_name"],
