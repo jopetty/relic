@@ -53,6 +53,3 @@ select = ["E", "F", "I", "N"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
-
-[tool.uv]
-cache-dir = "/scratch/jp6664/.cache/uv"

@@ -12,4 +12,3 @@
 #SBATCH --array=0-19
 
 singularity exec --overlay flicr_sif.ext3:ro /scratch/work/public/singularity/pytorch-24.10-py-3.10.sif /bin/bash -l -c 'uv run scripts/generate.py grid'
-
