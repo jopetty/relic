@@ -106,6 +106,34 @@ class Grammar:
     def parser(self) -> lark.Lark:
         return self._parser
 
+    @property
+    def is_cyclic(self) -> bool:
+        """Check if the grammar contains cycles."""
+        prods = {}
+        for prod in self.as_cfg.productions():
+            if not prod.is_lexical():
+                lhs = prod.lhs()
+                rhs_a, rbs_b = prod.rhs()
+                prods.setdefault(str(lhs), []).extend([str(rhs_a), str(rbs_b)])
+
+        visited = set()
+        stack = set()
+
+        def check_cycle(node):
+            visited.add(node)
+            stack.add(node)
+
+            for neighbor in prods.get(node, []):
+                if neighbor not in visited:
+                    if check_cycle(neighbor):
+                        return True
+                elif neighbor in stack:
+                    return True
+            stack.remove(node)
+            return False
+
+        return check_cycle("S")
+
     @classmethod
     def from_file(cls, grammar_file: pathlib.Path | str):
         if isinstance(grammar_file, str):
