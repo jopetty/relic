@@ -46,13 +46,10 @@ dev = ["pre-commit"]
 [tool.ruff]
 line-length = 88
 extend-include = ["*.ipynb"]
-extend-exclude = ["data/"]
+extend-exclude = ["data/", "*.slurm"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
-
-[tool.uv]
-cache-dir = "/scratch/jp6664/.cache/uv"
