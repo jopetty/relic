@@ -46,7 +46,7 @@ dev = ["pre-commit"]
 [tool.ruff]
 line-length = 88
 extend-include = ["*.ipynb"]
-extend-exclude = ["data/", "*.slurm"]
+extend-exclude = ["data/"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N"]
