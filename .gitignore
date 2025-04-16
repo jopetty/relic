@@ -131,6 +131,7 @@ dmypy.json
 logs/
 data/completions/
 data/
+backups/
 
 # SLURM
 *.ext3
