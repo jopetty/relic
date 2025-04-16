@@ -573,7 +573,7 @@ def openai_batch(
 
 def all_rand(
     # Grammar params
-    h_low: int = 10,
+    h_low: int = 5,
     h_high: int = 100,
     lambda_: float = 0.01,
     # Sample params
