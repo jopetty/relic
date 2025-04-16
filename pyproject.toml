@@ -7,7 +7,9 @@ requires-python = ">= 3.12, < 3.13"
 license = { file = "LICENSE" }
 authors = [
     { name = "Jackson Petty", email = "research@jacksonpetty.org" },
-    { name = "Michael Hu", email = "myh2014@nyu.edu" }
+    { name = "Michael Hu", email = "myh2014@nyu.edu" },
+    { name = "William Merrill", email = "willm@nyu.edu" },
+    { name = "Wentao Wang", email = "wentao.wang@nyu.edu" },
 ]
 
 dependencies = [
