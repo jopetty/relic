@@ -1,0 +1,7 @@
+{
+    "n_terminals": 230,
+    "n_nonterminals": 346,
+    "n_lexical_productions": 437,
+    "n_nonlexical_productions": 284,
+    "grammar_name": "grammar_20250223120256"
+}

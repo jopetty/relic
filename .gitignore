@@ -129,9 +129,20 @@ dmypy.json
 .pyre/
 
 logs/
-data/completions/
-data/
+data/*
 backups/
+
+# Allow data/backups
+!data/grammars
+
+data/grammars/**/*.jsonl
+data/grammars/**/*_samples.txt
+data/grammars/**/*.log
+data/grammars/**/*.txt.gz
+data/grammars/**/positive_samples.csv
 
 # SLURM
 *.ext3
+
+# Apple
+.DS_Store

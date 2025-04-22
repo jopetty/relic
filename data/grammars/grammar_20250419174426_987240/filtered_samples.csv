@@ -1,0 +1,991 @@
+sample,parse_depth,type,length
+t110,,negative,1
+t81,,negative,1
+t31,,negative,1
+t111,,negative,1
+t5,,negative,1
+t50,,negative,1
+t90,,negative,1
+t21,,negative,1
+t29,,negative,1
+t27,,negative,1
+t44 t54,2.0,positive,2
+t73 t77,2.0,positive,2
+t50 t76,2.0,positive,2
+t60 t76,2.0,positive,2
+t46 t10,2.0,positive,2
+t4 t46,2.0,positive,2
+t41 t46,2.0,positive,2
+t4 t76,2.0,positive,2
+t93 t106,2.0,positive,2
+t93 t54,2.0,positive,2
+t4 t30,,negative,2
+t36 t100,,negative,2
+t100 t17,,negative,2
+t3 t46,,negative,2
+t13 t7,,negative,2
+t107 t44,,negative,2
+t17 t61,,negative,2
+t91 t95,,negative,2
+t91 t0,,negative,2
+t67 t88,,negative,2
+t28 t8 t77,3.0,positive,3
+t19 t84 t76,3.0,positive,3
+t87 t48 t106,3.0,positive,3
+t36 t100 t51,3.0,positive,3
+t97 t33 t54,3.0,positive,3
+t60 t97 t5,3.0,positive,3
+t103 t33 t67,3.0,positive,3
+t80 t67 t106,3.0,positive,3
+t60 t97 t24,3.0,positive,3
+t103 t34 t46,3.0,positive,3
+t53 t93 t111,,negative,3
+t82 t40 t95,,negative,3
+t67 t75 t5,,negative,3
+t74 t17 t44,,negative,3
+t61 t103 t87,,negative,3
+t44 t28 t48,,negative,3
+t40 t67 t22,,negative,3
+t81 t106 t107,,negative,3
+t34 t82 t90,,negative,3
+t56 t72 t15,,negative,3
+t93 t103 t54 t30,4.0,positive,4
+t76 t76 t56 t87,4.0,positive,4
+t18 t56 t89 t87,4.0,positive,4
+t107 t10 t14 t36,4.0,positive,4
+t107 t74 t13 t18,4.0,positive,4
+t88 t4 t93 t10,4.0,positive,4
+t78 t53 t28 t106,4.0,positive,4
+t33 t10 t50 t87,4.0,positive,4
+t18 t103 t89 t87,4.0,positive,4
+t19 t104 t30 t46,4.0,positive,4
+t22 t32 t24 t53,,negative,4
+t24 t2 t15 t104,,negative,4
+t10 t103 t72 t15,,negative,4
+t104 t81 t82 t54,,negative,4
+t40 t22 t48 t36,,negative,4
+t53 t105 t75 t93,,negative,4
+t87 t42 t51 t78,,negative,4
+t2 t77 t103 t38,,negative,4
+t48 t69 t46 t4,,negative,4
+t51 t13 t21 t76,,negative,4
+t74 t87 t8 t4 t87,5.0,positive,5
+t100 t9 t67 t108 t41,4.0,positive,5
+t87 t0 t106 t69 t10,5.0,positive,5
+t107 t67 t5 t51 t77,5.0,positive,5
+t76 t54 t9 t46 t77,5.0,positive,5
+t32 t38 t2 t108 t41,4.0,positive,5
+t82 t82 t28 t51 t77,5.0,positive,5
+t36 t58 t28 t41 t106,5.0,positive,5
+t76 t84 t61 t56 t87,5.0,positive,5
+t46 t22 t54 t95 t110,4.0,positive,5
+t7 t4 t21 t36 t82,,negative,5
+t54 t8 t45 t107 t41,,negative,5
+t75 t22 t104 t15 t12,,negative,5
+t14 t91 t12 t87 t41,,negative,5
+t30 t2 t53 t75 t73,,negative,5
+t93 t107 t46 t19 t18,,negative,5
+t46 t40 t51 t8 t26,,negative,5
+t8 t12 t106 t54 t104,,negative,5
+t5 t74 t7 t103 t7,,negative,5
+t0 t21 t74 t73 t34,,negative,5
+t46 t80 t54 t27 t50 t108,6.0,positive,6
+t30 t50 t34 t107 t76 t24,4.0,positive,6
+t103 t95 t5 t78 t21 t46,6.0,positive,6
+t103 t61 t87 t0 t100 t8,5.0,positive,6
+t50 t54 t50 t31 t84 t14,6.0,positive,6
+t54 t51 t87 t50 t80 t41,5.0,positive,6
+t80 t41 t41 t46 t74 t9,5.0,positive,6
+t111 t22 t103 t54 t95 t111,6.0,positive,6
+t46 t108 t90 t32 t74 t2,6.0,positive,6
+t40 t78 t28 t38 t87 t27,4.0,positive,6
+t76 t67 t76 t103 t51 t9,,negative,6
+t106 t12 t2 t84 t93 t26,,negative,6
+t30 t3 t41 t30 t81 t76,,negative,6
+t72 t13 t3 t8 t107 t51,,negative,6
+t107 t54 t22 t105 t105 t78,,negative,6
+t111 t103 t33 t33 t78 t15,,negative,6
+t54 t105 t60 t17 t53 t28,,negative,6
+t22 t9 t42 t110 t81 t41,,negative,6
+t73 t34 t95 t58 t80 t28,,negative,6
+t107 t54 t111 t78 t28 t9,,negative,6
+t44 t80 t108 t77 t38 t50 t51,7.0,positive,7
+t36 t69 t84 t5 t95 t78 t18,6.0,positive,7
+t58 t87 t46 t28 t24 t61 t54,7.0,positive,7
+t111 t107 t80 t41 t12 t56 t49,6.0,positive,7
+t40 t61 t51 t60 t28 t84 t14,6.0,positive,7
+t103 t10 t50 t22 t87 t74 t18,5.0,positive,7
+t15 t32 t54 t4 t69 t50 t108,7.0,positive,7
+t61 t77 t100 t106 t54 t106 t19,6.0,positive,7
+t111 t9 t77 t41 t36 t54 t107,6.0,positive,7
+t58 t95 t87 t21 t95 t50 t24,7.0,positive,7
+t77 t103 t82 t88 t91 t28 t44,,negative,7
+t32 t42 t53 t100 t7 t82 t78,,negative,7
+t4 t72 t5 t12 t33 t22 t34,,negative,7
+t76 t44 t26 t34 t46 t91 t28,,negative,7
+t9 t32 t103 t93 t61 t38 t7,,negative,7
+t111 t19 t69 t31 t8 t33 t9,,negative,7
+t81 t94 t17 t33 t97 t76 t81,,negative,7
+t18 t58 t69 t41 t27 t15 t3,,negative,7
+t32 t12 t4 t29 t0 t108 t105,,negative,7
+t69 t18 t17 t46 t31 t61 t80,,negative,7
+t69 t51 t36 t36 t58 t106 t3 t30,4.0,positive,8
+t103 t108 t32 t50 t50 t111 t44 t54,8.0,positive,8
+t2 t15 t28 t100 t9 t84 t111 t87,7.0,positive,8
+t74 t87 t106 t77 t106 t41 t84 t93,8.0,positive,8
+t27 t7 t58 t110 t0 t87 t106 t93,6.0,positive,8
+t95 t29 t46 t9 t44 t80 t50 t8,6.0,positive,8
+t44 t95 t50 t36 t41 t78 t48 t24,6.0,positive,8
+t10 t61 t50 t28 t58 t51 t45 t87,7.0,positive,8
+t107 t34 t33 t58 t46 t36 t80 t74,7.0,positive,8
+t28 t111 t84 t90 t4 t69 t50 t108,8.0,positive,8
+t0 t28 t21 t30 t87 t29 t8 t103,,negative,8
+t10 t30 t49 t44 t105 t32 t90 t45,,negative,8
+t61 t24 t80 t104 t32 t34 t75 t40,,negative,8
+t97 t61 t72 t0 t53 t89 t7 t9,,negative,8
+t31 t19 t69 t18 t51 t13 t80 t90,,negative,8
+t74 t105 t51 t103 t49 t36 t12 t45,,negative,8
+t21 t42 t82 t41 t67 t24 t29 t26,,negative,8
+t54 t54 t17 t22 t24 t24 t27 t51,,negative,8
+t49 t95 t73 t34 t15 t31 t82 t74,,negative,8
+t44 t30 t58 t75 t38 t75 t9 t60,,negative,8
+t74 t41 t89 t45 t26 t80 t74 t50 t81,7.0,positive,9
+t58 t95 t14 t49 t0 t67 t110 t0 t10,6.0,positive,9
+t14 t46 t87 t95 t50 t51 t78 t3 t77,9.0,positive,9
+t30 t14 t67 t72 t111 t103 t89 t50 t8,7.0,positive,9
+t104 t28 t12 t27 t106 t49 t91 t94 t87,8.0,positive,9
+t67 t51 t77 t53 t77 t87 t87 t87 t87,8.0,positive,9
+t31 t54 t58 t80 t49 t4 t91 t95 t111,7.0,positive,9
+t46 t80 t90 t107 t2 t34 t18 t36 t27,8.0,positive,9
+t22 t54 t27 t77 t3 t60 t87 t36 t54,6.0,positive,9
+t74 t87 t29 t51 t3 t28 t3 t76 t108,9.0,positive,9
+t56 t75 t69 t45 t12 t0 t30 t69 t3,,negative,9
+t14 t49 t2 t32 t77 t72 t53 t100 t45,,negative,9
+t74 t14 t111 t2 t41 t9 t110 t4 t5,,negative,9
+t27 t0 t69 t3 t58 t13 t5 t87 t69,,negative,9
+t80 t72 t30 t0 t74 t7 t56 t76 t77,,negative,9
+t87 t3 t27 t14 t81 t97 t93 t104 t26,,negative,9
+t89 t49 t51 t73 t22 t58 t14 t2 t51,,negative,9
+t12 t69 t9 t87 t60 t88 t27 t17 t33,,negative,9
+t60 t28 t3 t19 t60 t17 t36 t108 t56,,negative,9
+t50 t56 t42 t103 t41 t48 t56 t19 t8,,negative,9
+t61 t77 t95 t34 t80 t36 t74 t38 t2 t27,10.0,positive,10
+t58 t56 t88 t14 t106 t8 t34 t46 t111 t54,6.0,positive,10
+t74 t88 t36 t100 t33 t18 t54 t12 t56 t77,7.0,positive,10
+t29 t103 t13 t69 t10 t2 t89 t27 t36 t27,8.0,positive,10
+t107 t74 t104 t22 t69 t46 t50 t103 t3 t48,8.0,positive,10
+t46 t50 t93 t10 t24 t80 t84 t50 t51 t111,10.0,positive,10
+t56 t33 t77 t50 t8 t9 t54 t106 t2 t10,8.0,positive,10
+t29 t30 t18 t103 t34 t2 t74 t87 t51 t77,7.0,positive,10
+t97 t17 t41 t72 t54 t26 t41 t49 t24 t76,8.0,positive,10
+t77 t94 t51 t19 t108 t18 t81 t41 t0 t8,8.0,positive,10
+t73 t24 t84 t97 t45 t22 t74 t72 t40 t67,,negative,10
+t5 t7 t107 t88 t45 t29 t110 t105 t105 t53,,negative,10
+t7 t91 t81 t95 t44 t97 t78 t60 t60 t76,,negative,10
+t67 t50 t56 t72 t61 t58 t19 t45 t73 t106,,negative,10
+t111 t24 t3 t36 t38 t76 t9 t80 t7 t22,,negative,10
+t53 t19 t58 t93 t18 t38 t29 t53 t15 t14,,negative,10
+t82 t77 t7 t33 t19 t5 t58 t76 t72 t7,,negative,10
+t106 t54 t91 t5 t103 t80 t3 t74 t106 t28,,negative,10
+t56 t76 t3 t29 t93 t2 t82 t38 t76 t28,,negative,10
+t19 t90 t2 t90 t22 t91 t48 t97 t24 t89,,negative,10
+t87 t80 t49 t36 t0 t111 t36 t103 t9 t69 t111,8.0,positive,11
+t41 t107 t87 t56 t50 t104 t49 t51 t0 t90 t58,8.0,positive,11
+t74 t78 t108 t36 t7 t50 t87 t81 t0 t10 t4,8.0,positive,11
+t18 t2 t82 t12 t2 t84 t30 t36 t81 t12 t18,6.0,positive,11
+t60 t93 t84 t5 t34 t2 t95 t14 t44 t80 t8,8.0,positive,11
+t14 t95 t111 t110 t30 t111 t36 t7 t50 t100 t106,8.0,positive,11
+t73 t50 t51 t40 t60 t28 t95 t10 t2 t74 t77,8.0,positive,11
+t61 t108 t8 t90 t69 t14 t0 t10 t106 t93 t87,7.0,positive,11
+t91 t80 t97 t41 t50 t36 t93 t81 t93 t0 t76,10.0,positive,11
+t58 t87 t34 t27 t110 t87 t74 t103 t78 t80 t111,8.0,positive,11
+t67 t105 t95 t111 t93 t31 t94 t80 t48 t31 t105,,negative,11
+t24 t21 t90 t51 t50 t106 t111 t94 t106 t53 t22,,negative,11
+t73 t60 t19 t100 t32 t94 t18 t104 t87 t22 t87,,negative,11
+t14 t50 t76 t31 t10 t107 t56 t32 t110 t106 t67,,negative,11
+t42 t90 t15 t13 t74 t34 t110 t0 t40 t41 t15,,negative,11
+t5 t78 t89 t8 t38 t2 t53 t91 t5 t60 t80,,negative,11
+t73 t12 t73 t5 t87 t93 t73 t104 t29 t87 t105,,negative,11
+t105 t74 t45 t4 t44 t22 t0 t111 t72 t53 t22,,negative,11
+t72 t41 t38 t82 t44 t93 t38 t58 t105 t97 t81,,negative,11
+t12 t78 t105 t28 t58 t50 t9 t15 t97 t0 t9,,negative,11
+t95 t36 t91 t95 t29 t54 t95 t9 t84 t54 t111 t67,7.0,positive,12
+t36 t12 t28 t9 t78 t93 t51 t87 t54 t67 t81 t76,12.0,positive,12
+t78 t54 t41 t29 t30 t97 t18 t18 t107 t2 t46 t41,10.0,positive,12
+t107 t78 t100 t49 t44 t46 t80 t45 t61 t2 t50 t28,8.0,positive,12
+t9 t69 t9 t46 t18 t36 t10 t40 t81 t32 t69 t10,10.0,positive,12
+t46 t107 t38 t54 t3 t76 t15 t106 t2 t30 t84 t2,9.0,positive,12
+t2 t104 t95 t106 t29 t106 t0 t40 t5 t106 t103 t28,8.0,positive,12
+t87 t76 t54 t56 t88 t15 t77 t45 t13 t18 t89 t54,7.0,positive,12
+t36 t50 t93 t22 t93 t76 t2 t104 t78 t24 t2 t111,8.0,positive,12
+t33 t58 t41 t107 t84 t87 t69 t46 t46 t76 t93 t51,9.0,positive,12
+t50 t21 t27 t50 t48 t19 t32 t111 t44 t82 t46 t67,,negative,12
+t82 t105 t31 t27 t49 t53 t94 t42 t97 t106 t8 t15,,negative,12
+t107 t0 t61 t80 t40 t78 t14 t18 t51 t104 t58 t75,,negative,12
+t89 t73 t82 t5 t76 t32 t72 t17 t38 t24 t94 t8,,negative,12
+t48 t42 t46 t42 t28 t81 t106 t72 t9 t75 t94 t77,,negative,12
+t53 t77 t82 t53 t18 t110 t41 t76 t103 t104 t74 t9,,negative,12
+t81 t91 t33 t38 t10 t89 t13 t2 t81 t81 t100 t61,,negative,12
+t91 t76 t53 t91 t106 t56 t32 t104 t77 t60 t93 t19,,negative,12
+t100 t88 t104 t3 t72 t19 t106 t72 t108 t58 t82 t7,,negative,12
+t41 t75 t75 t18 t60 t95 t103 t44 t89 t73 t24 t97,,negative,12
+t61 t106 t46 t2 t91 t36 t50 t30 t84 t46 t2 t46 t40,8.0,positive,13
+t58 t46 t44 t87 t72 t87 t46 t54 t36 t0 t72 t97 t5,8.0,positive,13
+t61 t58 t111 t50 t48 t60 t78 t0 t77 t105 t9 t49 t87,8.0,positive,13
+t80 t84 t95 t87 t103 t105 t10 t2 t44 t0 t61 t50 t84,7.0,positive,13
+t108 t45 t33 t106 t111 t60 t87 t87 t9 t10 t103 t30 t106,9.0,positive,13
+t29 t87 t46 t67 t84 t29 t14 t93 t67 t58 t51 t30 t41,9.0,positive,13
+t106 t90 t58 t46 t9 t10 t76 t41 t10 t73 t87 t50 t104,7.0,positive,13
+t60 t31 t91 t7 t107 t45 t78 t84 t58 t46 t50 t0 t8,9.0,positive,13
+t73 t10 t93 t100 t28 t51 t53 t87 t38 t74 t87 t77 t87,8.0,positive,13
+t104 t111 t94 t84 t44 t78 t81 t67 t2 t82 t87 t44 t90,8.0,positive,13
+t42 t93 t0 t49 t10 t73 t97 t3 t53 t49 t76 t51 t97,,negative,13
+t87 t87 t91 t105 t78 t15 t50 t46 t91 t111 t42 t97 t56,,negative,13
+t18 t54 t61 t69 t21 t89 t75 t22 t88 t19 t31 t75 t42,,negative,13
+t4 t36 t110 t22 t77 t13 t80 t91 t30 t88 t41 t94 t93,,negative,13
+t24 t73 t78 t21 t29 t78 t100 t53 t48 t108 t91 t77 t100,,negative,13
+t8 t72 t40 t18 t108 t54 t87 t14 t13 t4 t48 t7 t105,,negative,13
+t73 t14 t0 t34 t24 t41 t81 t36 t19 t82 t74 t30 t107,,negative,13
+t88 t72 t69 t103 t53 t26 t94 t28 t33 t110 t19 t22 t27,,negative,13
+t34 t95 t108 t80 t4 t87 t22 t89 t103 t77 t3 t28 t14,,negative,13
+t110 t12 t53 t100 t31 t81 t31 t60 t51 t61 t110 t61 t13,,negative,13
+t18 t78 t111 t46 t5 t78 t38 t58 t77 t13 t76 t3 t106 t111,9.0,positive,14
+t74 t90 t58 t10 t44 t50 t30 t2 t49 t34 t80 t42 t95 t10,10.0,positive,14
+t22 t10 t27 t106 t90 t33 t78 t14 t50 t44 t111 t84 t50 t41,9.0,positive,14
+t10 t14 t75 t17 t10 t74 t51 t40 t54 t14 t84 t111 t45 t87,11.0,positive,14
+t76 t58 t40 t49 t80 t49 t54 t38 t89 t77 t84 t78 t50 t104,8.0,positive,14
+t69 t95 t38 t80 t44 t87 t7 t107 t14 t72 t94 t29 t50 t111,9.0,positive,14
+t0 t31 t21 t74 t100 t32 t90 t80 t108 t77 t78 t21 t24 t77,7.0,positive,14
+t50 t87 t50 t84 t78 t46 t95 t58 t111 t106 t90 t27 t106 t41,10.0,positive,14
+t46 t108 t54 t18 t14 t48 t50 t111 t51 t53 t74 t74 t51 t106,12.0,positive,14
+t31 t106 t78 t54 t88 t32 t54 t58 t106 t54 t9 t46 t2 t51,11.0,positive,14
+t75 t110 t105 t8 t15 t10 t19 t14 t19 t44 t32 t8 t18 t27,,negative,14
+t30 t48 t41 t48 t100 t22 t5 t3 t14 t4 t44 t15 t29 t26,,negative,14
+t91 t84 t77 t84 t24 t7 t87 t36 t61 t51 t0 t80 t103 t3,,negative,14
+t36 t29 t13 t50 t108 t106 t22 t24 t44 t19 t2 t69 t15 t104,,negative,14
+t27 t15 t51 t95 t94 t89 t51 t40 t46 t81 t38 t30 t41 t48,,negative,14
+t74 t103 t84 t3 t105 t36 t42 t106 t90 t36 t51 t73 t33 t108,,negative,14
+t89 t72 t90 t0 t30 t76 t74 t41 t105 t48 t50 t91 t77 t94,,negative,14
+t103 t21 t80 t44 t93 t104 t54 t105 t42 t80 t67 t5 t14 t105,,negative,14
+t108 t31 t81 t78 t77 t8 t0 t107 t74 t90 t31 t9 t48 t84,,negative,14
+t104 t34 t75 t27 t82 t77 t0 t46 t10 t5 t51 t90 t84 t90,,negative,14
+t18 t95 t80 t84 t33 t50 t94 t30 t40 t49 t103 t94 t58 t104 t67,12.0,positive,15
+t87 t67 t51 t103 t81 t103 t108 t54 t13 t34 t10 t40 t40 t84 t78,8.0,positive,15
+t73 t77 t29 t46 t2 t58 t28 t77 t87 t87 t48 t27 t3 t49 t0,12.0,positive,15
+t84 t10 t94 t87 t36 t87 t36 t8 t2 t36 t93 t87 t50 t14 t76,9.0,positive,15
+t4 t78 t14 t108 t91 t100 t17 t51 t10 t58 t78 t28 t7 t82 t18,13.0,positive,15
+t14 t41 t10 t77 t87 t3 t9 t78 t78 t58 t95 t94 t50 t69 t10,10.0,positive,15
+t61 t10 t50 t36 t46 t80 t30 t36 t33 t87 t106 t111 t50 t28 t41,13.0,positive,15
+t14 t0 t2 t15 t75 t14 t97 t95 t54 t84 t111 t10 t50 t80 t108,10.0,positive,15
+t33 t74 t46 t69 t84 t84 t9 t41 t26 t87 t84 t54 t13 t67 t87,11.0,positive,15
+t17 t36 t2 t87 t80 t84 t87 t103 t10 t106 t74 t49 t108 t44 t69,13.0,positive,15
+t74 t111 t110 t10 t26 t106 t33 t13 t28 t21 t44 t104 t40 t69 t27,,negative,15
+t108 t76 t9 t50 t93 t84 t73 t100 t40 t41 t18 t95 t100 t36 t104,,negative,15
+t10 t105 t8 t27 t84 t34 t75 t110 t30 t69 t36 t84 t54 t89 t58,,negative,15
+t104 t30 t21 t89 t38 t84 t51 t94 t56 t45 t30 t77 t30 t10 t24,,negative,15
+t78 t51 t44 t77 t58 t73 t5 t77 t28 t3 t78 t81 t90 t49 t26,,negative,15
+t15 t40 t18 t4 t51 t107 t104 t21 t15 t21 t24 t10 t75 t46 t93,,negative,15
+t93 t89 t108 t34 t107 t45 t75 t110 t8 t97 t58 t13 t91 t34 t50,,negative,15
+t3 t58 t8 t90 t100 t51 t93 t81 t5 t8 t3 t93 t78 t53 t105,,negative,15
+t61 t33 t22 t108 t91 t104 t49 t36 t41 t3 t78 t48 t0 t58 t77,,negative,15
+t108 t12 t100 t77 t80 t84 t108 t88 t111 t30 t40 t18 t77 t34 t104,,negative,15
+t32 t32 t34 t77 t36 t50 t13 t95 t28 t87 t18 t30 t111 t51 t7 t29,11.0,positive,16
+t40 t9 t18 t60 t103 t10 t4 t74 t94 t3 t31 t21 t69 t84 t36 t27,13.0,positive,16
+t2 t91 t80 t108 t53 t41 t9 t111 t3 t36 t14 t49 t18 t104 t30 t67,13.0,positive,16
+t0 t40 t18 t74 t87 t67 t110 t48 t106 t38 t2 t110 t95 t48 t77 t87,11.0,positive,16
+t93 t27 t78 t84 t2 t33 t78 t18 t95 t46 t2 t51 t40 t44 t8 t18,15.0,positive,16
+t18 t78 t88 t69 t40 t2 t78 t8 t103 t80 t110 t29 t18 t58 t84 t10,11.0,positive,16
+t87 t32 t2 t2 t74 t74 t80 t41 t36 t58 t93 t95 t26 t94 t41 t58,11.0,positive,16
+t36 t18 t87 t46 t95 t9 t54 t58 t90 t80 t74 t93 t87 t13 t10 t106,12.0,positive,16
+t76 t46 t111 t87 t26 t87 t87 t46 t50 t10 t26 t87 t75 t14 t97 t30,7.0,positive,16
+t84 t46 t95 t87 t46 t87 t34 t80 t8 t90 t69 t50 t95 t107 t36 t111,14.0,positive,16
+t10 t8 t61 t94 t54 t36 t2 t100 t107 t105 t82 t73 t69 t56 t91 t89,,negative,16
+t95 t30 t88 t7 t30 t26 t19 t108 t54 t74 t94 t56 t94 t93 t89 t67,,negative,16
+t111 t36 t2 t95 t44 t69 t74 t111 t84 t107 t74 t103 t30 t12 t18 t88,,negative,16
+t38 t38 t19 t24 t42 t95 t28 t49 t88 t5 t33 t44 t5 t80 t4 t76,,negative,16
+t36 t49 t7 t73 t81 t95 t54 t15 t13 t32 t111 t54 t24 t76 t78 t80,,negative,16
+t88 t84 t69 t4 t15 t38 t4 t8 t97 t0 t54 t5 t42 t15 t82 t56,,negative,16
+t90 t82 t44 t51 t48 t27 t38 t107 t49 t51 t24 t0 t104 t50 t56 t93,,negative,16
+t100 t53 t72 t54 t44 t2 t41 t58 t8 t33 t97 t93 t61 t89 t78 t19,,negative,16
+t0 t103 t3 t111 t31 t24 t10 t56 t110 t27 t51 t58 t84 t45 t105 t27,,negative,16
+t42 t21 t5 t49 t75 t93 t110 t108 t69 t107 t60 t73 t103 t13 t54 t108,,negative,16
+t27 t2 t81 t29 t30 t50 t18 t111 t54 t3 t111 t90 t2 t4 t81 t36 t100,8.0,positive,17
+t14 t108 t77 t106 t77 t3 t84 t100 t104 t2 t93 t111 t50 t36 t48 t74 t46,11.0,positive,17
+t77 t12 t2 t93 t22 t69 t67 t8 t46 t40 t49 t93 t12 t67 t18 t84 t76,13.0,positive,17
+t111 t108 t91 t76 t69 t77 t27 t10 t50 t4 t31 t78 t36 t2 t58 t54 t10,12.0,positive,17
+t97 t94 t77 t87 t53 t87 t50 t36 t27 t87 t49 t58 t2 t67 t41 t21 t54,15.0,positive,17
+t31 t10 t41 t106 t110 t95 t2 t87 t24 t106 t77 t3 t18 t34 t107 t41 t8,11.0,positive,17
+t87 t34 t77 t40 t2 t19 t14 t0 t17 t80 t104 t30 t105 t69 t94 t80 t76,9.0,positive,17
+t88 t28 t10 t87 t77 t3 t74 t103 t54 t76 t2 t95 t90 t4 t3 t108 t41,11.0,positive,17
+t34 t107 t111 t28 t111 t10 t104 t2 t51 t105 t14 t51 t45 t80 t44 t38 t58,9.0,positive,17
+t74 t50 t84 t80 t58 t4 t46 t87 t87 t77 t41 t78 t27 t3 t8 t36 t3,12.0,positive,17
+t31 t58 t110 t76 t15 t106 t56 t14 t46 t19 t74 t14 t93 t108 t108 t32 t50,,negative,17
+t33 t111 t5 t106 t50 t2 t87 t78 t12 t33 t48 t89 t29 t14 t58 t21 t93,,negative,17
+t40 t84 t26 t73 t30 t110 t110 t111 t50 t81 t27 t13 t36 t3 t10 t41 t108,,negative,17
+t9 t32 t27 t45 t46 t89 t31 t67 t58 t38 t107 t75 t46 t41 t93 t105 t49,,negative,17
+t97 t14 t81 t78 t72 t42 t73 t89 t87 t21 t13 t26 t84 t21 t24 t95 t27,,negative,17
+t94 t42 t28 t26 t34 t95 t90 t94 t97 t21 t110 t10 t30 t33 t31 t49 t82,,negative,17
+t3 t31 t54 t42 t76 t54 t9 t67 t93 t80 t24 t75 t110 t40 t104 t53 t77,,negative,17
+t27 t87 t10 t5 t34 t94 t84 t12 t49 t87 t15 t73 t38 t10 t4 t87 t34,,negative,17
+t77 t27 t100 t27 t17 t10 t77 t9 t15 t14 t111 t53 t30 t56 t104 t41 t44,,negative,17
+t95 t49 t49 t74 t41 t89 t90 t0 t105 t13 t94 t94 t9 t29 t110 t5 t90,,negative,17
+t50 t54 t46 t26 t77 t50 t74 t41 t80 t27 t18 t95 t36 t77 t87 t41 t46 t50,16.0,positive,18
+t53 t77 t42 t38 t106 t51 t95 t27 t45 t58 t93 t95 t76 t51 t50 t36 t90 t107,9.0,positive,18
+t87 t69 t93 t77 t44 t111 t69 t82 t54 t56 t106 t36 t8 t87 t24 t41 t0 t41,15.0,positive,18
+t87 t31 t12 t78 t2 t36 t2 t36 t84 t36 t46 t46 t36 t21 t3 t44 t80 t28,12.0,positive,18
+t50 t36 t54 t105 t84 t2 t38 t50 t40 t36 t87 t44 t87 t30 t54 t107 t77 t87,11.0,positive,18
+t110 t84 t107 t56 t40 t2 t78 t53 t82 t9 t69 t32 t73 t74 t5 t36 t30 t77,10.0,positive,18
+t30 t54 t103 t18 t41 t31 t54 t54 t28 t44 t51 t67 t104 t46 t90 t107 t50 t18,13.0,positive,18
+t78 t50 t3 t94 t77 t87 t10 t77 t58 t74 t41 t67 t84 t4 t87 t87 t50 t46,9.0,positive,18
+t97 t12 t107 t2 t40 t2 t87 t29 t26 t87 t0 t89 t77 t50 t41 t18 t74 t87,10.0,positive,18
+t111 t61 t87 t81 t12 t78 t87 t67 t90 t36 t104 t95 t46 t2 t31 t48 t12 t77,14.0,positive,18
+t45 t51 t12 t46 t38 t77 t87 t46 t94 t42 t69 t19 t50 t31 t53 t54 t41 t56,,negative,18
+t61 t108 t8 t100 t50 t30 t4 t36 t111 t13 t32 t45 t28 t4 t5 t74 t69 t27,,negative,18
+t104 t56 t45 t60 t108 t30 t8 t19 t21 t12 t19 t88 t21 t106 t87 t34 t38 t95,,negative,18
+t28 t30 t2 t3 t56 t76 t34 t108 t38 t84 t90 t87 t44 t0 t69 t29 t93 t67,,negative,18
+t28 t46 t78 t44 t44 t19 t3 t36 t100 t111 t19 t100 t76 t106 t27 t44 t93 t56,,negative,18
+t81 t90 t91 t42 t34 t42 t0 t93 t91 t76 t82 t56 t14 t28 t60 t107 t61 t75,,negative,18
+t46 t4 t90 t106 t60 t0 t44 t76 t14 t44 t105 t81 t69 t56 t111 t12 t88 t30,,negative,18
+t28 t14 t2 t80 t77 t21 t49 t49 t95 t5 t46 t29 t22 t108 t33 t90 t24 t100,,negative,18
+t41 t15 t107 t9 t76 t5 t49 t9 t97 t18 t58 t67 t13 t29 t41 t51 t27 t61,,negative,18
+t9 t51 t22 t104 t28 t8 t33 t110 t91 t5 t34 t72 t14 t33 t107 t2 t105 t80,,negative,18
+t51 t40 t87 t17 t84 t27 t110 t95 t87 t46 t46 t30 t54 t84 t36 t74 t84 t5 t106,14.0,positive,19
+t91 t18 t84 t104 t9 t3 t2 t93 t12 t58 t67 t60 t50 t40 t50 t81 t74 t84 t46,15.0,positive,19
+t41 t89 t90 t90 t58 t2 t9 t73 t106 t54 t111 t18 t73 t95 t50 t15 t40 t28 t87,11.0,positive,19
+t50 t93 t22 t38 t46 t2 t22 t36 t3 t77 t3 t74 t2 t76 t2 t7 t87 t58 t51,9.0,positive,19
+t7 t50 t87 t76 t42 t24 t77 t104 t30 t54 t78 t104 t2 t31 t32 t80 t77 t84 t27,13.0,positive,19
+t51 t80 t54 t58 t45 t2 t95 t74 t80 t41 t84 t93 t26 t60 t8 t36 t91 t87 t18,11.0,positive,19
+t61 t58 t2 t46 t10 t111 t90 t69 t50 t31 t77 t3 t24 t15 t107 t28 t104 t87 t87,14.0,positive,19
+t4 t78 t88 t81 t2 t50 t89 t36 t72 t74 t78 t40 t90 t69 t84 t46 t61 t74 t76,7.0,positive,19
+t22 t110 t106 t34 t80 t110 t94 t80 t41 t14 t87 t21 t95 t31 t76 t19 t46 t111 t108,12.0,positive,19
+t10 t19 t30 t74 t2 t106 t18 t18 t90 t107 t2 t29 t72 t72 t106 t34 t10 t50 t31,9.0,positive,19
+t95 t41 t0 t76 t45 t17 t72 t3 t3 t51 t51 t51 t10 t8 t54 t50 t51 t77 t103,,negative,19
+t30 t14 t32 t5 t53 t28 t8 t36 t32 t36 t44 t89 t50 t60 t84 t77 t108 t88 t45,,negative,19
+t95 t34 t80 t74 t17 t56 t0 t50 t24 t24 t84 t93 t93 t5 t24 t89 t24 t30 t40,,negative,19
+t61 t33 t80 t36 t17 t110 t32 t29 t81 t93 t46 t22 t56 t32 t88 t100 t19 t105 t18,,negative,19
+t105 t56 t93 t10 t21 t12 t89 t3 t95 t76 t5 t26 t105 t12 t28 t32 t26 t13 t75,,negative,19
+t34 t7 t77 t80 t82 t74 t76 t17 t91 t13 t42 t27 t44 t17 t103 t111 t74 t111 t17,,negative,19
+t105 t67 t84 t0 t90 t75 t84 t17 t95 t50 t13 t97 t30 t3 t77 t10 t51 t46 t90,,negative,19
+t32 t77 t108 t111 t77 t44 t46 t74 t36 t18 t77 t53 t13 t15 t76 t107 t53 t33 t78,,negative,19
+t108 t84 t94 t78 t2 t34 t107 t73 t10 t50 t38 t104 t21 t48 t87 t29 t90 t26 t19,,negative,19
+t19 t30 t12 t95 t19 t29 t73 t12 t24 t0 t7 t97 t100 t111 t24 t73 t93 t9 t78,,negative,19
+t88 t45 t46 t30 t51 t41 t82 t38 t93 t91 t9 t8 t41 t80 t41 t108 t87 t18 t38 t2,12.0,positive,20
+t61 t77 t51 t90 t76 t80 t54 t67 t8 t78 t73 t74 t106 t90 t107 t76 t103 t103 t54 t8,12.0,positive,20
+t46 t80 t8 t2 t10 t111 t95 t110 t0 t104 t18 t10 t50 t40 t87 t29 t38 t95 t36 t27,12.0,positive,20
+t93 t7 t29 t69 t50 t50 t87 t46 t95 t87 t3 t14 t36 t93 t29 t27 t95 t58 t78 t84,11.0,positive,20
+t78 t111 t74 t2 t14 t78 t88 t81 t18 t80 t36 t76 t76 t77 t87 t111 t19 t104 t103 t76,11.0,positive,20
+t67 t90 t50 t87 t95 t9 t103 t30 t76 t10 t41 t110 t84 t48 t84 t2 t34 t24 t14 t77,14.0,positive,20
+t40 t50 t69 t87 t36 t40 t2 t30 t10 t2 t10 t14 t34 t5 t53 t40 t87 t28 t54 t27,11.0,positive,20
+t87 t30 t93 t93 t108 t9 t108 t2 t30 t14 t49 t103 t54 t50 t36 t22 t77 t84 t74 t74,13.0,positive,20
+t34 t108 t60 t107 t2 t82 t80 t94 t111 t111 t30 t51 t81 t78 t87 t12 t2 t111 t2 t77,11.0,positive,20
+t78 t10 t76 t2 t30 t29 t95 t81 t89 t36 t49 t50 t46 t44 t40 t2 t30 t78 t48 t111,16.0,positive,20
+t40 t110 t51 t2 t17 t108 t97 t48 t97 t32 t33 t67 t108 t17 t17 t13 t89 t80 t13 t24,,negative,20
+t34 t56 t2 t89 t5 t89 t45 t94 t38 t89 t7 t51 t38 t31 t15 t34 t36 t36 t69 t78,,negative,20
+t54 t61 t28 t61 t42 t82 t44 t95 t93 t58 t4 t84 t18 t76 t4 t29 t4 t13 t103 t26,,negative,20
+t67 t77 t53 t91 t108 t97 t84 t67 t105 t56 t8 t18 t73 t97 t30 t84 t50 t95 t41 t45,,negative,20
+t87 t22 t110 t30 t44 t32 t38 t104 t15 t95 t44 t75 t110 t82 t46 t18 t49 t32 t17 t46,,negative,20
+t110 t41 t80 t13 t75 t103 t72 t74 t33 t73 t3 t82 t18 t19 t58 t84 t26 t93 t108 t78,,negative,20
+t88 t34 t108 t15 t107 t106 t51 t89 t74 t14 t5 t107 t51 t2 t81 t110 t54 t81 t4 t14,,negative,20
+t29 t51 t38 t93 t108 t28 t76 t78 t14 t22 t30 t36 t95 t41 t97 t13 t3 t30 t103 t17,,negative,20
+t28 t12 t45 t93 t17 t28 t33 t34 t9 t29 t67 t69 t95 t44 t81 t87 t42 t12 t77 t111,,negative,20
+t105 t30 t0 t72 t54 t110 t50 t78 t7 t32 t72 t84 t22 t97 t89 t40 t34 t26 t90 t58,,negative,20
+t50 t30 t14 t84 t36 t95 t46 t18 t103 t30 t78 t0 t74 t5 t80 t27 t53 t77 t78 t30 t77,11.0,positive,21
+t40 t41 t40 t50 t51 t81 t30 t31 t100 t111 t18 t34 t2 t14 t51 t93 t29 t111 t67 t28 t41,12.0,positive,21
+t7 t9 t106 t34 t2 t29 t28 t3 t106 t31 t40 t103 t24 t72 t84 t94 t77 t87 t67 t50 t111,10.0,positive,21
+t46 t46 t94 t104 t40 t84 t3 t53 t106 t89 t27 t58 t76 t41 t58 t29 t28 t14 t87 t41 t80,10.0,positive,21
+t10 t45 t107 t40 t30 t89 t13 t10 t80 t58 t54 t28 t26 t94 t8 t91 t58 t28 t41 t110 t10,11.0,positive,21
+t34 t74 t94 t18 t54 t77 t56 t40 t2 t9 t58 t2 t58 t78 t48 t50 t40 t49 t41 t34 t77,13.0,positive,21
+t103 t27 t5 t80 t74 t94 t77 t91 t74 t10 t2 t106 t106 t106 t17 t84 t2 t18 t31 t84 t2,12.0,positive,21
+t44 t78 t74 t106 t41 t78 t0 t46 t90 t104 t45 t58 t58 t58 t51 t78 t22 t29 t2 t41 t50,9.0,positive,21
+t77 t44 t30 t54 t41 t12 t29 t69 t84 t31 t10 t60 t87 t95 t7 t58 t54 t87 t21 t56 t8,10.0,positive,21
+t34 t103 t87 t108 t45 t78 t106 t26 t60 t69 t46 t60 t12 t77 t13 t111 t49 t51 t81 t49 t87,15.0,positive,21
+t51 t82 t26 t72 t18 t33 t48 t106 t49 t60 t94 t50 t73 t56 t77 t12 t94 t45 t31 t0 t17,,negative,21
+t0 t14 t15 t15 t88 t12 t103 t72 t36 t45 t5 t46 t104 t22 t72 t40 t91 t67 t88 t22 t26,,negative,21
+t100 t84 t44 t2 t54 t46 t91 t54 t0 t0 t18 t81 t7 t24 t27 t103 t110 t44 t91 t88 t33,,negative,21
+t94 t49 t54 t48 t24 t89 t7 t13 t84 t89 t84 t104 t110 t19 t67 t4 t51 t56 t81 t12 t51,,negative,21
+t32 t91 t107 t41 t12 t27 t7 t28 t76 t36 t60 t49 t107 t36 t33 t34 t5 t38 t34 t31 t15,,negative,21
+t97 t93 t60 t97 t26 t41 t72 t15 t106 t30 t100 t53 t8 t80 t14 t82 t78 t0 t21 t91 t7,,negative,21
+t81 t108 t8 t67 t91 t14 t53 t17 t111 t100 t103 t58 t81 t103 t4 t48 t60 t5 t87 t12 t105,,negative,21
+t38 t89 t38 t111 t69 t76 t27 t107 t75 t45 t94 t44 t88 t3 t88 t100 t77 t36 t87 t78 t84,,negative,21
+t40 t72 t84 t81 t88 t94 t104 t22 t90 t21 t88 t3 t10 t56 t38 t90 t74 t73 t93 t111 t13,,negative,21
+t72 t29 t29 t104 t50 t32 t0 t80 t78 t72 t15 t88 t107 t72 t41 t111 t2 t10 t89 t103 t76,,negative,21
+t36 t30 t72 t51 t54 t76 t51 t77 t87 t3 t36 t69 t34 t13 t73 t78 t22 t12 t10 t26 t36 t87,12.0,positive,22
+t9 t103 t106 t87 t80 t108 t30 t54 t46 t78 t14 t38 t87 t67 t41 t95 t51 t50 t28 t18 t90 t10,16.0,positive,22
+t87 t46 t18 t77 t76 t45 t8 t46 t111 t100 t76 t5 t50 t84 t107 t26 t4 t90 t29 t58 t54 t41,16.0,positive,22
+t78 t30 t18 t26 t50 t80 t94 t54 t15 t2 t80 t40 t28 t111 t27 t111 t80 t58 t46 t30 t50 t41,11.0,positive,22
+t97 t105 t38 t77 t74 t44 t41 t84 t74 t77 t40 t10 t77 t12 t87 t14 t97 t95 t18 t49 t46 t27,11.0,positive,22
+t40 t38 t2 t87 t33 t10 t14 t58 t54 t9 t54 t76 t54 t93 t69 t36 t50 t50 t27 t3 t50 t46,14.0,positive,22
+t74 t87 t14 t61 t77 t53 t15 t69 t46 t30 t111 t94 t45 t54 t78 t95 t76 t53 t77 t58 t46 t84,9.0,positive,22
+t87 t29 t36 t93 t84 t5 t87 t111 t97 t40 t28 t104 t9 t69 t45 t67 t76 t3 t54 t41 t103 t76,16.0,positive,22
+t34 t9 t28 t28 t69 t91 t80 t108 t103 t40 t81 t106 t74 t50 t15 t4 t80 t41 t40 t18 t77 t87,12.0,positive,22
+t111 t13 t95 t58 t29 t88 t77 t67 t31 t53 t30 t94 t87 t50 t78 t44 t31 t80 t108 t103 t95 t106,11.0,positive,22
+t56 t36 t34 t46 t12 t40 t31 t51 t60 t21 t41 t41 t27 t40 t2 t88 t106 t90 t4 t48 t14 t73,,negative,22
+t88 t34 t26 t34 t53 t9 t53 t100 t61 t46 t91 t87 t89 t31 t14 t93 t50 t19 t41 t38 t80 t27,,negative,22
+t30 t61 t67 t69 t10 t45 t31 t44 t94 t7 t100 t51 t14 t34 t7 t34 t18 t41 t21 t38 t75 t13,,negative,22
+t74 t8 t50 t67 t53 t4 t81 t111 t27 t110 t0 t67 t15 t2 t94 t26 t80 t82 t17 t0 t78 t45,,negative,22
+t27 t4 t93 t7 t94 t48 t88 t67 t78 t13 t81 t40 t78 t81 t41 t81 t42 t49 t76 t60 t24 t51,,negative,22
+t15 t7 t110 t9 t111 t78 t88 t88 t110 t78 t91 t58 t4 t84 t14 t3 t108 t61 t17 t91 t69 t106,,negative,22
+t28 t9 t88 t94 t0 t32 t34 t46 t13 t72 t2 t90 t61 t105 t58 t49 t8 t33 t38 t29 t7 t77,,negative,22
+t91 t97 t106 t13 t7 t50 t72 t89 t100 t91 t8 t103 t74 t78 t84 t10 t28 t105 t60 t13 t69 t58,,negative,22
+t76 t95 t9 t58 t84 t49 t110 t8 t24 t108 t15 t69 t14 t22 t27 t18 t76 t76 t50 t110 t77 t18,,negative,22
+t41 t95 t46 t93 t76 t80 t56 t8 t33 t89 t30 t69 t2 t56 t69 t5 t38 t104 t19 t41 t38 t38,,negative,22
+t18 t38 t18 t31 t51 t18 t87 t50 t40 t10 t58 t36 t45 t50 t50 t9 t67 t28 t18 t45 t0 t5 t10,13.0,positive,23
+t41 t41 t106 t78 t30 t24 t36 t41 t22 t54 t78 t28 t61 t2 t54 t95 t31 t38 t107 t78 t90 t67 t46,12.0,positive,23
+t17 t10 t9 t75 t69 t22 t104 t46 t10 t94 t107 t111 t34 t77 t30 t41 t46 t2 t103 t30 t27 t45 t27,13.0,positive,23
+t87 t50 t77 t50 t58 t67 t21 t87 t41 t51 t22 t31 t100 t28 t89 t80 t87 t100 t2 t50 t12 t42 t87,10.0,positive,23
+t103 t45 t26 t87 t18 t29 t2 t53 t77 t87 t5 t56 t10 t44 t18 t87 t36 t95 t84 t36 t45 t87 t28,13.0,positive,23
+t18 t4 t56 t94 t38 t50 t80 t108 t14 t87 t82 t111 t44 t74 t10 t2 t27 t9 t67 t76 t76 t61 t46,14.0,positive,23
+t29 t77 t3 t108 t77 t10 t80 t107 t46 t30 t18 t93 t80 t41 t46 t78 t18 t14 t49 t93 t93 t77 t54,10.0,positive,23
+t28 t111 t108 t103 t84 t50 t91 t50 t50 t14 t18 t87 t12 t87 t14 t49 t78 t50 t46 t10 t74 t87 t87,14.0,positive,23
+t97 t74 t9 t84 t34 t94 t0 t77 t51 t104 t30 t103 t7 t46 t54 t7 t107 t31 t69 t95 t53 t74 t106,15.0,positive,23
+t13 t30 t110 t51 t108 t38 t2 t41 t106 t54 t22 t106 t100 t33 t50 t31 t87 t30 t18 t106 t56 t106 t36,12.0,positive,23
+t58 t3 t31 t31 t51 t42 t78 t61 t105 t88 t50 t80 t34 t34 t106 t104 t10 t22 t27 t107 t31 t0 t95,,negative,23
+t61 t91 t56 t40 t7 t22 t21 t24 t48 t21 t88 t48 t10 t8 t104 t81 t7 t89 t56 t93 t19 t42 t14,,negative,23
+t3 t94 t3 t87 t58 t45 t26 t41 t32 t107 t104 t27 t50 t81 t91 t33 t51 t41 t104 t3 t72 t9 t89,,negative,23
+t3 t46 t110 t106 t94 t29 t44 t78 t9 t108 t50 t53 t13 t60 t36 t46 t13 t56 t24 t82 t74 t81 t72,,negative,23
+t27 t30 t42 t73 t72 t18 t15 t4 t13 t22 t15 t74 t76 t108 t38 t12 t106 t41 t108 t44 t44 t58 t78,,negative,23
+t87 t54 t17 t61 t60 t41 t38 t22 t58 t50 t82 t105 t58 t58 t94 t97 t9 t36 t31 t87 t8 t56 t2,,negative,23
+t108 t5 t9 t32 t88 t48 t17 t104 t111 t61 t38 t48 t110 t67 t9 t105 t22 t61 t105 t61 t27 t103 t17,,negative,23
+t38 t53 t9 t87 t13 t8 t81 t103 t48 t89 t27 t58 t30 t91 t9 t49 t33 t88 t103 t13 t54 t93 t12,,negative,23
+t69 t94 t67 t104 t53 t49 t58 t29 t50 t103 t50 t100 t38 t22 t54 t111 t7 t38 t104 t67 t24 t111 t110,,negative,23
+t81 t13 t31 t10 t61 t9 t80 t51 t106 t10 t56 t53 t40 t93 t32 t38 t18 t87 t7 t49 t44 t80 t93,,negative,23
+t104 t15 t103 t3 t36 t106 t106 t100 t76 t36 t36 t14 t95 t50 t103 t2 t34 t80 t94 t90 t103 t46 t97 t24,13.0,positive,24
+t111 t19 t104 t30 t9 t103 t54 t14 t36 t41 t103 t74 t56 t24 t110 t48 t24 t13 t26 t61 t106 t90 t36 t2,11.0,positive,24
+t105 t41 t46 t3 t46 t54 t100 t74 t50 t74 t74 t8 t103 t81 t48 t48 t103 t30 t12 t10 t18 t80 t34 t14,13.0,positive,24
+t36 t50 t32 t54 t36 t30 t94 t27 t94 t77 t10 t41 t51 t90 t78 t50 t46 t41 t24 t69 t26 t31 t84 t46,15.0,positive,24
+t31 t34 t50 t10 t58 t104 t74 t29 t30 t94 t78 t12 t2 t2 t69 t89 t54 t26 t78 t54 t27 t54 t49 t8,18.0,positive,24
+t84 t9 t36 t69 t34 t26 t87 t27 t30 t93 t3 t100 t45 t58 t74 t50 t94 t110 t30 t28 t84 t93 t67 t54,15.0,positive,24
+t50 t12 t80 t94 t45 t33 t106 t93 t51 t54 t107 t40 t95 t110 t90 t107 t2 t22 t58 t10 t2 t36 t81 t51,13.0,positive,24
+t17 t38 t80 t40 t58 t32 t14 t3 t78 t61 t3 t67 t74 t0 t41 t54 t76 t58 t67 t93 t50 t80 t54 t87,15.0,positive,24
+t100 t10 t89 t77 t87 t12 t56 t77 t75 t38 t29 t103 t95 t111 t21 t50 t36 t28 t38 t27 t110 t111 t30 t77,11.0,positive,24
+t84 t87 t53 t40 t58 t46 t69 t0 t95 t94 t107 t28 t42 t45 t51 t49 t3 t95 t50 t51 t48 t2 t45 t58,13.0,positive,24
+t48 t50 t81 t76 t24 t93 t110 t81 t49 t50 t73 t42 t100 t51 t0 t49 t21 t80 t75 t14 t8 t78 t30 t106,,negative,24
+t54 t56 t48 t44 t21 t13 t15 t30 t94 t56 t0 t42 t8 t93 t110 t18 t111 t67 t81 t74 t80 t69 t75 t72,,negative,24
+t41 t110 t15 t12 t9 t12 t95 t90 t32 t45 t89 t8 t34 t90 t28 t36 t89 t19 t67 t12 t93 t80 t18 t76,,negative,24
+t60 t80 t44 t67 t88 t56 t3 t72 t100 t2 t40 t56 t107 t18 t48 t15 t15 t38 t110 t14 t18 t19 t72 t74,,negative,24
+t88 t36 t27 t61 t15 t18 t13 t91 t22 t36 t106 t8 t30 t89 t7 t106 t41 t18 t97 t58 t34 t95 t17 t108,,negative,24
+t51 t53 t74 t41 t78 t10 t13 t104 t38 t84 t22 t111 t15 t90 t19 t45 t32 t33 t91 t73 t93 t81 t103 t13,,negative,24
+t87 t60 t84 t32 t24 t4 t7 t103 t87 t75 t77 t89 t24 t17 t34 t93 t107 t75 t78 t26 t8 t26 t95 t2,,negative,24
+t91 t13 t77 t108 t21 t111 t90 t22 t51 t76 t38 t84 t45 t84 t56 t48 t12 t94 t28 t14 t40 t21 t93 t75,,negative,24
+t45 t44 t105 t94 t73 t21 t104 t53 t76 t75 t8 t48 t0 t73 t56 t8 t74 t91 t69 t51 t58 t5 t89 t67,,negative,24
+t13 t2 t87 t36 t82 t7 t3 t4 t14 t104 t53 t76 t3 t4 t95 t53 t53 t4 t15 t74 t19 t12 t36 t100,,negative,24
+t46 t107 t7 t28 t87 t44 t103 t45 t87 t0 t58 t51 t87 t74 t77 t46 t44 t41 t87 t46 t5 t74 t93 t67 t78,14.0,positive,25
+t50 t50 t0 t108 t74 t9 t74 t50 t80 t91 t18 t90 t107 t61 t77 t53 t91 t50 t50 t93 t107 t9 t49 t50 t108,18.0,positive,25
+t22 t111 t87 t88 t75 t31 t91 t36 t22 t72 t106 t3 t106 t69 t77 t48 t50 t111 t87 t69 t10 t53 t50 t51 t27,12.0,positive,25
+t46 t56 t50 t36 t72 t108 t40 t106 t26 t41 t69 t95 t2 t2 t51 t87 t58 t67 t28 t106 t30 t74 t2 t36 t28,15.0,positive,25
+t106 t87 t12 t77 t5 t74 t41 t106 t93 t77 t8 t103 t18 t80 t84 t29 t30 t105 t69 t18 t77 t94 t50 t34 t2,12.0,positive,25
+t14 t41 t104 t95 t76 t94 t27 t69 t10 t104 t80 t10 t87 t27 t0 t77 t51 t100 t36 t95 t46 t87 t76 t50 t18,21.0,positive,25
+t46 t108 t76 t80 t106 t22 t58 t76 t30 t74 t31 t87 t76 t3 t95 t93 t87 t77 t67 t51 t104 t49 t50 t10 t2,18.0,positive,25
+t31 t91 t22 t111 t21 t10 t87 t80 t77 t94 t69 t46 t15 t76 t28 t44 t90 t107 t58 t106 t93 t50 t67 t12 t77,15.0,positive,25
+t41 t111 t103 t54 t88 t80 t49 t31 t54 t87 t46 t87 t76 t95 t14 t107 t76 t30 t51 t77 t93 t87 t87 t18 t77,15.0,positive,25
+t40 t2 t84 t36 t40 t95 t27 t5 t100 t72 t87 t69 t18 t107 t111 t50 t31 t87 t41 t18 t41 t51 t2 t30 t41,19.0,positive,25
+t110 t34 t34 t69 t60 t111 t2 t111 t105 t94 t41 t13 t81 t41 t0 t17 t72 t58 t14 t67 t73 t76 t41 t80 t110,,negative,25
+t4 t34 t49 t44 t106 t42 t4 t100 t19 t69 t81 t18 t77 t95 t31 t32 t9 t76 t9 t27 t100 t88 t34 t78 t104,,negative,25
+t9 t28 t58 t21 t40 t93 t41 t54 t12 t27 t45 t108 t48 t19 t58 t26 t17 t21 t27 t45 t94 t32 t34 t21 t44,,negative,25
+t78 t28 t31 t61 t87 t104 t10 t4 t5 t22 t30 t56 t26 t77 t89 t41 t84 t41 t111 t89 t91 t22 t40 t74 t87,,negative,25
+t24 t12 t82 t107 t26 t51 t5 t45 t2 t111 t33 t40 t81 t40 t15 t97 t26 t32 t4 t108 t75 t105 t94 t40 t42,,negative,25
+t42 t84 t46 t45 t105 t100 t17 t94 t2 t2 t53 t10 t67 t74 t104 t95 t74 t54 t60 t7 t93 t26 t17 t88 t61,,negative,25
+t26 t94 t94 t34 t81 t30 t51 t18 t93 t4 t26 t15 t93 t9 t76 t103 t40 t56 t27 t110 t28 t107 t34 t61 t49,,negative,25
+t89 t50 t38 t108 t26 t44 t50 t50 t12 t87 t81 t5 t105 t104 t61 t103 t97 t0 t27 t29 t75 t10 t19 t8 t91,,negative,25
+t91 t33 t19 t110 t106 t10 t45 t48 t108 t67 t111 t100 t26 t19 t36 t7 t4 t26 t91 t7 t0 t42 t69 t38 t73,,negative,25
+t75 t48 t4 t46 t36 t5 t9 t27 t54 t87 t19 t49 t31 t104 t105 t87 t8 t27 t76 t104 t108 t100 t93 t50 t89,,negative,25
+t107 t28 t106 t27 t18 t54 t50 t93 t21 t2 t53 t28 t46 t54 t40 t46 t90 t50 t36 t111 t111 t50 t7 t60 t8 t46,18.0,positive,26
+t34 t58 t95 t46 t53 t77 t4 t80 t41 t13 t95 t14 t107 t54 t50 t106 t93 t108 t100 t29 t76 t46 t46 t104 t74 t77,17.0,positive,26
+t18 t103 t89 t10 t27 t84 t84 t2 t80 t88 t50 t93 t100 t8 t46 t50 t50 t46 t30 t74 t46 t2 t46 t46 t90 t13,12.0,positive,26
+t9 t2 t36 t94 t84 t88 t4 t87 t53 t80 t51 t48 t38 t80 t12 t22 t61 t56 t54 t38 t80 t60 t87 t51 t103 t27,12.0,positive,26
+t33 t38 t9 t36 t69 t84 t40 t111 t69 t12 t87 t2 t29 t30 t31 t77 t3 t94 t3 t33 t50 t90 t107 t93 t104 t40,17.0,positive,26
+t30 t10 t80 t41 t36 t88 t78 t45 t51 t38 t58 t36 t81 t106 t87 t104 t2 t22 t51 t34 t87 t2 t74 t31 t80 t111,10.0,positive,26
+t36 t108 t91 t3 t44 t111 t103 t5 t44 t80 t108 t24 t104 t26 t87 t14 t104 t107 t24 t78 t53 t77 t32 t84 t22 t10,13.0,positive,26
+t38 t53 t42 t27 t104 t84 t10 t106 t111 t91 t87 t77 t53 t10 t50 t78 t21 t105 t50 t54 t9 t106 t103 t2 t87 t87,13.0,positive,26
+t7 t87 t46 t34 t50 t88 t46 t107 t40 t84 t93 t78 t12 t111 t48 t42 t7 t104 t2 t36 t26 t60 t58 t111 t36 t8,17.0,positive,26
+t58 t74 t46 t77 t111 t76 t8 t31 t40 t18 t56 t38 t107 t54 t2 t30 t36 t75 t78 t22 t67 t82 t73 t58 t53 t28,16.0,positive,26
+t31 t22 t3 t33 t33 t108 t106 t3 t93 t34 t93 t75 t46 t58 t40 t28 t17 t74 t108 t28 t18 t9 t100 t75 t93 t84,,negative,26
+t103 t84 t41 t26 t53 t103 t110 t108 t46 t10 t7 t44 t73 t29 t49 t60 t9 t40 t93 t27 t67 t93 t78 t87 t108 t10,,negative,26
+t67 t103 t29 t41 t29 t67 t76 t103 t40 t89 t28 t30 t46 t90 t76 t30 t28 t3 t33 t24 t105 t29 t60 t41 t44 t72,,negative,26
+t49 t10 t22 t32 t18 t21 t51 t41 t44 t51 t74 t60 t104 t87 t26 t8 t26 t56 t56 t103 t2 t15 t45 t12 t38 t34,,negative,26
+t53 t91 t72 t53 t67 t105 t53 t106 t61 t29 t80 t108 t30 t4 t93 t89 t80 t77 t108 t106 t106 t91 t19 t67 t29 t61,,negative,26
+t58 t107 t32 t5 t40 t91 t13 t81 t2 t69 t46 t19 t40 t10 t72 t10 t104 t13 t21 t32 t7 t28 t95 t48 t36 t54,,negative,26
+t60 t67 t24 t80 t54 t48 t100 t48 t36 t53 t15 t75 t77 t33 t107 t81 t100 t104 t7 t89 t9 t30 t18 t0 t32 t104,,negative,26
+t38 t54 t88 t21 t110 t22 t111 t103 t10 t107 t72 t111 t21 t42 t108 t90 t18 t84 t0 t108 t9 t97 t103 t95 t106 t72,,negative,26
+t46 t29 t53 t90 t31 t107 t89 t8 t56 t60 t4 t9 t94 t93 t91 t14 t80 t89 t38 t18 t104 t3 t17 t89 t17 t111,,negative,26
+t49 t24 t44 t0 t93 t51 t87 t27 t51 t17 t15 t67 t76 t45 t24 t7 t0 t27 t19 t21 t21 t106 t94 t90 t42 t7,,negative,26
+t3 t9 t58 t28 t111 t111 t90 t17 t108 t58 t50 t54 t9 t90 t40 t95 t14 t67 t46 t54 t87 t60 t41 t46 t77 t67 t87,13.0,positive,27
+t87 t36 t93 t51 t10 t74 t93 t2 t61 t77 t38 t29 t42 t90 t54 t2 t104 t30 t100 t108 t18 t9 t49 t7 t58 t50 t8,14.0,positive,27
+t87 t74 t56 t46 t45 t30 t41 t36 t10 t9 t69 t104 t107 t106 t95 t10 t94 t0 t90 t61 t106 t67 t87 t18 t46 t36 t111,12.0,positive,27
+t22 t69 t50 t78 t88 t12 t106 t95 t84 t2 t46 t74 t80 t34 t50 t103 t50 t89 t77 t106 t78 t95 t51 t106 t88 t67 t48,12.0,positive,27
+t8 t69 t45 t58 t84 t51 t46 t53 t45 t29 t54 t58 t84 t51 t22 t45 t9 t78 t81 t50 t87 t50 t44 t87 t108 t36 t3,15.0,positive,27
+t40 t7 t50 t51 t50 t106 t33 t77 t56 t87 t38 t50 t103 t67 t40 t30 t103 t49 t106 t38 t80 t89 t54 t41 t3 t42 t10,13.0,positive,27
+t87 t29 t69 t93 t100 t45 t107 t58 t67 t15 t46 t46 t67 t36 t76 t87 t3 t78 t80 t108 t21 t30 t54 t93 t67 t97 t24,13.0,positive,27
+t18 t84 t80 t3 t78 t18 t69 t76 t84 t93 t80 t9 t67 t51 t2 t7 t40 t30 t2 t84 t81 t87 t50 t95 t78 t69 t87,17.0,positive,27
+t107 t106 t2 t53 t108 t76 t32 t74 t50 t78 t40 t18 t87 t29 t49 t18 t4 t31 t78 t30 t27 t36 t106 t9 t84 t2 t14,17.0,positive,27
+t107 t10 t87 t106 t36 t106 t12 t77 t29 t10 t17 t88 t50 t40 t51 t2 t46 t15 t111 t60 t4 t93 t106 t54 t50 t80 t108,18.0,positive,27
+t74 t31 t38 t76 t38 t46 t0 t67 t13 t33 t95 t104 t8 t14 t18 t19 t97 t78 t95 t4 t78 t75 t21 t5 t51 t17 t58,,negative,27
+t76 t106 t48 t33 t26 t8 t13 t95 t12 t111 t4 t108 t75 t32 t94 t53 t27 t81 t73 t5 t9 t69 t56 t51 t31 t44 t22,,negative,27
+t41 t46 t97 t106 t58 t22 t108 t32 t84 t29 t3 t31 t5 t50 t69 t61 t89 t38 t7 t44 t84 t88 t80 t100 t54 t46 t78,,negative,27
+t111 t84 t72 t80 t3 t15 t107 t82 t9 t110 t111 t95 t4 t2 t29 t24 t60 t3 t41 t48 t51 t48 t72 t107 t58 t105 t5,,negative,27
+t36 t27 t95 t53 t38 t111 t24 t28 t44 t103 t12 t78 t111 t12 t32 t0 t33 t17 t41 t10 t94 t28 t41 t49 t34 t111 t42,,negative,27
+t82 t31 t84 t61 t73 t61 t41 t31 t110 t4 t58 t60 t32 t9 t91 t36 t53 t2 t76 t103 t78 t46 t12 t100 t108 t110 t40,,negative,27
+t50 t60 t50 t111 t107 t60 t78 t48 t103 t48 t31 t103 t42 t3 t15 t3 t76 t58 t84 t21 t29 t105 t4 t78 t51 t95 t60,,negative,27
+t67 t111 t40 t78 t105 t111 t58 t94 t100 t75 t5 t33 t88 t19 t2 t10 t19 t49 t78 t106 t12 t22 t72 t95 t110 t75 t34,,negative,27
+t110 t84 t44 t49 t45 t73 t72 t15 t90 t5 t44 t49 t61 t13 t94 t69 t12 t34 t7 t69 t94 t56 t72 t27 t51 t40 t105,,negative,27
+t26 t91 t61 t75 t15 t19 t77 t33 t26 t107 t32 t10 t48 t8 t89 t91 t10 t51 t104 t100 t97 t18 t40 t49 t13 t29 t56,,negative,27
+t82 t12 t107 t41 t58 t78 t18 t93 t58 t67 t111 t36 t18 t54 t110 t53 t2 t28 t88 t15 t90 t46 t82 t90 t10 t95 t5 t87,14.0,positive,28
+t12 t29 t69 t22 t84 t58 t54 t111 t111 t50 t93 t84 t74 t77 t44 t31 t21 t84 t34 t50 t30 t78 t46 t90 t77 t40 t36 t76,14.0,positive,28
+t34 t77 t76 t111 t41 t31 t104 t87 t80 t94 t13 t89 t76 t2 t69 t40 t95 t95 t38 t106 t22 t84 t111 t97 t80 t41 t78 t111,14.0,positive,28
+t29 t42 t18 t56 t61 t82 t18 t58 t107 t54 t24 t95 t50 t34 t50 t36 t40 t84 t93 t106 t103 t38 t14 t44 t80 t69 t50 t108,16.0,positive,28
+t40 t103 t51 t45 t51 t46 t9 t28 t76 t18 t51 t100 t27 t40 t56 t74 t106 t74 t95 t31 t103 t95 t36 t50 t58 t74 t54 t41,19.0,positive,28
+t42 t33 t87 t40 t18 t36 t46 t104 t46 t90 t51 t2 t22 t46 t2 t44 t12 t32 t26 t93 t110 t48 t74 t3 t80 t108 t44 t80,10.0,positive,28
+t9 t0 t10 t34 t27 t87 t22 t18 t51 t88 t34 t87 t74 t78 t77 t58 t46 t54 t84 t2 t104 t111 t77 t58 t69 t40 t2 t40,14.0,positive,28
+t50 t74 t14 t51 t31 t72 t107 t73 t77 t87 t104 t76 t34 t77 t105 t27 t54 t107 t60 t49 t3 t54 t81 t89 t30 t19 t84 t51,16.0,positive,28
+t41 t87 t100 t27 t87 t36 t29 t29 t111 t84 t77 t53 t77 t3 t77 t87 t93 t97 t30 t87 t30 t50 t30 t90 t44 t41 t58 t10,16.0,positive,28
+t9 t106 t106 t78 t30 t51 t93 t94 t80 t87 t9 t77 t4 t58 t93 t42 t18 t2 t10 t50 t46 t51 t21 t5 t58 t87 t36 t54,13.0,positive,28
+t107 t48 t51 t49 t18 t49 t15 t58 t54 t111 t107 t51 t9 t9 t2 t75 t24 t104 t78 t87 t46 t90 t104 t26 t29 t105 t14 t19,,negative,28
+t81 t61 t78 t8 t84 t106 t28 t107 t104 t75 t3 t13 t29 t33 t60 t7 t60 t56 t21 t54 t22 t87 t36 t69 t76 t34 t90 t27,,negative,28
+t15 t90 t41 t4 t93 t28 t27 t100 t31 t69 t80 t106 t77 t94 t76 t32 t4 t74 t22 t19 t84 t50 t58 t93 t41 t69 t54 t33,,negative,28
+t45 t67 t17 t49 t108 t19 t36 t27 t69 t45 t17 t46 t97 t10 t8 t100 t53 t15 t33 t26 t75 t41 t45 t45 t45 t69 t41 t21,,negative,28
+t111 t7 t80 t81 t41 t69 t84 t0 t90 t5 t80 t103 t10 t2 t73 t33 t74 t40 t30 t97 t46 t36 t27 t31 t58 t45 t56 t84,,negative,28
+t104 t9 t26 t34 t19 t74 t91 t97 t67 t31 t48 t33 t103 t75 t41 t110 t9 t33 t93 t51 t67 t5 t0 t14 t77 t73 t108 t49,,negative,28
+t94 t67 t18 t105 t50 t51 t78 t84 t31 t76 t8 t22 t50 t48 t2 t56 t48 t14 t34 t80 t24 t110 t10 t106 t40 t89 t33 t28,,negative,28
+t80 t84 t81 t8 t56 t0 t30 t50 t4 t87 t49 t97 t77 t12 t88 t14 t13 t78 t90 t78 t91 t81 t82 t5 t93 t38 t60 t108,,negative,28
+t54 t5 t7 t33 t9 t76 t19 t46 t18 t89 t40 t69 t76 t110 t10 t81 t36 t42 t90 t8 t22 t94 t44 t90 t21 t40 t53 t76,,negative,28
+t89 t80 t78 t107 t77 t54 t67 t28 t19 t108 t27 t40 t80 t10 t40 t29 t73 t28 t45 t18 t31 t97 t5 t87 t33 t24 t3 t80,,negative,28
+t111 t50 t50 t30 t95 t36 t5 t106 t56 t95 t3 t104 t106 t100 t87 t54 t84 t10 t74 t77 t13 t40 t84 t10 t95 t87 t84 t95 t49,13.0,positive,29
+t40 t58 t87 t36 t2 t7 t107 t34 t2 t30 t42 t95 t107 t54 t18 t106 t84 t14 t84 t14 t50 t50 t93 t106 t58 t106 t2 t73 t77,12.0,positive,29
+t87 t106 t87 t3 t94 t10 t69 t50 t87 t106 t34 t10 t50 t46 t87 t2 t69 t87 t95 t84 t2 t4 t60 t31 t103 t95 t77 t10 t54,16.0,positive,29
+t46 t54 t104 t2 t87 t87 t3 t82 t61 t74 t111 t77 t87 t5 t108 t36 t22 t76 t27 t41 t87 t87 t19 t30 t38 t80 t45 t29 t78,15.0,positive,29
+t29 t29 t50 t104 t41 t29 t30 t34 t2 t111 t46 t2 t82 t28 t106 t106 t38 t2 t95 t74 t80 t58 t84 t93 t48 t76 t108 t78 t27,16.0,positive,29
+t87 t30 t74 t77 t111 t90 t100 t80 t18 t97 t106 t78 t90 t2 t60 t54 t91 t103 t3 t13 t111 t41 t24 t82 t13 t8 t95 t50 t30,13.0,positive,29
+t50 t36 t84 t78 t7 t58 t95 t74 t77 t3 t61 t50 t94 t51 t21 t15 t111 t3 t46 t40 t60 t110 t22 t69 t74 t27 t104 t84 t67,17.0,positive,29
+t91 t9 t106 t80 t89 t45 t87 t3 t87 t95 t38 t54 t51 t77 t74 t27 t50 t3 t36 t12 t106 t84 t76 t75 t69 t0 t111 t36 t111,10.0,positive,29
+t107 t28 t106 t77 t51 t80 t58 t36 t48 t87 t50 t50 t95 t78 t58 t22 t58 t54 t110 t90 t33 t106 t87 t106 t4 t108 t3 t49 t67,18.0,positive,29
+t95 t76 t2 t14 t41 t87 t44 t76 t12 t74 t10 t87 t29 t49 t36 t28 t76 t107 t28 t74 t77 t87 t84 t87 t54 t46 t77 t77 t87,12.0,positive,29
+t60 t81 t108 t93 t81 t50 t41 t50 t100 t87 t110 t44 t0 t4 t49 t77 t56 t42 t4 t27 t19 t21 t32 t26 t41 t72 t18 t28 t28,,negative,29
+t3 t13 t8 t108 t0 t95 t33 t84 t2 t45 t15 t7 t24 t73 t53 t26 t29 t95 t77 t67 t33 t4 t2 t80 t21 t88 t106 t8 t88,,negative,29
+t53 t31 t34 t44 t22 t29 t40 t31 t84 t58 t105 t41 t87 t78 t103 t49 t74 t81 t72 t22 t108 t95 t13 t10 t75 t69 t29 t34 t73,,negative,29
+t3 t103 t19 t14 t72 t110 t12 t97 t61 t81 t8 t84 t87 t49 t8 t105 t36 t49 t76 t95 t84 t9 t13 t34 t12 t88 t29 t7 t2,,negative,29
+t74 t53 t72 t106 t50 t17 t60 t80 t60 t95 t10 t9 t40 t49 t33 t24 t107 t13 t78 t67 t88 t2 t77 t22 t67 t78 t75 t106 t8,,negative,29
+t27 t26 t53 t60 t56 t105 t74 t41 t51 t21 t14 t103 t22 t49 t69 t10 t12 t24 t48 t26 t105 t24 t95 t53 t72 t26 t45 t49 t61,,negative,29
+t18 t2 t108 t19 t94 t12 t14 t78 t15 t8 t0 t53 t78 t90 t48 t17 t80 t41 t2 t105 t29 t81 t110 t38 t12 t45 t100 t72 t100,,negative,29
+t8 t90 t17 t58 t0 t91 t80 t8 t21 t18 t58 t54 t97 t36 t10 t14 t4 t73 t33 t31 t87 t77 t77 t111 t0 t94 t41 t5 t32,,negative,29
+t107 t111 t8 t78 t44 t87 t58 t77 t30 t29 t27 t49 t31 t31 t74 t13 t34 t104 t91 t95 t104 t2 t100 t91 t106 t82 t89 t27 t17,,negative,29
+t94 t69 t104 t104 t17 t80 t88 t106 t42 t100 t84 t60 t80 t60 t97 t58 t104 t106 t41 t17 t27 t3 t17 t61 t40 t90 t100 t10 t24,,negative,29
+t97 t74 t87 t51 t13 t21 t17 t22 t76 t2 t94 t103 t54 t41 t94 t45 t12 t15 t106 t60 t50 t77 t3 t111 t90 t69 t94 t80 t9 t106,17.0,positive,30
+t111 t58 t103 t54 t29 t76 t78 t74 t40 t93 t88 t18 t84 t103 t41 t21 t27 t45 t78 t10 t2 t54 t41 t77 t87 t49 t78 t2 t36 t50,21.0,positive,30
+t44 t93 t80 t49 t51 t87 t33 t77 t0 t93 t78 t40 t40 t84 t95 t58 t87 t78 t30 t44 t80 t111 t111 t103 t13 t41 t80 t2 t36 t108,17.0,positive,30
+t74 t44 t100 t41 t27 t67 t34 t77 t75 t10 t80 t44 t69 t87 t3 t53 t87 t2 t84 t74 t10 t76 t87 t27 t72 t77 t3 t36 t3 t87,14.0,positive,30
+t7 t40 t77 t95 t56 t74 t10 t26 t51 t82 t45 t87 t58 t54 t95 t95 t46 t90 t88 t95 t24 t87 t30 t41 t100 t91 t29 t9 t3 t77,17.0,positive,30
+t34 t107 t111 t18 t36 t44 t31 t77 t3 t95 t54 t111 t56 t44 t18 t45 t58 t34 t77 t51 t81 t95 t69 t69 t0 t36 t12 t78 t30 t27,14.0,positive,30
+t51 t2 t95 t36 t30 t104 t95 t46 t50 t41 t45 t50 t87 t38 t80 t36 t18 t73 t56 t50 t51 t67 t44 t76 t40 t95 t10 t2 t2 t3,20.0,positive,30
+t76 t106 t108 t58 t104 t95 t111 t53 t56 t22 t69 t14 t38 t50 t13 t14 t27 t34 t14 t53 t2 t10 t30 t111 t17 t80 t77 t69 t90 t36,15.0,positive,30
+t95 t61 t74 t14 t58 t93 t93 t34 t24 t49 t103 t95 t13 t54 t30 t56 t10 t97 t87 t17 t80 t107 t46 t107 t0 t72 t50 t93 t28 t41,15.0,positive,30
+t100 t14 t40 t50 t9 t34 t22 t28 t28 t38 t50 t93 t100 t87 t26 t78 t12 t51 t72 t81 t14 t41 t90 t41 t21 t53 t74 t56 t80 t87,18.0,positive,30
+t84 t32 t44 t58 t22 t46 t77 t31 t48 t50 t51 t38 t100 t45 t31 t24 t78 t33 t12 t46 t46 t48 t91 t88 t77 t73 t18 t54 t46 t12,,negative,30
+t5 t46 t42 t48 t32 t17 t30 t93 t81 t44 t5 t80 t54 t93 t72 t32 t24 t104 t56 t19 t53 t8 t100 t2 t105 t3 t31 t24 t24 t53,,negative,30
+t32 t27 t12 t90 t106 t88 t3 t107 t90 t105 t61 t53 t41 t104 t60 t21 t84 t38 t46 t107 t93 t69 t84 t90 t97 t61 t8 t60 t89 t104,,negative,30
+t45 t15 t73 t18 t84 t13 t44 t30 t27 t46 t72 t110 t53 t7 t78 t30 t10 t17 t14 t60 t76 t36 t107 t81 t54 t90 t89 t84 t34 t50,,negative,30
+t58 t84 t111 t38 t51 t94 t44 t80 t100 t9 t72 t19 t61 t97 t9 t7 t61 t4 t22 t10 t8 t50 t28 t94 t5 t107 t78 t78 t108 t90,,negative,30
+t90 t24 t105 t33 t41 t28 t12 t50 t91 t108 t12 t81 t13 t107 t28 t54 t106 t3 t26 t90 t74 t104 t49 t110 t84 t91 t41 t91 t40 t72,,negative,30
+t103 t91 t17 t78 t72 t69 t110 t46 t93 t75 t77 t74 t46 t14 t74 t22 t111 t2 t91 t15 t60 t100 t61 t110 t17 t32 t73 t18 t21 t103,,negative,30
+t33 t97 t89 t110 t58 t51 t51 t36 t104 t87 t58 t22 t3 t75 t88 t22 t91 t100 t82 t76 t103 t44 t9 t42 t22 t31 t97 t9 t12 t40,,negative,30
+t81 t84 t36 t27 t44 t13 t82 t88 t21 t60 t74 t29 t111 t46 t18 t95 t4 t34 t90 t29 t0 t30 t12 t93 t32 t58 t41 t31 t13 t41,,negative,30
+t106 t5 t90 t45 t53 t67 t5 t105 t77 t58 t50 t107 t31 t82 t54 t53 t17 t14 t60 t107 t94 t33 t42 t50 t15 t7 t31 t2 t42 t81,,negative,30
+t41 t31 t0 t33 t77 t40 t4 t50 t33 t67 t87 t27 t50 t50 t95 t29 t28 t84 t67 t95 t80 t84 t29 t69 t94 t74 t41 t36 t69 t74 t8,16.0,positive,31
+t104 t58 t50 t87 t50 t110 t7 t107 t80 t44 t108 t58 t84 t50 t3 t30 t36 t27 t10 t61 t77 t18 t45 t38 t51 t41 t58 t36 t104 t93 t46,15.0,positive,31
+t78 t22 t9 t3 t81 t80 t106 t54 t74 t58 t67 t104 t49 t87 t41 t22 t69 t46 t10 t58 t73 t2 t88 t10 t104 t80 t41 t36 t3 t50 t51,16.0,positive,31
+t38 t50 t80 t84 t27 t40 t2 t40 t87 t81 t87 t97 t74 t78 t87 t87 t44 t106 t77 t107 t30 t9 t100 t41 t94 t80 t80 t84 t94 t80 t51,14.0,positive,31
+t84 t9 t36 t73 t77 t80 t108 t100 t27 t18 t81 t30 t87 t78 t38 t46 t14 t58 t28 t30 t50 t27 t78 t84 t40 t12 t50 t100 t8 t90 t10,20.0,positive,31
+t87 t38 t5 t76 t2 t3 t69 t51 t21 t30 t2 t93 t13 t106 t78 t50 t84 t80 t76 t45 t69 t91 t50 t50 t56 t18 t74 t29 t106 t76 t54,11.0,positive,31
+t73 t77 t95 t21 t44 t87 t36 t76 t105 t0 t21 t56 t2 t8 t45 t80 t18 t107 t95 t110 t29 t69 t69 t46 t95 t87 t14 t3 t30 t78 t95,15.0,positive,31
+t18 t18 t2 t14 t91 t45 t46 t14 t2 t40 t30 t106 t100 t80 t51 t103 t95 t36 t95 t3 t8 t54 t77 t105 t34 t54 t8 t77 t46 t3 t77,19.0,positive,31
+t78 t87 t46 t2 t94 t87 t58 t50 t0 t69 t30 t74 t2 t2 t9 t111 t9 t49 t34 t26 t31 t40 t60 t46 t40 t97 t95 t94 t24 t51 t8,17.0,positive,31
+t32 t107 t28 t29 t69 t87 t36 t22 t12 t40 t34 t42 t90 t50 t82 t104 t50 t50 t24 t87 t106 t36 t26 t103 t41 t107 t18 t111 t111 t73 t77,17.0,positive,31
+t106 t30 t27 t53 t110 t107 t12 t28 t36 t5 t90 t28 t74 t14 t78 t42 t29 t26 t28 t19 t18 t84 t53 t82 t44 t12 t93 t40 t9 t44 t36,,negative,31
+t73 t81 t89 t56 t17 t7 t61 t94 t27 t111 t74 t4 t17 t107 t38 t42 t30 t40 t72 t14 t31 t22 t8 t49 t80 t89 t104 t22 t89 t58 t49,,negative,31
+t81 t95 t30 t93 t22 t22 t75 t7 t40 t50 t90 t58 t90 t81 t7 t88 t100 t24 t110 t105 t50 t27 t77 t82 t27 t61 t82 t97 t105 t2 t103,,negative,31
+t81 t14 t46 t50 t31 t29 t18 t77 t31 t76 t44 t91 t31 t31 t12 t53 t38 t97 t110 t90 t51 t76 t14 t0 t108 t17 t44 t36 t95 t8 t88,,negative,31
+t58 t78 t74 t81 t22 t87 t58 t54 t0 t100 t87 t31 t100 t60 t89 t22 t33 t89 t4 t7 t3 t15 t56 t22 t77 t80 t48 t44 t5 t29 t107,,negative,31
+t87 t26 t46 t93 t3 t74 t17 t5 t8 t7 t2 t100 t29 t26 t61 t48 t26 t50 t87 t0 t42 t28 t87 t36 t36 t8 t49 t13 t69 t108 t38,,negative,31
+t45 t107 t12 t45 t69 t54 t44 t48 t76 t28 t88 t84 t24 t67 t94 t46 t93 t5 t105 t38 t18 t67 t54 t84 t14 t42 t15 t82 t34 t49 t74,,negative,31
+t5 t60 t108 t110 t93 t19 t3 t60 t61 t84 t49 t42 t90 t104 t103 t45 t91 t61 t38 t94 t76 t100 t40 t76 t13 t21 t111 t13 t27 t67 t49,,negative,31
+t33 t42 t78 t76 t19 t28 t108 t54 t75 t75 t0 t32 t54 t22 t76 t2 t72 t30 t90 t13 t78 t17 t90 t21 t50 t30 t89 t40 t95 t2 t58,,negative,31
+t104 t103 t21 t73 t94 t89 t41 t97 t58 t95 t75 t12 t19 t50 t82 t51 t41 t77 t0 t21 t7 t56 t72 t97 t97 t100 t88 t40 t56 t17 t14,,negative,31
+t78 t88 t9 t28 t10 t18 t45 t84 t29 t100 t50 t58 t76 t76 t95 t69 t84 t28 t46 t10 t111 t80 t49 t51 t53 t38 t2 t87 t94 t30 t49 t87,14.0,positive,32
+t32 t2 t34 t2 t10 t106 t103 t40 t15 t10 t93 t69 t87 t32 t81 t4 t4 t80 t41 t103 t77 t87 t0 t22 t78 t103 t40 t0 t40 t46 t8 t93,19.0,positive,32
+t46 t108 t44 t8 t103 t8 t2 t3 t54 t69 t10 t82 t54 t31 t94 t4 t36 t27 t41 t29 t46 t54 t26 t51 t46 t80 t49 t76 t77 t53 t24 t93,17.0,positive,32
+t9 t106 t34 t80 t58 t104 t46 t2 t104 t31 t21 t106 t2 t31 t103 t36 t27 t95 t9 t49 t50 t50 t111 t4 t51 t90 t58 t74 t90 t18 t31 t77,12.0,positive,32
+t67 t18 t41 t41 t69 t51 t100 t8 t7 t107 t34 t72 t8 t13 t104 t28 t41 t18 t97 t51 t36 t21 t8 t107 t67 t30 t36 t81 t106 t93 t2 t87,20.0,positive,32
+t36 t105 t17 t69 t77 t111 t58 t2 t9 t10 t4 t24 t87 t106 t3 t14 t80 t34 t27 t111 t87 t78 t110 t18 t93 t76 t33 t78 t13 t24 t106 t8,18.0,positive,32
+t34 t56 t74 t50 t81 t45 t21 t32 t107 t50 t2 t36 t3 t50 t111 t107 t95 t50 t18 t74 t74 t54 t50 t87 t69 t84 t76 t50 t78 t40 t50 t104,16.0,positive,32
+t93 t31 t77 t95 t50 t74 t78 t13 t3 t30 t31 t46 t54 t14 t10 t105 t69 t3 t36 t2 t36 t87 t111 t9 t0 t2 t50 t10 t51 t90 t18 t18,19.0,positive,32
+t2 t81 t80 t14 t108 t111 t9 t90 t58 t46 t34 t77 t103 t5 t69 t77 t3 t8 t103 t2 t46 t15 t18 t36 t104 t95 t74 t2 t46 t3 t87 t10,17.0,positive,32
+t87 t40 t54 t95 t87 t50 t46 t78 t72 t87 t74 t111 t58 t106 t81 t2 t10 t8 t54 t22 t67 t2 t15 t87 t80 t87 t84 t29 t29 t49 t32 t8,14.0,positive,32
+t110 t103 t5 t46 t38 t50 t5 t81 t106 t14 t36 t77 t51 t0 t90 t36 t94 t94 t111 t4 t87 t14 t81 t54 t8 t90 t76 t13 t84 t93 t19 t58,,negative,32
+t19 t97 t67 t0 t88 t93 t5 t73 t38 t14 t74 t42 t31 t29 t103 t90 t46 t4 t17 t104 t31 t28 t88 t74 t30 t75 t73 t48 t0 t87 t54 t17,,negative,32
+t2 t56 t5 t44 t22 t3 t29 t53 t61 t15 t76 t31 t61 t0 t28 t72 t4 t60 t69 t75 t48 t30 t46 t48 t40 t27 t29 t3 t51 t41 t107 t26,,negative,32
+t87 t5 t76 t10 t30 t53 t24 t69 t108 t5 t58 t91 t74 t44 t2 t36 t103 t3 t36 t10 t60 t78 t10 t51 t36 t60 t95 t41 t17 t90 t36 t26,,negative,32
+t84 t9 t9 t21 t19 t36 t27 t17 t53 t56 t53 t105 t27 t76 t61 t103 t54 t13 t10 t3 t87 t75 t42 t12 t42 t110 t72 t13 t17 t108 t17 t60,,negative,32
+t60 t110 t10 t76 t93 t56 t87 t33 t91 t49 t29 t7 t22 t105 t10 t40 t0 t40 t19 t49 t29 t76 t33 t88 t28 t12 t32 t46 t9 t33 t18 t12,,negative,32
+t67 t104 t50 t81 t93 t50 t72 t15 t8 t106 t12 t22 t12 t4 t8 t95 t60 t89 t110 t2 t31 t61 t89 t3 t0 t7 t28 t31 t111 t60 t49 t28,,negative,32
+t28 t26 t105 t22 t50 t17 t32 t73 t104 t21 t7 t26 t28 t41 t50 t33 t34 t21 t108 t111 t17 t36 t90 t73 t108 t13 t46 t15 t100 t14 t42 t76,,negative,32
+t74 t80 t58 t2 t87 t87 t56 t81 t10 t19 t73 t13 t111 t108 t67 t60 t93 t80 t77 t28 t67 t30 t103 t21 t2 t10 t103 t74 t29 t36 t24 t74,,negative,32
+t31 t13 t7 t108 t10 t104 t46 t34 t29 t88 t38 t103 t18 t61 t13 t44 t8 t73 t51 t7 t107 t27 t103 t15 t89 t61 t32 t46 t82 t89 t40 t67,,negative,32
+t74 t107 t76 t30 t46 t30 t61 t106 t9 t27 t12 t97 t7 t42 t40 t111 t50 t22 t2 t89 t77 t103 t54 t103 t40 t40 t78 t49 t111 t3 t50 t58 t28,18.0,positive,33
+t76 t97 t3 t2 t73 t77 t18 t29 t46 t30 t14 t93 t93 t103 t32 t10 t2 t45 t50 t10 t80 t97 t95 t111 t84 t40 t38 t18 t41 t26 t31 t106 t54,16.0,positive,33
+t50 t18 t31 t9 t44 t87 t74 t80 t67 t31 t34 t54 t50 t51 t104 t104 t95 t50 t84 t10 t14 t48 t77 t3 t41 t78 t73 t77 t28 t69 t90 t4 t10,17.0,positive,33
+t88 t60 t78 t27 t44 t2 t36 t87 t89 t29 t74 t36 t87 t80 t84 t28 t2 t2 t4 t54 t58 t48 t12 t84 t22 t7 t9 t67 t50 t18 t111 t94 t14,19.0,positive,33
+t97 t41 t46 t46 t90 t22 t54 t50 t87 t87 t107 t54 t87 t72 t40 t97 t7 t50 t36 t22 t69 t111 t87 t38 t50 t36 t36 t87 t51 t21 t87 t84 t46,15.0,positive,33
+t38 t74 t36 t87 t34 t77 t44 t54 t45 t87 t110 t0 t21 t77 t38 t50 t87 t100 t30 t50 t111 t46 t22 t75 t46 t54 t22 t22 t50 t50 t54 t58 t54,22.0,positive,33
+t95 t107 t34 t2 t4 t77 t53 t77 t87 t87 t87 t107 t95 t110 t2 t38 t77 t14 t108 t90 t107 t95 t9 t97 t95 t7 t58 t3 t103 t81 t41 t81 t76,20.0,positive,33
+t50 t30 t14 t103 t30 t36 t14 t30 t54 t87 t19 t74 t74 t95 t110 t3 t0 t21 t107 t53 t108 t87 t12 t15 t111 t2 t3 t34 t77 t76 t51 t74 t27,15.0,positive,33
+t50 t9 t76 t2 t50 t69 t38 t50 t84 t50 t106 t88 t61 t87 t91 t30 t90 t93 t78 t27 t111 t41 t80 t75 t34 t2 t5 t49 t78 t46 t30 t14 t27,18.0,positive,33
+t84 t88 t67 t111 t3 t111 t13 t84 t78 t69 t27 t28 t38 t2 t91 t95 t40 t80 t41 t93 t31 t48 t8 t103 t51 t103 t54 t2 t60 t67 t87 t81 t8,14.0,positive,33
+t107 t72 t31 t80 t56 t91 t31 t30 t82 t15 t17 t104 t33 t100 t110 t46 t53 t50 t108 t87 t7 t46 t67 t7 t34 t10 t30 t107 t33 t48 t26 t10 t100,,negative,33
+t29 t80 t44 t28 t15 t110 t44 t9 t108 t13 t90 t2 t45 t13 t3 t28 t56 t22 t19 t89 t12 t74 t50 t76 t5 t107 t15 t110 t28 t10 t82 t60 t14,,negative,33
+t107 t104 t38 t50 t48 t97 t12 t77 t74 t3 t22 t104 t54 t15 t34 t14 t0 t2 t7 t72 t4 t50 t44 t80 t7 t36 t75 t26 t87 t24 t61 t14 t17,,negative,33
+t95 t75 t95 t54 t54 t97 t41 t34 t95 t105 t58 t9 t82 t22 t95 t32 t104 t30 t31 t12 t76 t97 t51 t19 t38 t51 t28 t24 t110 t18 t53 t46 t90,,negative,33
+t84 t3 t5 t31 t53 t21 t78 t31 t106 t67 t36 t41 t93 t90 t76 t54 t69 t82 t74 t9 t100 t93 t19 t38 t51 t24 t13 t73 t24 t31 t54 t10 t27,,negative,33
+t29 t56 t95 t46 t13 t60 t22 t53 t4 t53 t51 t32 t44 t75 t36 t90 t103 t51 t82 t54 t45 t75 t67 t40 t80 t4 t82 t78 t46 t10 t30 t78 t4,,negative,33
+t34 t34 t21 t8 t74 t34 t49 t50 t21 t111 t76 t89 t81 t87 t12 t81 t17 t105 t82 t41 t56 t103 t2 t74 t41 t3 t105 t107 t33 t107 t103 t60 t17,,negative,33
+t95 t7 t107 t72 t111 t0 t53 t69 t54 t53 t107 t3 t90 t42 t0 t107 t108 t53 t111 t105 t110 t61 t19 t33 t42 t111 t0 t69 t88 t111 t80 t61 t72,,negative,33
+t72 t89 t17 t15 t61 t77 t2 t80 t76 t44 t90 t33 t56 t27 t90 t17 t28 t75 t7 t29 t60 t42 t87 t17 t50 t90 t34 t110 t104 t78 t106 t8 t97,,negative,33
+t45 t38 t106 t100 t80 t34 t82 t105 t38 t30 t61 t106 t2 t50 t18 t21 t78 t107 t17 t9 t51 t97 t73 t5 t45 t3 t53 t108 t40 t40 t18 t36 t73,,negative,33
+t38 t34 t77 t87 t46 t104 t49 t100 t87 t67 t3 t76 t80 t54 t27 t30 t61 t50 t111 t10 t104 t107 t34 t87 t51 t51 t90 t93 t9 t87 t28 t28 t41 t100,15.0,positive,34
+t34 t87 t89 t77 t12 t29 t34 t80 t0 t58 t80 t27 t46 t3 t87 t29 t111 t87 t89 t90 t93 t67 t2 t73 t77 t87 t80 t41 t100 t30 t13 t103 t77 t87,22.0,positive,34
+t84 t94 t77 t54 t106 t33 t77 t12 t87 t106 t93 t14 t10 t111 t111 t50 t12 t2 t18 t95 t29 t106 t2 t88 t80 t58 t111 t41 t91 t29 t38 t2 t50 t106,21.0,positive,34
+t110 t103 t30 t42 t12 t77 t106 t61 t77 t34 t50 t51 t48 t46 t87 t111 t38 t28 t8 t93 t44 t34 t34 t18 t67 t50 t60 t12 t82 t0 t34 t26 t78 t104,14.0,positive,34
+t46 t41 t87 t33 t27 t58 t18 t60 t36 t75 t34 t2 t31 t12 t56 t30 t2 t50 t80 t27 t54 t58 t54 t46 t54 t100 t24 t27 t80 t89 t30 t2 t81 t54,17.0,positive,34
+t106 t91 t27 t58 t111 t88 t100 t100 t41 t21 t22 t111 t87 t73 t77 t46 t9 t30 t87 t100 t7 t100 t46 t2 t54 t111 t30 t34 t2 t107 t54 t53 t82 t10,19.0,positive,34
+t111 t54 t69 t84 t50 t46 t87 t21 t50 t95 t3 t46 t77 t2 t9 t51 t8 t74 t88 t80 t29 t18 t50 t54 t2 t31 t17 t80 t41 t58 t51 t54 t50 t46,15.0,positive,34
+t104 t80 t54 t58 t77 t58 t28 t87 t72 t58 t8 t51 t54 t74 t3 t78 t51 t110 t0 t84 t93 t106 t76 t34 t14 t76 t38 t2 t107 t41 t34 t24 t36 t108,21.0,positive,34
+t44 t103 t38 t29 t104 t84 t76 t103 t50 t3 t106 t81 t87 t69 t50 t51 t106 t9 t38 t24 t108 t87 t54 t38 t93 t100 t81 t28 t103 t93 t29 t69 t94 t28,16.0,positive,34
+t38 t14 t10 t111 t104 t34 t9 t75 t69 t56 t76 t103 t10 t4 t76 t51 t111 t41 t58 t36 t103 t50 t80 t41 t18 t58 t107 t2 t18 t78 t3 t58 t46 t77,17.0,positive,34
+t27 t27 t90 t8 t61 t110 t45 t95 t21 t88 t19 t74 t108 t38 t103 t82 t45 t97 t60 t4 t58 t44 t50 t38 t8 t100 t7 t81 t29 t73 t29 t95 t15 t80,,negative,34
+t4 t103 t104 t77 t77 t103 t7 t88 t12 t69 t103 t84 t67 t49 t46 t17 t26 t12 t106 t78 t106 t93 t111 t2 t3 t14 t107 t5 t90 t74 t61 t18 t33 t94,,negative,34
+t10 t0 t75 t93 t19 t69 t111 t15 t80 t72 t4 t56 t5 t51 t56 t108 t10 t8 t90 t60 t97 t61 t54 t45 t18 t34 t108 t5 t21 t108 t40 t110 t61 t26,,negative,34
+t77 t60 t81 t77 t73 t67 t75 t91 t75 t45 t36 t100 t90 t9 t3 t67 t38 t58 t2 t93 t77 t87 t34 t28 t33 t32 t30 t40 t0 t50 t53 t38 t44 t5,,negative,34
+t60 t106 t32 t13 t31 t3 t81 t3 t107 t8 t8 t77 t32 t2 t7 t7 t56 t91 t58 t24 t21 t38 t4 t0 t73 t45 t34 t74 t34 t110 t27 t33 t100 t24,,negative,34
+t77 t97 t100 t104 t41 t48 t29 t12 t58 t88 t97 t7 t42 t2 t2 t67 t38 t0 t53 t7 t78 t27 t4 t7 t107 t81 t10 t77 t60 t9 t44 t75 t111 t28,,negative,34
+t54 t74 t67 t56 t4 t61 t22 t58 t75 t49 t84 t105 t9 t38 t100 t80 t7 t69 t28 t107 t26 t93 t61 t56 t42 t107 t106 t40 t94 t40 t3 t26 t74 t28,,negative,34
+t77 t8 t15 t78 t54 t29 t21 t106 t89 t9 t22 t58 t4 t26 t42 t90 t28 t51 t10 t75 t40 t110 t51 t95 t89 t61 t46 t33 t7 t100 t10 t87 t30 t26,,negative,34
+t88 t34 t74 t87 t13 t15 t53 t87 t12 t33 t40 t73 t7 t45 t32 t61 t33 t67 t9 t34 t50 t80 t67 t107 t61 t32 t32 t81 t93 t75 t103 t9 t95 t105,,negative,34
+t97 t30 t22 t42 t17 t8 t38 t5 t61 t53 t8 t51 t58 t60 t93 t5 t51 t4 t30 t95 t73 t60 t13 t75 t32 t12 t7 t104 t80 t49 t14 t5 t53 t48,,negative,34
+t12 t41 t36 t3 t110 t49 t90 t87 t107 t46 t12 t82 t50 t78 t22 t50 t41 t54 t2 t51 t106 t69 t77 t87 t53 t106 t18 t2 t50 t48 t10 t106 t77 t3 t27,11.0,positive,35
+t31 t76 t80 t97 t30 t69 t18 t38 t87 t106 t34 t108 t41 t87 t34 t87 t50 t87 t100 t87 t84 t110 t30 t50 t30 t50 t34 t4 t106 t90 t69 t106 t53 t56 t76,16.0,positive,35
+t50 t91 t31 t95 t50 t40 t3 t46 t104 t50 t84 t36 t78 t3 t87 t93 t56 t78 t95 t29 t53 t95 t15 t3 t46 t78 t94 t58 t41 t9 t77 t38 t103 t36 t27,16.0,positive,35
+t18 t106 t46 t2 t50 t41 t77 t12 t87 t104 t87 t46 t38 t107 t51 t48 t51 t76 t18 t90 t4 t45 t73 t74 t14 t74 t51 t36 t13 t111 t3 t84 t87 t69 t90,14.0,positive,35
+t73 t10 t87 t13 t94 t10 t50 t40 t38 t89 t77 t58 t87 t106 t51 t87 t87 t45 t50 t36 t36 t13 t40 t77 t78 t45 t103 t41 t58 t94 t69 t84 t46 t106 t36,17.0,positive,35
+t14 t18 t77 t87 t91 t29 t8 t26 t9 t49 t41 t28 t41 t29 t76 t74 t87 t36 t21 t87 t80 t69 t40 t3 t54 t29 t36 t95 t104 t67 t95 t41 t50 t14 t77,26.0,positive,35
+t14 t3 t2 t108 t111 t9 t105 t14 t49 t18 t76 t36 t13 t17 t76 t30 t29 t18 t49 t77 t3 t108 t90 t80 t22 t28 t28 t95 t76 t3 t61 t77 t104 t36 t27,20.0,positive,35
+t107 t50 t18 t51 t76 t106 t95 t50 t93 t40 t74 t93 t104 t93 t81 t60 t80 t74 t107 t111 t34 t77 t78 t38 t34 t77 t46 t74 t77 t3 t46 t28 t50 t0 t31,19.0,positive,35
+t69 t36 t54 t58 t95 t22 t69 t91 t36 t78 t0 t50 t51 t80 t106 t60 t18 t80 t93 t30 t87 t21 t18 t50 t51 t46 t111 t8 t53 t56 t107 t41 t78 t48 t76,14.0,positive,35
+t84 t84 t93 t32 t46 t106 t56 t87 t10 t50 t40 t3 t94 t81 t9 t32 t9 t0 t17 t8 t58 t31 t69 t104 t95 t84 t80 t54 t32 t88 t31 t78 t87 t41 t106,19.0,positive,35
+t18 t42 t26 t84 t111 t88 t97 t77 t67 t77 t33 t78 t15 t84 t53 t34 t110 t42 t54 t21 t8 t100 t73 t30 t9 t94 t3 t31 t50 t72 t3 t72 t78 t30 t89,,negative,35
+t13 t107 t24 t94 t104 t104 t4 t44 t14 t108 t107 t77 t40 t53 t34 t82 t77 t100 t46 t60 t48 t4 t18 t31 t60 t15 t97 t108 t33 t67 t9 t88 t89 t82 t87,,negative,35
+t88 t42 t108 t30 t14 t15 t72 t91 t81 t58 t22 t69 t15 t82 t74 t24 t28 t80 t80 t82 t51 t32 t7 t29 t40 t76 t3 t82 t100 t45 t22 t24 t38 t88 t103,,negative,35
+t30 t12 t12 t60 t78 t42 t49 t24 t81 t24 t30 t53 t95 t87 t54 t54 t107 t38 t29 t72 t30 t3 t103 t2 t48 t91 t56 t90 t21 t84 t28 t50 t14 t75 t49,,negative,35
+t61 t84 t26 t77 t13 t10 t0 t75 t27 t21 t94 t32 t103 t42 t29 t69 t84 t100 t108 t74 t60 t82 t12 t108 t15 t40 t76 t49 t94 t108 t74 t81 t100 t34 t19,,negative,35
+t91 t80 t73 t53 t94 t111 t24 t42 t107 t73 t4 t0 t93 t82 t81 t38 t44 t41 t80 t72 t87 t94 t95 t26 t74 t104 t56 t75 t24 t103 t36 t110 t0 t56 t75,,negative,35
+t97 t19 t90 t44 t87 t53 t61 t53 t110 t9 t36 t82 t29 t84 t61 t72 t91 t22 t41 t97 t77 t108 t29 t15 t31 t67 t29 t49 t87 t36 t41 t78 t28 t74 t18,,negative,35
+t80 t41 t84 t103 t77 t48 t31 t80 t94 t5 t106 t58 t100 t41 t94 t32 t18 t61 t44 t45 t0 t22 t81 t22 t40 t90 t0 t5 t12 t97 t74 t107 t10 t26 t5,,negative,35
+t26 t53 t48 t40 t73 t29 t95 t56 t7 t12 t17 t67 t69 t84 t107 t21 t100 t24 t49 t18 t91 t26 t46 t103 t107 t49 t28 t34 t106 t81 t111 t56 t8 t111 t38,,negative,35
+t110 t60 t31 t32 t42 t46 t12 t67 t8 t95 t87 t107 t14 t95 t14 t31 t12 t56 t82 t74 t29 t21 t45 t12 t7 t26 t88 t88 t31 t97 t58 t29 t60 t19 t30,,negative,35
+t78 t0 t69 t53 t77 t105 t60 t51 t77 t97 t73 t51 t87 t9 t32 t87 t106 t36 t95 t29 t7 t10 t33 t77 t41 t78 t80 t53 t2 t106 t90 t69 t84 t46 t50 t27,20.0,positive,36
+t9 t41 t56 t21 t18 t28 t111 t103 t18 t110 t81 t3 t0 t0 t22 t106 t2 t58 t40 t2 t104 t80 t2 t44 t106 t54 t45 t111 t97 t77 t3 t51 t88 t78 t2 t10,19.0,positive,36
+t111 t38 t29 t95 t38 t22 t46 t111 t46 t80 t41 t72 t90 t77 t87 t45 t107 t80 t91 t42 t45 t87 t2 t100 t88 t75 t2 t4 t54 t10 t80 t41 t0 t103 t95 t3,18.0,positive,36
+t87 t41 t50 t27 t58 t44 t67 t3 t69 t106 t50 t104 t95 t34 t2 t93 t51 t104 t30 t49 t80 t41 t84 t36 t10 t60 t90 t29 t69 t36 t90 t50 t50 t36 t5 t27,17.0,positive,36
+t34 t50 t18 t54 t3 t76 t67 t13 t91 t30 t90 t3 t50 t104 t104 t22 t80 t27 t58 t34 t22 t106 t40 t84 t107 t89 t77 t3 t34 t27 t13 t88 t45 t76 t60 t78,12.0,positive,36
+t38 t29 t46 t111 t84 t22 t67 t104 t30 t91 t84 t30 t38 t2 t0 t111 t50 t78 t40 t9 t87 t76 t9 t103 t30 t91 t30 t14 t80 t27 t84 t50 t50 t50 t81 t77,18.0,positive,36
+t95 t36 t106 t18 t41 t93 t108 t87 t19 t14 t95 t51 t91 t36 t33 t106 t3 t74 t2 t50 t93 t46 t84 t50 t54 t29 t2 t34 t77 t87 t40 t24 t18 t56 t78 t46,19.0,positive,36
+t100 t104 t67 t69 t77 t76 t103 t34 t89 t77 t22 t67 t76 t41 t58 t97 t30 t106 t104 t18 t77 t18 t74 t105 t9 t69 t40 t107 t107 t106 t111 t30 t15 t9 t76 t2,16.0,positive,36
+t41 t78 t10 t18 t93 t77 t27 t74 t10 t41 t56 t74 t78 t80 t14 t87 t50 t58 t95 t10 t77 t44 t0 t4 t95 t36 t32 t33 t78 t77 t38 t33 t56 t27 t87 t58,16.0,positive,36
+t103 t84 t46 t41 t46 t27 t2 t104 t111 t45 t58 t56 t106 t80 t108 t104 t18 t78 t53 t82 t53 t22 t111 t3 t48 t36 t103 t97 t87 t38 t2 t80 t36 t3 t36 t28,16.0,positive,36
+t46 t32 t18 t33 t5 t18 t77 t75 t73 t89 t67 t17 t82 t50 t61 t40 t94 t10 t107 t32 t3 t77 t60 t51 t82 t95 t104 t78 t67 t73 t40 t104 t0 t58 t15 t2,,negative,36
+t9 t7 t94 t33 t73 t94 t15 t21 t7 t32 t29 t80 t69 t19 t82 t91 t94 t60 t95 t46 t0 t95 t67 t81 t81 t18 t69 t17 t33 t34 t80 t67 t51 t87 t69 t51,,negative,36
+t42 t41 t106 t110 t40 t36 t95 t53 t18 t13 t14 t46 t2 t90 t22 t29 t27 t9 t17 t15 t90 t94 t26 t94 t76 t40 t67 t56 t54 t74 t73 t18 t54 t46 t75 t33,,negative,36
+t56 t12 t45 t3 t30 t81 t50 t73 t97 t27 t82 t18 t54 t76 t100 t19 t41 t84 t15 t76 t84 t77 t93 t9 t46 t111 t30 t34 t30 t78 t60 t21 t76 t105 t0 t80,,negative,36
+t76 t88 t42 t41 t18 t26 t48 t53 t111 t48 t48 t58 t27 t105 t9 t54 t12 t5 t2 t41 t27 t58 t14 t3 t108 t75 t73 t111 t74 t61 t14 t82 t89 t91 t14 t78,,negative,36
+t100 t54 t49 t38 t93 t27 t67 t7 t97 t53 t56 t7 t103 t67 t56 t42 t73 t34 t78 t87 t87 t105 t34 t49 t107 t19 t53 t8 t80 t24 t49 t82 t9 t104 t90 t80,,negative,36
+t27 t75 t72 t54 t33 t78 t108 t108 t60 t10 t10 t31 t36 t76 t50 t49 t74 t0 t7 t60 t50 t12 t19 t31 t44 t107 t91 t28 t7 t31 t45 t67 t15 t36 t24 t80,,negative,36
+t30 t19 t60 t28 t69 t82 t17 t10 t103 t93 t91 t21 t30 t10 t78 t76 t32 t41 t10 t15 t17 t22 t58 t30 t56 t73 t17 t30 t106 t4 t87 t84 t61 t18 t24 t14,,negative,36
+t4 t50 t81 t53 t67 t110 t17 t45 t81 t80 t27 t78 t100 t29 t42 t0 t48 t14 t36 t103 t13 t22 t90 t111 t15 t46 t100 t18 t54 t46 t18 t103 t95 t3 t8 t103,,negative,36
+t28 t24 t78 t104 t58 t17 t33 t40 t50 t8 t93 t100 t3 t78 t100 t34 t36 t110 t4 t4 t3 t51 t76 t26 t93 t21 t24 t91 t51 t30 t32 t82 t51 t87 t107 t17,,negative,36
+t103 t54 t2 t44 t103 t106 t30 t107 t41 t107 t50 t18 t50 t22 t76 t60 t13 t18 t76 t45 t80 t10 t9 t69 t0 t18 t81 t24 t32 t77 t3 t41 t80 t41 t36 t2 t46,14.0,positive,37
+t36 t53 t106 t87 t54 t27 t45 t44 t80 t32 t69 t90 t44 t78 t73 t3 t106 t60 t51 t40 t95 t84 t74 t74 t29 t103 t15 t90 t50 t50 t107 t54 t111 t9 t95 t93 t106,21.0,positive,37
+t9 t69 t36 t50 t28 t9 t41 t46 t10 t94 t54 t26 t69 t50 t76 t8 t51 t10 t2 t49 t15 t12 t32 t76 t8 t67 t54 t45 t46 t2 t84 t103 t73 t2 t84 t50 t106,19.0,positive,37
+t46 t45 t50 t46 t77 t53 t87 t75 t110 t38 t58 t111 t93 t67 t56 t87 t30 t46 t87 t14 t95 t84 t73 t2 t36 t30 t78 t84 t22 t54 t24 t41 t44 t10 t50 t87 t49,21.0,positive,37
+t58 t38 t21 t87 t91 t50 t27 t111 t106 t2 t51 t21 t30 t54 t88 t67 t69 t44 t9 t78 t103 t80 t36 t106 t84 t2 t54 t54 t107 t106 t29 t54 t50 t54 t95 t22 t76,18.0,positive,37
+t74 t87 t56 t90 t58 t51 t12 t77 t95 t14 t84 t26 t105 t38 t80 t91 t76 t84 t27 t13 t95 t87 t48 t111 t54 t107 t13 t51 t67 t80 t80 t67 t58 t111 t2 t84 t84,19.0,positive,37
+t46 t54 t107 t50 t87 t10 t50 t40 t87 t93 t108 t100 t28 t21 t77 t58 t95 t14 t76 t40 t111 t3 t56 t32 t69 t3 t106 t87 t32 t13 t18 t80 t36 t87 t44 t50 t111,16.0,positive,37
+t44 t0 t29 t41 t10 t76 t54 t107 t108 t110 t74 t80 t41 t41 t27 t69 t69 t42 t45 t41 t80 t41 t78 t50 t40 t76 t30 t38 t73 t77 t46 t2 t46 t77 t87 t40 t87,19.0,positive,37
+t45 t107 t77 t17 t13 t95 t27 t111 t111 t87 t36 t67 t67 t49 t54 t50 t44 t91 t3 t36 t9 t106 t61 t77 t12 t77 t80 t84 t10 t54 t10 t4 t69 t40 t40 t50 t111,19.0,positive,37
+t32 t9 t30 t84 t87 t50 t36 t8 t18 t58 t46 t75 t34 t2 t105 t89 t77 t49 t24 t36 t111 t95 t67 t111 t3 t51 t111 t29 t3 t27 t33 t2 t104 t80 t58 t30 t10,25.0,positive,37
+t90 t88 t77 t2 t93 t82 t97 t100 t74 t42 t13 t10 t8 t87 t34 t5 t45 t36 t19 t75 t22 t14 t95 t69 t2 t42 t100 t103 t26 t41 t77 t15 t36 t36 t2 t110 t44,,negative,37
+t21 t88 t32 t49 t74 t19 t44 t58 t54 t32 t106 t84 t110 t67 t56 t49 t21 t45 t69 t0 t104 t100 t34 t19 t10 t10 t40 t31 t50 t44 t41 t53 t56 t61 t84 t15 t38,,negative,37
+t33 t34 t93 t29 t56 t108 t111 t56 t111 t32 t15 t9 t61 t105 t97 t108 t30 t106 t76 t21 t60 t30 t81 t15 t38 t38 t111 t13 t74 t108 t53 t81 t0 t87 t106 t29 t105,,negative,37
+t7 t104 t108 t36 t36 t94 t17 t53 t93 t31 t15 t103 t88 t107 t42 t51 t21 t56 t103 t45 t44 t91 t13 t69 t14 t26 t74 t97 t19 t9 t97 t5 t36 t77 t18 t81 t69,,negative,37
+t75 t61 t53 t50 t69 t30 t34 t14 t56 t15 t14 t36 t38 t17 t7 t40 t12 t84 t78 t100 t46 t17 t13 t74 t53 t31 t12 t82 t32 t51 t69 t73 t94 t30 t75 t81 t56,,negative,37
+t90 t58 t28 t45 t95 t0 t44 t32 t103 t105 t81 t48 t29 t22 t111 t97 t24 t34 t91 t105 t111 t48 t26 t50 t24 t50 t46 t95 t67 t78 t89 t111 t5 t49 t93 t46 t40,,negative,37
+t28 t32 t38 t90 t80 t48 t81 t69 t21 t94 t75 t108 t9 t58 t28 t56 t100 t48 t107 t89 t73 t17 t95 t88 t8 t29 t67 t56 t28 t91 t103 t76 t51 t40 t53 t61 t82,,negative,37
+t24 t32 t81 t97 t82 t22 t90 t38 t13 t9 t28 t15 t78 t103 t75 t32 t38 t69 t107 t111 t87 t94 t13 t15 t3 t31 t51 t19 t46 t77 t82 t50 t76 t90 t94 t44 t49,,negative,37
+t18 t106 t56 t93 t94 t34 t18 t67 t60 t93 t54 t69 t88 t72 t46 t81 t10 t103 t38 t80 t51 t80 t17 t36 t48 t81 t10 t2 t31 t41 t97 t24 t84 t32 t76 t36 t21,,negative,37
+t44 t91 t33 t93 t69 t75 t61 t90 t9 t45 t87 t60 t72 t4 t48 t88 t41 t100 t69 t54 t33 t51 t75 t87 t54 t72 t67 t69 t95 t107 t7 t80 t32 t34 t61 t48 t36,,negative,37
+t91 t84 t78 t103 t78 t87 t10 t0 t100 t2 t69 t84 t30 t13 t77 t14 t108 t90 t27 t77 t13 t69 t10 t77 t58 t2 t36 t36 t84 t67 t4 t91 t3 t3 t49 t46 t58 t8,19.0,positive,38
+t76 t18 t2 t10 t53 t77 t41 t54 t69 t36 t50 t41 t103 t41 t76 t14 t69 t74 t21 t100 t58 t50 t10 t60 t103 t27 t78 t27 t5 t30 t36 t50 t13 t46 t30 t78 t31 t67,19.0,positive,38
+t4 t97 t18 t105 t9 t49 t27 t54 t58 t50 t84 t46 t2 t84 t77 t91 t3 t18 t78 t7 t107 t46 t54 t95 t31 t84 t30 t50 t38 t58 t10 t32 t76 t28 t18 t93 t7 t107,24.0,positive,38
+t111 t12 t10 t58 t28 t28 t67 t36 t3 t78 t111 t14 t67 t76 t97 t56 t31 t110 t95 t58 t93 t80 t84 t51 t50 t51 t50 t36 t76 t46 t53 t78 t84 t69 t50 t100 t61 t77,16.0,positive,38
+t34 t34 t94 t108 t93 t41 t58 t51 t41 t36 t89 t82 t46 t87 t100 t10 t46 t54 t2 t38 t58 t50 t73 t50 t69 t104 t3 t84 t74 t84 t80 t87 t34 t5 t87 t58 t26 t78,27.0,positive,38
+t103 t78 t32 t80 t5 t77 t87 t14 t94 t80 t74 t50 t104 t56 t88 t105 t10 t77 t94 t106 t77 t41 t88 t77 t84 t108 t41 t87 t4 t106 t76 t95 t111 t104 t2 t56 t2 t87,18.0,positive,38
+t87 t103 t81 t46 t80 t18 t2 t95 t84 t10 t80 t13 t74 t50 t81 t45 t80 t21 t87 t87 t60 t81 t22 t38 t84 t84 t46 t46 t78 t48 t54 t29 t104 t84 t61 t3 t90 t27,25.0,positive,38
+t88 t28 t69 t107 t30 t14 t30 t50 t72 t50 t61 t87 t9 t50 t104 t0 t46 t14 t3 t51 t45 t77 t3 t78 t50 t69 t40 t46 t90 t22 t46 t40 t103 t18 t108 t12 t50 t46,16.0,positive,38
+t84 t10 t84 t58 t19 t111 t41 t111 t45 t9 t77 t3 t108 t30 t40 t26 t93 t40 t74 t32 t82 t58 t27 t74 t54 t34 t84 t30 t111 t31 t54 t84 t29 t81 t78 t78 t80 t28,23.0,positive,38
+t33 t10 t84 t89 t77 t87 t103 t95 t108 t72 t77 t74 t29 t104 t84 t76 t104 t95 t8 t90 t74 t28 t58 t111 t95 t50 t74 t46 t13 t44 t80 t36 t104 t3 t93 t50 t10 t107,22.0,positive,38
+t110 t29 t103 t31 t8 t72 t95 t36 t81 t73 t3 t48 t46 t82 t100 t14 t12 t51 t14 t51 t31 t46 t88 t22 t107 t24 t14 t67 t19 t21 t41 t46 t0 t17 t19 t73 t34 t33,,negative,38
+t38 t32 t105 t73 t15 t50 t74 t106 t69 t34 t107 t9 t17 t75 t84 t67 t106 t89 t29 t30 t4 t2 t29 t84 t77 t13 t77 t45 t27 t38 t32 t75 t61 t87 t4 t97 t28 t82,,negative,38
+t21 t40 t72 t26 t61 t89 t105 t54 t36 t61 t80 t108 t82 t19 t28 t76 t4 t89 t38 t44 t36 t100 t88 t74 t5 t49 t40 t4 t4 t91 t69 t29 t81 t17 t53 t73 t90 t73,,negative,38
+t30 t21 t33 t33 t2 t107 t80 t106 t76 t4 t28 t60 t12 t29 t33 t27 t53 t30 t80 t5 t81 t89 t33 t60 t42 t9 t82 t74 t46 t2 t108 t94 t45 t54 t41 t67 t24 t8,,negative,38
+t32 t15 t111 t12 t0 t24 t78 t30 t107 t21 t17 t31 t45 t14 t75 t56 t12 t80 t4 t29 t45 t7 t49 t84 t4 t29 t19 t95 t111 t110 t27 t82 t80 t3 t41 t15 t3 t36,,negative,38
+t100 t105 t8 t41 t56 t50 t51 t38 t40 t78 t69 t76 t41 t49 t13 t76 t94 t29 t60 t17 t28 t97 t75 t89 t73 t74 t22 t76 t54 t12 t94 t106 t40 t76 t49 t17 t18 t90,,negative,38
+t74 t45 t93 t15 t76 t94 t111 t82 t38 t42 t28 t33 t105 t104 t73 t24 t88 t21 t107 t29 t26 t34 t28 t30 t13 t26 t95 t7 t38 t40 t61 t21 t53 t4 t26 t30 t9 t100,,negative,38
+t75 t38 t76 t27 t91 t36 t88 t76 t41 t0 t107 t88 t9 t33 t29 t72 t67 t91 t30 t45 t77 t10 t45 t27 t88 t7 t72 t24 t67 t40 t100 t94 t14 t13 t34 t61 t67 t14,,negative,38
+t32 t17 t73 t51 t58 t8 t7 t13 t44 t14 t49 t82 t93 t107 t27 t91 t46 t7 t78 t34 t89 t28 t7 t106 t90 t32 t36 t91 t24 t24 t73 t19 t38 t42 t69 t89 t84 t26,,negative,38
+t38 t74 t87 t87 t97 t53 t19 t26 t42 t78 t72 t82 t77 t41 t75 t111 t30 t14 t40 t42 t33 t108 t3 t53 t9 t67 t78 t13 t19 t3 t89 t89 t105 t41 t15 t46 t90 t8,,negative,38
+t46 t41 t58 t106 t36 t9 t107 t38 t87 t54 t74 t80 t58 t90 t14 t3 t2 t87 t84 t50 t50 t74 t107 t2 t50 t46 t40 t78 t95 t84 t2 t29 t28 t38 t36 t0 t84 t94 t77,12.0,positive,39
+t103 t111 t87 t50 t36 t41 t30 t50 t2 t107 t0 t27 t45 t110 t30 t60 t107 t95 t9 t46 t74 t87 t46 t93 t100 t87 t18 t49 t29 t110 t103 t80 t41 t7 t40 t67 t36 t29 t77,23.0,positive,39
+t82 t24 t58 t111 t10 t84 t80 t8 t0 t84 t80 t44 t69 t108 t74 t9 t53 t30 t56 t88 t18 t77 t87 t18 t93 t72 t100 t107 t27 t46 t77 t80 t41 t89 t45 t8 t111 t88 t78,20.0,positive,39
+t74 t106 t95 t58 t74 t18 t103 t2 t77 t95 t38 t2 t34 t56 t45 t18 t81 t95 t18 t80 t100 t69 t54 t27 t54 t78 t95 t95 t58 t111 t89 t54 t50 t50 t14 t31 t84 t50 t27,12.0,positive,39
+t77 t36 t51 t34 t78 t76 t111 t103 t36 t80 t50 t10 t13 t14 t87 t27 t111 t69 t13 t78 t97 t30 t45 t10 t60 t60 t36 t110 t30 t77 t36 t36 t77 t41 t3 t97 t73 t87 t76,16.0,positive,39
+t46 t38 t77 t12 t106 t9 t10 t18 t54 t54 t27 t32 t41 t4 t106 t76 t10 t41 t51 t72 t87 t100 t28 t31 t46 t36 t30 t30 t110 t49 t24 t94 t90 t91 t34 t78 t104 t95 t106,22.0,positive,39
+t9 t18 t38 t50 t14 t31 t84 t5 t74 t10 t2 t50 t0 t84 t54 t36 t95 t14 t49 t50 t7 t58 t104 t2 t51 t8 t69 t84 t2 t80 t84 t76 t51 t49 t50 t50 t111 t4 t77,13.0,positive,39
+t103 t108 t7 t9 t76 t77 t87 t29 t26 t87 t110 t38 t77 t42 t45 t44 t58 t36 t34 t42 t80 t94 t69 t50 t19 t84 t106 t106 t110 t48 t30 t74 t46 t80 t58 t36 t100 t51 t67,17.0,positive,39
+t110 t30 t18 t106 t9 t103 t30 t95 t13 t95 t14 t58 t58 t67 t61 t46 t9 t10 t18 t67 t58 t51 t45 t34 t74 t90 t107 t84 t28 t27 t2 t8 t106 t51 t40 t50 t69 t103 t87,19.0,positive,39
+t77 t18 t19 t94 t8 t91 t29 t106 t19 t27 t18 t87 t34 t41 t8 t48 t95 t100 t74 t50 t40 t29 t87 t29 t107 t106 t95 t60 t50 t67 t93 t100 t95 t78 t93 t87 t21 t84 t87,13.0,positive,39
+t2 t36 t31 t53 t33 t84 t97 t87 t21 t91 t48 t76 t60 t38 t5 t44 t53 t87 t51 t38 t67 t91 t27 t12 t75 t91 t14 t105 t17 t80 t84 t15 t51 t60 t100 t105 t89 t104 t90,,negative,39
+t42 t103 t49 t26 t34 t69 t75 t21 t27 t73 t94 t50 t42 t94 t89 t44 t46 t44 t103 t17 t53 t91 t75 t110 t94 t89 t108 t53 t28 t26 t41 t8 t36 t49 t78 t54 t51 t82 t73,,negative,39
+t100 t49 t17 t31 t10 t41 t18 t41 t3 t72 t27 t72 t60 t40 t0 t90 t48 t46 t88 t58 t51 t72 t5 t12 t88 t67 t3 t15 t32 t14 t24 t80 t5 t22 t8 t48 t27 t26 t111,,negative,39
+t50 t48 t51 t103 t80 t105 t33 t111 t9 t19 t94 t95 t111 t78 t111 t103 t108 t80 t22 t33 t40 t110 t4 t106 t87 t107 t34 t93 t106 t4 t82 t88 t14 t5 t30 t34 t87 t34 t90,,negative,39
+t31 t69 t9 t19 t106 t81 t76 t61 t45 t8 t84 t18 t8 t45 t8 t50 t15 t46 t15 t26 t67 t77 t108 t31 t34 t27 t82 t5 t41 t95 t22 t45 t28 t2 t33 t49 t69 t38 t18,,negative,39
+t82 t4 t8 t110 t36 t103 t87 t22 t18 t30 t61 t4 t95 t46 t67 t54 t28 t46 t95 t8 t97 t0 t15 t4 t82 t54 t18 t33 t74 t46 t5 t80 t5 t49 t27 t4 t97 t0 t30,,negative,39
+t27 t19 t8 t108 t10 t58 t4 t61 t77 t50 t67 t73 t31 t24 t18 t54 t84 t7 t81 t82 t7 t5 t34 t107 t89 t5 t73 t82 t21 t81 t82 t49 t34 t32 t110 t69 t8 t42 t94,,negative,39
+t58 t54 t60 t32 t76 t15 t40 t46 t4 t41 t22 t77 t90 t75 t38 t24 t54 t67 t14 t89 t76 t12 t107 t69 t4 t26 t88 t111 t106 t54 t10 t36 t31 t48 t30 t95 t108 t111 t89,,negative,39
+t42 t110 t32 t27 t26 t45 t42 t111 t75 t74 t5 t107 t58 t44 t2 t58 t61 t108 t91 t100 t110 t67 t3 t46 t74 t44 t81 t53 t4 t3 t31 t56 t110 t90 t45 t2 t38 t40 t110,,negative,39
+t34 t97 t103 t28 t9 t104 t0 t24 t91 t54 t36 t51 t67 t60 t88 t13 t106 t19 t5 t80 t34 t82 t8 t18 t15 t110 t103 t90 t105 t76 t44 t91 t33 t45 t90 t36 t17 t40 t82,,negative,39
+t72 t8 t97 t87 t24 t74 t58 t51 t41 t34 t34 t2 t78 t2 t104 t30 t38 t53 t51 t60 t78 t104 t77 t44 t0 t3 t95 t36 t21 t18 t51 t14 t34 t78 t58 t69 t95 t95 t78 t54,19.0,positive,40
+t107 t84 t29 t53 t77 t84 t106 t50 t50 t46 t87 t29 t34 t9 t89 t45 t87 t81 t78 t77 t84 t41 t58 t94 t29 t18 t93 t107 t106 t87 t41 t107 t24 t18 t30 t106 t51 t54 t41 t93,22.0,positive,40
+t76 t50 t3 t82 t78 t74 t50 t94 t0 t106 t0 t21 t56 t82 t40 t7 t29 t54 t78 t51 t58 t36 t3 t67 t34 t38 t107 t72 t58 t24 t36 t33 t74 t18 t50 t34 t9 t54 t77 t58,18.0,positive,40
+t103 t27 t87 t111 t29 t78 t2 t36 t2 t60 t111 t3 t30 t34 t12 t2 t8 t93 t36 t93 t106 t97 t15 t50 t51 t10 t41 t46 t106 t87 t50 t75 t10 t2 t27 t95 t106 t97 t7 t107,17.0,positive,40
+t18 t8 t95 t46 t26 t36 t104 t40 t50 t73 t69 t84 t34 t78 t5 t41 t51 t2 t18 t44 t50 t87 t36 t24 t36 t87 t87 t40 t95 t75 t69 t93 t12 t77 t44 t84 t76 t26 t93 t54,13.0,positive,40
+t58 t30 t10 t95 t18 t10 t94 t84 t44 t78 t53 t40 t84 t106 t8 t76 t111 t3 t84 t111 t94 t69 t74 t87 t18 t36 t87 t93 t82 t2 t93 t80 t93 t58 t87 t77 t77 t46 t94 t10,24.0,positive,40
+t10 t74 t77 t104 t4 t69 t29 t13 t46 t58 t90 t3 t49 t3 t87 t4 t38 t104 t41 t41 t2 t84 t103 t50 t19 t87 t50 t80 t67 t36 t87 t3 t87 t2 t84 t84 t22 t12 t28 t51,15.0,positive,40
+t87 t56 t33 t77 t8 t45 t104 t2 t90 t87 t69 t51 t46 t104 t54 t106 t77 t2 t7 t58 t78 t106 t103 t15 t80 t106 t77 t3 t111 t40 t38 t107 t38 t46 t95 t90 t84 t2 t36 t67,24.0,positive,40
+t15 t30 t34 t80 t95 t50 t76 t106 t22 t106 t53 t74 t32 t107 t38 t31 t46 t18 t106 t2 t78 t18 t80 t40 t51 t3 t36 t95 t107 t2 t84 t107 t27 t40 t111 t45 t58 t5 t54 t41,19.0,positive,40
+t18 t74 t111 t93 t74 t50 t104 t9 t31 t110 t75 t44 t40 t28 t41 t15 t13 t18 t97 t0 t46 t2 t51 t50 t84 t18 t34 t80 t87 t3 t91 t50 t18 t2 t30 t45 t50 t78 t58 t111,21.0,positive,40
+t46 t108 t69 t94 t29 t41 t24 t88 t36 t107 t12 t26 t95 t73 t26 t27 t105 t10 t81 t42 t110 t108 t49 t32 t51 t45 t111 t4 t74 t15 t61 t106 t17 t76 t22 t27 t29 t44 t58 t97,,negative,40
+t106 t48 t95 t111 t3 t42 t48 t22 t104 t21 t9 t45 t18 t32 t78 t48 t34 t21 t60 t108 t12 t24 t110 t111 t61 t107 t15 t30 t81 t26 t84 t108 t45 t13 t8 t95 t106 t95 t45 t26,,negative,40
+t51 t61 t88 t73 t61 t21 t108 t67 t51 t34 t26 t28 t111 t18 t30 t93 t10 t15 t10 t107 t45 t107 t48 t90 t45 t31 t106 t40 t4 t105 t54 t106 t38 t80 t73 t50 t30 t17 t2 t41,,negative,40
+t19 t21 t5 t105 t10 t50 t53 t51 t38 t34 t89 t41 t61 t61 t51 t26 t67 t56 t105 t94 t87 t3 t60 t45 t29 t88 t61 t38 t48 t100 t56 t8 t93 t5 t31 t76 t56 t72 t53 t4,,negative,40
+t72 t67 t36 t4 t104 t107 t4 t110 t29 t30 t103 t54 t19 t93 t17 t13 t73 t61 t67 t108 t27 t46 t29 t2 t5 t81 t40 t72 t30 t103 t13 t0 t61 t90 t30 t111 t0 t31 t40 t15,,negative,40
+t51 t22 t7 t87 t110 t77 t32 t49 t61 t58 t44 t95 t91 t28 t87 t21 t81 t69 t4 t76 t13 t24 t103 t27 t50 t75 t67 t50 t74 t95 t53 t14 t110 t89 t18 t110 t49 t24 t56 t46,,negative,40
+t49 t54 t14 t34 t33 t87 t7 t104 t19 t105 t0 t9 t111 t10 t44 t106 t88 t42 t18 t30 t107 t4 t53 t77 t73 t110 t75 t2 t29 t33 t19 t94 t34 t13 t104 t67 t30 t51 t103 t2,,negative,40
+t22 t21 t28 t0 t14 t14 t94 t80 t27 t17 t60 t5 t14 t34 t15 t106 t105 t9 t26 t12 t53 t111 t31 t60 t94 t17 t103 t106 t26 t2 t27 t40 t48 t67 t90 t54 t49 t31 t50 t2,,negative,40
+t8 t17 t36 t88 t34 t53 t27 t60 t8 t72 t36 t8 t54 t77 t3 t7 t31 t78 t24 t53 t107 t67 t13 t46 t17 t103 t46 t105 t14 t49 t26 t48 t41 t74 t107 t34 t38 t30 t19 t10,,negative,40
+t58 t0 t67 t7 t31 t91 t2 t78 t82 t104 t28 t7 t87 t33 t61 t15 t31 t50 t80 t88 t108 t81 t82 t87 t67 t60 t18 t54 t27 t100 t18 t100 t45 t78 t8 t34 t17 t50 t87 t9,,negative,40
+t91 t27 t41 t51 t9 t78 t45 t77 t94 t106 t84 t111 t50 t106 t84 t80 t58 t41 t40 t67 t3 t28 t80 t41 t36 t31 t87 t3 t38 t50 t87 t22 t38 t73 t77 t87 t53 t2 t97 t3 t30,21.0,positive,41
+t46 t50 t75 t10 t32 t40 t80 t54 t9 t90 t104 t30 t9 t53 t77 t3 t30 t42 t10 t51 t14 t106 t9 t49 t95 t107 t27 t77 t104 t41 t110 t77 t87 t87 t104 t18 t100 t106 t87 t106 t27,21.0,positive,41
+t74 t50 t50 t84 t34 t56 t44 t87 t100 t77 t10 t44 t106 t95 t111 t27 t84 t58 t106 t2 t91 t75 t78 t0 t103 t74 t103 t50 t106 t94 t90 t107 t58 t2 t94 t45 t51 t0 t95 t8 t48,19.0,positive,41
+t77 t87 t29 t111 t36 t93 t22 t14 t78 t111 t8 t95 t74 t2 t111 t30 t36 t100 t77 t94 t30 t54 t50 t4 t50 t50 t46 t58 t29 t27 t50 t81 t10 t44 t80 t95 t40 t15 t103 t30 t46,23.0,positive,41
+t78 t22 t78 t14 t111 t54 t31 t72 t18 t77 t46 t40 t58 t95 t84 t2 t40 t2 t111 t50 t34 t2 t12 t77 t77 t93 t78 t54 t8 t0 t0 t95 t10 t46 t80 t58 t40 t46 t10 t2 t10,21.0,positive,41
+t58 t38 t41 t78 t80 t41 t46 t8 t111 t19 t84 t40 t18 t41 t93 t40 t50 t8 t2 t81 t41 t41 t58 t10 t51 t73 t74 t2 t78 t38 t18 t58 t54 t78 t78 t78 t48 t91 t50 t103 t67,15.0,positive,41
+t34 t97 t2 t36 t107 t111 t106 t81 t74 t88 t18 t94 t0 t53 t9 t69 t38 t50 t50 t69 t38 t58 t100 t87 t67 t29 t28 t95 t50 t7 t107 t81 t40 t107 t54 t93 t74 t30 t10 t2 t84,14.0,positive,41
+t104 t2 t76 t94 t27 t41 t100 t77 t46 t13 t69 t9 t103 t77 t69 t84 t13 t41 t58 t110 t36 t60 t87 t38 t89 t73 t74 t87 t26 t36 t58 t76 t58 t107 t67 t30 t48 t9 t38 t95 t10,17.0,positive,41
+t41 t54 t27 t0 t107 t27 t12 t2 t87 t34 t77 t87 t4 t41 t87 t5 t32 t50 t4 t77 t87 t46 t30 t111 t46 t24 t95 t78 t41 t41 t76 t9 t51 t58 t36 t22 t46 t2 t67 t30 t110,14.0,positive,41
+t2 t84 t8 t7 t58 t38 t104 t54 t87 t84 t46 t53 t54 t50 t31 t103 t51 t94 t54 t50 t36 t87 t29 t107 t95 t78 t58 t87 t46 t84 t46 t46 t78 t53 t50 t9 t18 t29 t111 t49 t106,19.0,positive,41
+t21 t5 t45 t49 t60 t58 t81 t3 t41 t41 t8 t87 t10 t88 t41 t56 t24 t38 t105 t97 t15 t53 t28 t93 t24 t33 t14 t72 t30 t33 t42 t15 t26 t94 t8 t110 t77 t27 t95 t12 t94,,negative,41
+t3 t60 t53 t74 t103 t91 t74 t72 t28 t7 t41 t93 t34 t75 t100 t10 t91 t80 t67 t93 t84 t42 t53 t56 t72 t95 t7 t44 t103 t110 t31 t90 t19 t110 t103 t27 t46 t82 t93 t50 t44,,negative,41
+t27 t72 t84 t53 t7 t82 t69 t91 t32 t8 t31 t46 t27 t19 t7 t77 t41 t4 t110 t51 t76 t41 t14 t53 t103 t58 t40 t2 t34 t108 t4 t108 t97 t21 t97 t36 t106 t3 t14 t28 t30,,negative,41
+t26 t26 t74 t26 t27 t45 t89 t49 t80 t51 t53 t56 t2 t81 t54 t26 t36 t94 t82 t10 t110 t84 t10 t100 t41 t100 t22 t110 t67 t2 t100 t93 t91 t38 t58 t95 t91 t77 t90 t40 t80,,negative,41
+t88 t100 t91 t32 t77 t50 t91 t110 t77 t0 t111 t41 t40 t18 t15 t76 t45 t44 t74 t42 t51 t97 t8 t7 t7 t40 t103 t80 t67 t95 t75 t18 t93 t50 t12 t53 t24 t27 t32 t95 t111,,negative,41
+t46 t28 t26 t26 t10 t95 t17 t60 t5 t54 t105 t53 t76 t32 t4 t0 t61 t84 t48 t7 t95 t15 t27 t60 t110 t3 t8 t67 t30 t89 t77 t87 t56 t88 t111 t40 t36 t41 t33 t105 t73,,negative,41
+t60 t4 t84 t15 t49 t38 t105 t107 t34 t42 t21 t69 t103 t7 t61 t97 t97 t111 t8 t38 t38 t40 t53 t4 t4 t58 t87 t49 t56 t50 t51 t80 t46 t31 t60 t2 t76 t69 t80 t106 t67,,negative,41
+t48 t3 t0 t58 t15 t40 t69 t76 t41 t89 t90 t27 t5 t100 t88 t15 t75 t100 t67 t69 t75 t74 t93 t22 t27 t53 t18 t15 t29 t38 t61 t34 t95 t72 t27 t21 t44 t45 t13 t72 t81,,negative,41
+t9 t14 t14 t17 t67 t44 t18 t44 t110 t80 t13 t103 t100 t45 t107 t13 t75 t84 t5 t74 t104 t93 t17 t12 t60 t7 t2 t110 t4 t50 t22 t108 t28 t3 t77 t77 t54 t18 t84 t32 t29,,negative,41
+t93 t48 t15 t67 t18 t94 t56 t33 t90 t0 t48 t3 t29 t40 t48 t0 t49 t61 t19 t22 t48 t30 t15 t33 t9 t88 t28 t3 t75 t15 t95 t53 t54 t0 t73 t97 t41 t106 t2 t104 t18,,negative,41
+t74 t107 t2 t46 t54 t50 t80 t27 t75 t46 t33 t87 t106 t69 t18 t106 t80 t82 t74 t74 t90 t14 t36 t8 t84 t2 t12 t94 t77 t3 t58 t77 t44 t0 t38 t22 t46 t46 t77 t46 t103 t67,19.0,positive,42
+t46 t95 t40 t36 t29 t18 t38 t94 t77 t80 t84 t72 t58 t29 t87 t87 t95 t46 t28 t60 t30 t78 t0 t24 t30 t75 t84 t111 t0 t95 t78 t95 t67 t27 t36 t38 t9 t72 t18 t50 t54 t107,14.0,positive,42
+t76 t111 t87 t106 t8 t2 t40 t7 t106 t31 t77 t97 t76 t91 t9 t38 t36 t74 t36 t72 t0 t41 t106 t30 t44 t87 t77 t67 t51 t87 t22 t111 t76 t90 t93 t87 t72 t40 t104 t3 t78 t87,26.0,positive,42
+t76 t41 t87 t29 t69 t104 t5 t87 t50 t48 t51 t107 t104 t94 t80 t60 t18 t18 t87 t87 t38 t107 t78 t0 t84 t40 t67 t80 t41 t28 t54 t58 t74 t21 t76 t14 t84 t12 t80 t67 t67 t108,20.0,positive,42
+t7 t50 t12 t103 t81 t38 t13 t69 t38 t107 t84 t2 t67 t84 t88 t26 t80 t41 t2 t42 t26 t78 t31 t21 t2 t36 t93 t111 t41 t80 t111 t3 t84 t54 t111 t58 t46 t22 t30 t14 t49 t77,17.0,positive,42
+t8 t2 t7 t22 t46 t34 t103 t87 t3 t54 t26 t77 t95 t50 t22 t84 t13 t87 t5 t27 t41 t90 t27 t4 t95 t38 t87 t3 t111 t24 t18 t103 t53 t82 t89 t54 t87 t95 t87 t74 t27 t58,17.0,positive,42
+t82 t33 t106 t108 t95 t3 t46 t54 t12 t73 t74 t10 t78 t82 t91 t95 t38 t50 t36 t106 t29 t69 t104 t80 t41 t51 t3 t54 t13 t77 t87 t87 t93 t34 t13 t28 t80 t87 t50 t31 t87 t69,21.0,positive,42
+t46 t95 t78 t7 t12 t97 t15 t31 t107 t111 t77 t74 t93 t49 t77 t29 t36 t10 t9 t89 t54 t60 t44 t80 t108 t54 t77 t90 t27 t77 t3 t84 t111 t90 t91 t15 t50 t60 t18 t106 t45 t107,16.0,positive,42
+t80 t14 t108 t15 t17 t87 t32 t108 t78 t91 t9 t77 t29 t107 t104 t44 t77 t84 t87 t29 t74 t3 t13 t54 t38 t58 t2 t30 t34 t2 t50 t54 t22 t77 t3 t2 t84 t36 t76 t7 t107 t28,27.0,positive,42
+t87 t58 t111 t4 t14 t50 t29 t38 t107 t50 t48 t76 t45 t10 t42 t111 t30 t36 t51 t12 t87 t74 t87 t50 t93 t24 t67 t22 t76 t80 t80 t67 t58 t41 t58 t89 t50 t69 t87 t60 t78 t10,20.0,positive,42
+t89 t111 t41 t49 t17 t22 t108 t95 t12 t4 t33 t108 t58 t27 t13 t97 t14 t41 t74 t29 t15 t76 t8 t51 t60 t2 t42 t77 t72 t100 t75 t38 t40 t3 t53 t111 t89 t45 t95 t40 t22 t12,,negative,42
+t8 t61 t7 t50 t33 t33 t75 t100 t54 t94 t32 t0 t17 t41 t78 t13 t77 t67 t56 t72 t33 t10 t91 t24 t41 t30 t3 t88 t13 t28 t81 t40 t88 t105 t40 t88 t4 t42 t108 t75 t78 t24,,negative,42
+t19 t30 t88 t22 t29 t106 t13 t84 t42 t89 t26 t41 t38 t88 t36 t14 t56 t42 t17 t10 t41 t87 t18 t22 t12 t19 t28 t53 t108 t14 t94 t103 t73 t91 t9 t104 t80 t49 t26 t49 t27 t77,,negative,42
+t19 t91 t105 t74 t48 t100 t54 t53 t108 t26 t27 t89 t111 t88 t104 t22 t74 t27 t30 t19 t51 t80 t26 t58 t45 t21 t45 t0 t38 t19 t8 t88 t73 t46 t76 t82 t91 t67 t10 t82 t14 t12,,negative,42
+t48 t51 t89 t27 t24 t75 t111 t42 t76 t0 t27 t73 t31 t107 t82 t48 t69 t76 t29 t76 t40 t3 t94 t34 t69 t60 t95 t45 t44 t4 t41 t42 t106 t13 t53 t84 t104 t36 t93 t38 t15 t48,,negative,42
+t94 t24 t76 t108 t22 t0 t46 t73 t77 t106 t108 t2 t111 t88 t108 t69 t36 t77 t80 t0 t53 t44 t46 t61 t105 t67 t44 t107 t50 t30 t56 t41 t5 t18 t75 t7 t53 t74 t48 t3 t100 t74,,negative,42
+t21 t27 t27 t44 t28 t28 t15 t105 t73 t56 t14 t69 t82 t4 t56 t104 t48 t67 t41 t87 t4 t77 t69 t108 t90 t34 t34 t51 t31 t4 t42 t95 t82 t97 t3 t17 t88 t94 t69 t108 t88 t46,,negative,42
+t45 t69 t32 t69 t19 t38 t60 t32 t36 t53 t107 t94 t28 t58 t51 t13 t4 t34 t72 t30 t74 t90 t75 t81 t46 t49 t111 t97 t31 t78 t18 t42 t67 t34 t28 t89 t104 t90 t5 t32 t15 t61,,negative,42
+t15 t13 t67 t34 t49 t69 t44 t106 t21 t28 t100 t88 t50 t42 t0 t44 t97 t106 t5 t76 t22 t75 t8 t31 t27 t5 t76 t73 t40 t77 t76 t78 t76 t9 t78 t46 t44 t5 t51 t72 t9 t42,,negative,42
+t75 t33 t41 t51 t17 t95 t69 t3 t15 t22 t111 t49 t58 t84 t21 t61 t72 t81 t93 t4 t105 t27 t28 t100 t81 t30 t46 t17 t54 t28 t53 t53 t81 t0 t9 t33 t76 t34 t67 t50 t18 t48,,negative,42
+t27 t46 t49 t53 t84 t74 t87 t87 t100 t36 t87 t44 t78 t87 t28 t103 t90 t29 t28 t105 t80 t15 t89 t84 t30 t54 t72 t29 t69 t22 t7 t58 t18 t46 t40 t90 t111 t30 t36 t94 t45 t50 t51,21.0,positive,43
+t60 t41 t14 t69 t34 t80 t106 t41 t56 t94 t74 t2 t78 t77 t76 t4 t58 t41 t74 t60 t74 t90 t44 t69 t46 t50 t36 t100 t44 t74 t50 t46 t24 t78 t30 t94 t77 t49 t108 t27 t41 t87 t45,16.0,positive,43
+t50 t51 t12 t30 t78 t74 t50 t34 t108 t78 t9 t106 t22 t28 t46 t61 t106 t106 t97 t42 t74 t77 t78 t74 t18 t31 t46 t76 t18 t36 t18 t13 t74 t49 t80 t4 t27 t41 t48 t36 t50 t46 t93,20.0,positive,43
+t87 t51 t0 t10 t8 t40 t30 t87 t94 t54 t58 t46 t106 t8 t103 t111 t95 t14 t78 t84 t28 t36 t88 t87 t77 t87 t54 t95 t2 t50 t29 t41 t74 t10 t50 t31 t50 t54 t69 t93 t72 t30 t18,12.0,positive,43
+t103 t108 t110 t74 t36 t30 t0 t21 t77 t69 t76 t18 t2 t0 t53 t78 t77 t2 t95 t45 t60 t69 t46 t104 t7 t58 t13 t7 t58 t12 t29 t32 t106 t106 t56 t54 t49 t104 t7 t58 t41 t58 t103,24.0,positive,43
+t87 t95 t36 t84 t84 t14 t75 t80 t41 t84 t34 t90 t27 t106 t40 t111 t58 t76 t45 t14 t53 t91 t30 t74 t78 t42 t38 t67 t106 t36 t73 t106 t78 t90 t36 t74 t104 t49 t41 t111 t14 t45 t107,23.0,positive,43
+t87 t84 t84 t84 t87 t26 t44 t78 t9 t58 t2 t94 t45 t103 t94 t10 t107 t3 t41 t46 t18 t77 t26 t41 t67 t74 t28 t74 t80 t41 t15 t2 t60 t58 t78 t0 t36 t50 t51 t22 t45 t87 t54,21.0,positive,43
+t24 t42 t87 t29 t27 t10 t80 t91 t95 t38 t8 t2 t7 t10 t77 t50 t48 t51 t38 t29 t106 t91 t36 t45 t44 t49 t82 t45 t29 t69 t53 t77 t9 t41 t44 t69 t78 t29 t14 t67 t41 t89 t90,20.0,positive,43
+t42 t61 t77 t87 t21 t87 t111 t27 t30 t50 t87 t95 t50 t61 t90 t107 t67 t76 t80 t49 t100 t27 t50 t36 t78 t27 t72 t27 t58 t76 t30 t107 t111 t30 t84 t50 t51 t22 t54 t51 t87 t26 t36,17.0,positive,43
+t73 t77 t9 t105 t69 t74 t50 t46 t75 t69 t0 t91 t36 t81 t54 t88 t10 t51 t100 t46 t97 t30 t51 t95 t36 t69 t29 t61 t2 t3 t87 t104 t74 t44 t51 t69 t87 t36 t104 t77 t10 t95 t54,17.0,positive,43
+t45 t77 t13 t53 t61 t51 t84 t78 t89 t97 t72 t5 t12 t94 t12 t38 t80 t30 t33 t18 t77 t19 t77 t58 t94 t48 t91 t67 t7 t22 t33 t38 t34 t13 t21 t90 t106 t91 t12 t30 t103 t103 t41,,negative,43
+t24 t94 t51 t26 t2 t42 t14 t42 t97 t8 t8 t29 t51 t90 t33 t93 t40 t4 t8 t14 t9 t90 t38 t40 t58 t48 t7 t76 t56 t13 t91 t40 t82 t10 t36 t77 t3 t74 t10 t48 t58 t111 t95,,negative,43
+t46 t87 t107 t45 t17 t46 t110 t15 t48 t14 t54 t75 t67 t19 t78 t13 t28 t88 t94 t10 t18 t17 t42 t9 t45 t90 t74 t44 t97 t3 t72 t3 t18 t34 t41 t106 t94 t21 t74 t41 t19 t69 t42,,negative,43
+t67 t97 t46 t5 t105 t31 t78 t17 t58 t103 t12 t19 t87 t107 t22 t97 t91 t75 t110 t54 t82 t44 t10 t105 t60 t15 t108 t10 t32 t46 t36 t60 t28 t22 t84 t38 t50 t28 t4 t30 t107 t26 t33,,negative,43
+t49 t45 t69 t54 t50 t38 t8 t41 t32 t76 t41 t67 t49 t77 t60 t38 t67 t7 t74 t49 t45 t33 t13 t75 t19 t110 t21 t76 t88 t110 t15 t72 t38 t80 t75 t76 t88 t108 t53 t73 t107 t29 t88,,negative,43
+t32 t75 t111 t69 t100 t53 t2 t2 t18 t19 t82 t76 t104 t75 t24 t44 t58 t31 t80 t12 t46 t12 t27 t0 t33 t103 t91 t51 t38 t7 t2 t80 t74 t30 t22 t78 t27 t33 t111 t69 t28 t73 t58,,negative,43
+t9 t94 t61 t46 t28 t14 t49 t80 t28 t32 t103 t51 t40 t58 t22 t73 t104 t58 t54 t46 t42 t8 t107 t80 t76 t12 t0 t60 t53 t30 t110 t72 t34 t78 t67 t110 t4 t84 t100 t18 t80 t45 t61,,negative,43
+t90 t53 t90 t69 t34 t33 t54 t24 t80 t29 t48 t19 t81 t77 t34 t15 t100 t3 t100 t42 t49 t91 t5 t106 t80 t32 t3 t38 t49 t27 t44 t73 t13 t105 t30 t49 t58 t103 t9 t32 t7 t8 t51,,negative,43
+t34 t106 t41 t104 t94 t82 t54 t30 t19 t87 t76 t3 t51 t61 t10 t91 t105 t34 t22 t54 t12 t110 t50 t104 t10 t17 t18 t40 t18 t76 t75 t105 t28 t19 t58 t58 t104 t12 t5 t81 t73 t9 t13,,negative,43
+t53 t21 t82 t100 t4 t54 t95 t10 t36 t29 t26 t38 t78 t22 t31 t88 t45 t50 t9 t17 t50 t58 t45 t0 t82 t14 t89 t69 t53 t4 t29 t110 t28 t87 t73 t91 t40 t88 t18 t89 t46 t21 t7,,negative,43
+t33 t22 t106 t28 t50 t9 t78 t95 t104 t111 t74 t9 t89 t50 t41 t22 t42 t18 t107 t46 t97 t73 t32 t45 t93 t46 t26 t31 t103 t67 t21 t106 t31 t72 t22 t54 t46 t41 t22 t67 t110 t58 t54 t3,21.0,positive,44
+t50 t8 t10 t82 t104 t2 t40 t104 t10 t9 t72 t104 t111 t12 t87 t29 t3 t51 t69 t87 t29 t34 t41 t60 t36 t18 t69 t95 t10 t74 t31 t3 t58 t13 t104 t103 t54 t58 t80 t108 t103 t38 t14 t36,24.0,positive,44
+t87 t87 t31 t13 t74 t80 t41 t93 t111 t3 t84 t27 t88 t26 t51 t18 t103 t28 t75 t41 t40 t12 t82 t103 t95 t5 t111 t74 t2 t30 t78 t93 t111 t90 t104 t30 t110 t2 t51 t48 t103 t61 t51 t18,15.0,positive,44
+t77 t8 t45 t46 t28 t18 t30 t34 t27 t56 t26 t51 t74 t87 t27 t82 t54 t107 t28 t36 t40 t111 t84 t50 t46 t69 t104 t95 t58 t3 t87 t14 t82 t54 t87 t40 t24 t46 t95 t110 t58 t103 t95 t54,23.0,positive,44
+t29 t111 t54 t78 t81 t38 t53 t2 t41 t100 t17 t28 t74 t4 t22 t50 t95 t87 t93 t100 t28 t12 t87 t50 t46 t5 t78 t103 t36 t95 t9 t74 t78 t82 t77 t87 t12 t61 t50 t90 t13 t74 t2 t56,16.0,positive,44
+t95 t50 t87 t34 t108 t90 t53 t46 t87 t111 t30 t2 t2 t7 t58 t14 t51 t49 t30 t74 t10 t42 t18 t2 t29 t54 t58 t103 t13 t84 t67 t36 t58 t108 t69 t50 t51 t3 t27 t10 t106 t8 t77 t87,22.0,positive,44
+t36 t100 t2 t95 t10 t10 t32 t46 t111 t87 t46 t18 t41 t93 t69 t30 t32 t81 t50 t34 t87 t50 t46 t88 t40 t95 t27 t95 t8 t46 t50 t10 t82 t90 t78 t84 t53 t28 t10 t89 t45 t50 t38 t9,24.0,positive,44
+t107 t56 t40 t46 t111 t90 t77 t44 t74 t12 t77 t110 t30 t103 t46 t2 t8 t97 t50 t78 t106 t50 t80 t41 t93 t72 t46 t3 t107 t41 t87 t91 t50 t13 t3 t50 t10 t58 t106 t77 t74 t4 t84 t14,27.0,positive,44
+t91 t80 t27 t3 t50 t103 t8 t45 t69 t46 t2 t14 t36 t3 t2 t27 t18 t49 t33 t106 t97 t27 t30 t69 t24 t84 t38 t8 t69 t111 t38 t22 t46 t74 t2 t93 t78 t87 t100 t80 t80 t104 t45 t88,16.0,positive,44
+t84 t31 t82 t45 t84 t2 t14 t107 t74 t29 t56 t46 t10 t46 t42 t30 t111 t72 t103 t78 t104 t30 t18 t10 t50 t40 t30 t38 t2 t73 t41 t93 t58 t111 t104 t107 t90 t36 t12 t29 t76 t26 t78 t51,23.0,positive,44
+t108 t87 t73 t15 t27 t12 t73 t24 t45 t94 t87 t81 t4 t94 t69 t97 t49 t28 t44 t17 t95 t49 t18 t94 t89 t17 t80 t111 t31 t3 t19 t76 t72 t97 t58 t84 t104 t21 t76 t7 t2 t22 t60 t18,,negative,44
+t89 t54 t8 t7 t67 t28 t17 t12 t28 t9 t49 t106 t41 t94 t18 t18 t89 t24 t29 t75 t26 t80 t21 t76 t31 t51 t28 t24 t60 t29 t40 t89 t73 t54 t45 t69 t42 t40 t24 t56 t78 t107 t53 t41,,negative,44
+t29 t76 t56 t49 t105 t69 t38 t78 t4 t40 t4 t100 t88 t104 t0 t107 t100 t24 t24 t110 t58 t44 t84 t4 t40 t49 t87 t94 t88 t106 t111 t95 t38 t41 t19 t31 t106 t0 t12 t28 t49 t50 t111 t54,,negative,44
+t82 t32 t38 t17 t46 t33 t56 t56 t0 t91 t26 t69 t80 t67 t93 t53 t77 t90 t50 t21 t106 t45 t74 t34 t89 t48 t106 t27 t73 t42 t75 t81 t110 t93 t77 t22 t49 t76 t27 t67 t77 t91 t58 t44,,negative,44
+t74 t80 t72 t84 t29 t78 t31 t110 t82 t89 t18 t19 t29 t31 t24 t3 t58 t93 t9 t77 t32 t74 t51 t0 t78 t75 t97 t69 t94 t69 t106 t58 t78 t12 t17 t104 t91 t67 t94 t15 t91 t21 t87 t14,,negative,44
+t0 t0 t32 t97 t110 t78 t87 t24 t17 t44 t18 t89 t90 t84 t105 t10 t91 t94 t73 t33 t84 t100 t0 t107 t24 t97 t90 t12 t60 t17 t9 t94 t44 t97 t7 t90 t29 t95 t58 t50 t42 t31 t29 t28,,negative,44
+t24 t15 t72 t41 t12 t26 t26 t78 t108 t30 t81 t7 t69 t106 t10 t41 t7 t93 t81 t50 t105 t91 t31 t51 t34 t42 t103 t88 t69 t84 t72 t22 t104 t60 t61 t110 t106 t7 t32 t9 t5 t106 t22 t2,,negative,44
+t84 t95 t29 t88 t12 t29 t75 t18 t106 t34 t14 t15 t103 t78 t19 t46 t42 t100 t88 t2 t104 t78 t12 t45 t22 t17 t90 t28 t3 t21 t41 t75 t51 t73 t45 t44 t38 t44 t93 t67 t3 t41 t19 t78,,negative,44
+t76 t108 t90 t103 t103 t8 t110 t97 t88 t7 t76 t95 t5 t30 t32 t78 t88 t78 t103 t18 t88 t4 t60 t29 t74 t73 t103 t4 t95 t111 t45 t45 t54 t44 t19 t36 t40 t12 t8 t108 t32 t7 t21 t4,,negative,44
+t4 t38 t3 t27 t36 t76 t34 t45 t15 t88 t78 t53 t58 t0 t33 t107 t75 t14 t14 t42 t82 t90 t15 t78 t28 t40 t87 t5 t105 t106 t15 t108 t108 t84 t105 t31 t76 t24 t60 t69 t80 t107 t26 t53,,negative,44
+t74 t77 t105 t84 t2 t93 t103 t95 t74 t2 t13 t95 t50 t78 t26 t31 t2 t54 t9 t7 t76 t81 t30 t105 t50 t3 t32 t73 t78 t40 t67 t80 t103 t30 t31 t84 t24 t2 t17 t69 t24 t78 t40 t95 t104,23.0,positive,45
+t69 t106 t2 t50 t2 t87 t45 t27 t106 t41 t110 t80 t41 t100 t80 t27 t74 t30 t36 t78 t90 t22 t87 t54 t104 t87 t50 t104 t87 t87 t44 t94 t45 t36 t95 t84 t2 t36 t36 t111 t84 t50 t50 t58 t2,15.0,positive,45
+t78 t80 t17 t41 t5 t51 t14 t87 t94 t69 t107 t108 t82 t34 t106 t95 t0 t100 t77 t87 t106 t31 t24 t36 t53 t56 t104 t2 t54 t18 t106 t41 t31 t69 t45 t54 t3 t54 t9 t69 t103 t95 t3 t67 t41,17.0,positive,45
+t41 t15 t3 t41 t97 t41 t95 t40 t40 t95 t40 t36 t80 t93 t77 t3 t26 t19 t40 t30 t46 t76 t46 t84 t3 t106 t77 t95 t84 t2 t13 t84 t8 t51 t100 t89 t91 t69 t50 t36 t18 t27 t104 t106 t76,17.0,positive,45
+t36 t87 t8 t73 t77 t40 t81 t14 t38 t9 t78 t74 t84 t2 t50 t36 t36 t36 t12 t56 t13 t50 t106 t103 t9 t38 t18 t2 t84 t27 t2 t100 t72 t45 t58 t81 t45 t106 t78 t2 t50 t28 t111 t4 t51,19.0,positive,45
+t9 t46 t54 t32 t34 t2 t84 t46 t15 t2 t40 t95 t58 t46 t12 t87 t95 t22 t69 t14 t87 t3 t87 t91 t30 t69 t50 t78 t36 t38 t2 t95 t110 t21 t107 t10 t2 t77 t10 t4 t108 t22 t90 t9 t106,21.0,positive,45
+t34 t87 t87 t93 t87 t95 t36 t41 t91 t104 t78 t45 t46 t106 t78 t31 t53 t78 t50 t111 t24 t77 t87 t106 t107 t46 t84 t3 t103 t111 t54 t24 t104 t74 t77 t46 t41 t46 t72 t77 t40 t50 t2 t41 t51,23.0,positive,45
+t46 t107 t95 t50 t36 t106 t58 t111 t3 t110 t48 t9 t76 t84 t50 t104 t31 t12 t74 t80 t58 t3 t28 t3 t69 t2 t80 t45 t78 t50 t41 t78 t36 t78 t53 t77 t87 t5 t78 t30 t104 t67 t10 t111 t30,20.0,positive,45
+t46 t87 t76 t104 t95 t29 t108 t110 t74 t41 t87 t74 t84 t80 t44 t8 t12 t2 t103 t7 t107 t84 t30 t74 t87 t10 t4 t41 t87 t104 t36 t33 t32 t9 t76 t0 t12 t28 t51 t22 t3 t110 t54 t8 t77,22.0,positive,45
+t9 t18 t9 t84 t95 t29 t2 t8 t80 t36 t3 t36 t10 t34 t87 t74 t77 t38 t21 t61 t78 t111 t87 t50 t104 t2 t36 t28 t15 t74 t87 t28 t34 t5 t12 t77 t3 t27 t9 t38 t50 t22 t78 t0 t8,26.0,positive,45
+t72 t53 t30 t14 t14 t0 t107 t110 t34 t49 t10 t73 t61 t49 t49 t36 t51 t19 t77 t100 t88 t27 t72 t111 t14 t28 t69 t12 t0 t5 t10 t26 t89 t73 t76 t2 t94 t17 t49 t13 t49 t91 t75 t21 t110,,negative,45
+t8 t27 t104 t110 t78 t51 t46 t41 t84 t81 t51 t42 t22 t15 t94 t90 t95 t103 t72 t5 t17 t95 t100 t94 t94 t103 t15 t84 t56 t32 t78 t77 t44 t2 t61 t93 t87 t80 t2 t29 t14 t56 t38 t10 t67,,negative,45
+t48 t4 t8 t100 t93 t108 t9 t103 t34 t105 t22 t13 t95 t14 t36 t21 t104 t107 t22 t107 t31 t7 t89 t69 t58 t97 t9 t19 t50 t42 t75 t90 t110 t41 t105 t19 t77 t29 t45 t27 t10 t40 t31 t94 t100,,negative,45
+t31 t42 t103 t10 t49 t78 t26 t45 t34 t58 t73 t3 t69 t21 t84 t4 t54 t34 t82 t30 t28 t19 t76 t72 t29 t10 t22 t49 t17 t9 t17 t89 t29 t2 t45 t97 t94 t9 t58 t17 t45 t15 t26 t19 t74,,negative,45
+t36 t22 t58 t31 t49 t26 t69 t93 t9 t87 t91 t40 t34 t36 t84 t56 t7 t95 t32 t0 t58 t19 t44 t21 t106 t80 t69 t74 t21 t14 t18 t17 t89 t84 t61 t56 t48 t0 t22 t111 t8 t73 t54 t0 t74,,negative,45
+t94 t103 t33 t84 t15 t75 t97 t91 t51 t26 t41 t90 t48 t97 t24 t77 t8 t49 t41 t107 t106 t53 t21 t60 t40 t73 t103 t42 t44 t74 t69 t27 t41 t26 t24 t45 t80 t58 t41 t106 t30 t75 t111 t67 t45,,negative,45
+t106 t49 t77 t17 t106 t60 t78 t108 t45 t74 t80 t21 t103 t2 t74 t26 t48 t60 t100 t27 t45 t95 t51 t8 t2 t8 t24 t82 t84 t106 t67 t81 t28 t72 t10 t84 t60 t111 t91 t58 t8 t21 t67 t50 t54,,negative,45
+t34 t67 t10 t51 t14 t33 t8 t26 t33 t84 t36 t97 t7 t74 t60 t31 t44 t94 t0 t67 t58 t7 t67 t69 t75 t9 t17 t69 t111 t14 t31 t100 t77 t48 t93 t97 t111 t32 t21 t40 t36 t18 t21 t74 t14,,negative,45
+t61 t19 t73 t87 t100 t50 t3 t7 t17 t15 t58 t82 t108 t50 t93 t91 t54 t94 t90 t40 t22 t24 t100 t31 t104 t46 t27 t19 t36 t73 t106 t34 t69 t17 t9 t38 t36 t87 t69 t50 t56 t34 t38 t9 t87,,negative,45
+t0 t14 t104 t94 t82 t104 t103 t60 t94 t107 t97 t17 t32 t31 t3 t45 t82 t88 t31 t80 t42 t80 t5 t76 t97 t42 t48 t40 t75 t87 t12 t18 t28 t33 t58 t19 t56 t27 t107 t7 t15 t18 t19 t21 t15,,negative,45
+t104 t40 t2 t72 t77 t87 t104 t87 t87 t29 t104 t44 t97 t9 t38 t87 t93 t0 t77 t44 t0 t44 t74 t107 t18 t2 t61 t56 t9 t95 t87 t78 t88 t2 t108 t81 t93 t78 t77 t84 t27 t87 t38 t80 t58 t27,16.0,positive,46
+t32 t91 t36 t46 t10 t36 t7 t50 t36 t90 t51 t84 t77 t54 t38 t104 t2 t45 t58 t94 t95 t69 t87 t76 t108 t5 t76 t77 t14 t10 t108 t8 t80 t58 t29 t2 t9 t3 t46 t14 t84 t12 t2 t36 t50 t50,21.0,positive,46
+t87 t28 t76 t76 t110 t95 t95 t3 t106 t4 t36 t76 t90 t77 t87 t87 t69 t2 t7 t69 t84 t2 t36 t9 t84 t14 t95 t12 t15 t80 t108 t77 t3 t18 t24 t10 t87 t69 t40 t87 t40 t87 t13 t40 t30 t18,18.0,positive,46
+t78 t88 t89 t50 t106 t51 t13 t26 t84 t9 t80 t41 t36 t69 t40 t46 t3 t46 t50 t104 t40 t31 t51 t100 t34 t80 t42 t41 t58 t106 t104 t31 t40 t30 t110 t104 t2 t44 t80 t27 t111 t67 t107 t31 t81 t111,20.0,positive,46
+t36 t54 t58 t31 t50 t14 t21 t18 t87 t87 t36 t10 t19 t30 t9 t97 t95 t111 t111 t94 t106 t19 t61 t106 t104 t84 t4 t80 t78 t97 t33 t78 t0 t50 t111 t103 t26 t36 t46 t87 t26 t51 t53 t84 t27 t27,21.0,positive,46
+t18 t13 t18 t95 t111 t21 t69 t41 t40 t90 t87 t14 t108 t110 t74 t18 t87 t46 t78 t110 t48 t40 t30 t36 t46 t78 t111 t54 t9 t69 t40 t27 t58 t74 t77 t80 t27 t72 t84 t48 t67 t51 t80 t54 t27 t77,21.0,positive,46
+t41 t3 t33 t58 t54 t41 t9 t69 t74 t10 t26 t87 t34 t2 t13 t28 t7 t111 t24 t100 t27 t8 t44 t27 t107 t7 t36 t22 t100 t50 t78 t87 t74 t78 t104 t40 t30 t87 t36 t91 t93 t48 t87 t48 t46 t5,14.0,positive,46
+t8 t77 t87 t93 t58 t30 t82 t50 t46 t46 t34 t50 t78 t80 t41 t10 t60 t77 t0 t40 t40 t46 t18 t32 t46 t107 t90 t56 t84 t77 t87 t77 t54 t27 t10 t105 t74 t2 t108 t78 t18 t2 t46 t103 t45 t107,11.0,positive,46
+t61 t41 t58 t9 t69 t74 t2 t40 t12 t77 t0 t73 t2 t80 t90 t13 t90 t26 t56 t30 t111 t76 t90 t38 t67 t74 t58 t110 t106 t51 t69 t38 t107 t41 t36 t50 t48 t12 t80 t27 t2 t15 t50 t31 t18 t27,14.0,positive,46
+t30 t74 t56 t69 t30 t13 t81 t94 t3 t34 t2 t36 t46 t80 t58 t67 t30 t18 t87 t18 t87 t3 t18 t75 t74 t2 t24 t90 t107 t80 t44 t27 t44 t69 t87 t90 t93 t51 t87 t9 t31 t3 t45 t58 t45 t58,21.0,positive,46
+t22 t103 t89 t90 t56 t38 t26 t33 t74 t103 t105 t38 t7 t80 t0 t87 t50 t82 t22 t27 t48 t48 t60 t31 t36 t84 t69 t3 t9 t30 t56 t31 t15 t28 t15 t34 t12 t61 t91 t18 t93 t18 t74 t51 t36 t36,,negative,46
+t104 t44 t40 t10 t34 t36 t60 t77 t56 t108 t103 t74 t111 t12 t32 t67 t32 t38 t67 t46 t48 t41 t41 t111 t93 t50 t82 t60 t12 t48 t93 t89 t22 t12 t8 t40 t89 t0 t30 t4 t91 t3 t105 t100 t89 t8,,negative,46
+t14 t103 t0 t17 t103 t61 t80 t54 t5 t7 t95 t33 t61 t108 t88 t49 t93 t60 t69 t5 t19 t0 t56 t111 t111 t7 t10 t42 t75 t74 t80 t27 t104 t107 t32 t75 t73 t31 t28 t38 t9 t72 t94 t87 t7 t18,,negative,46
+t15 t10 t34 t80 t33 t12 t33 t81 t41 t105 t69 t34 t13 t42 t84 t34 t28 t28 t3 t97 t44 t90 t81 t21 t91 t38 t67 t27 t34 t15 t91 t93 t5 t19 t7 t27 t44 t95 t5 t12 t87 t26 t54 t49 t21 t4,,negative,46
+t31 t67 t51 t107 t82 t53 t17 t74 t51 t30 t42 t28 t5 t111 t95 t104 t8 t67 t80 t3 t61 t41 t38 t53 t12 t7 t50 t27 t91 t40 t108 t74 t108 t9 t21 t110 t53 t58 t76 t111 t41 t84 t74 t93 t13 t18,,negative,46
+t49 t72 t19 t73 t29 t15 t97 t26 t106 t8 t51 t21 t4 t80 t49 t51 t32 t67 t41 t58 t19 t61 t33 t14 t40 t107 t21 t48 t38 t60 t94 t9 t106 t81 t107 t4 t74 t82 t58 t38 t50 t48 t89 t75 t17 t107,,negative,46
+t67 t2 t27 t88 t69 t106 t80 t46 t34 t76 t78 t14 t97 t104 t97 t41 t4 t19 t58 t88 t26 t26 t26 t107 t82 t87 t56 t106 t46 t12 t13 t91 t69 t84 t87 t60 t88 t24 t40 t30 t54 t14 t41 t105 t38 t4,,negative,46
+t56 t100 t104 t4 t9 t89 t5 t76 t61 t30 t100 t53 t17 t50 t110 t73 t36 t3 t111 t41 t90 t28 t67 t110 t17 t87 t4 t87 t31 t12 t32 t29 t14 t106 t0 t12 t78 t72 t106 t106 t89 t15 t44 t95 t24 t60,,negative,46
+t4 t2 t69 t73 t28 t76 t82 t111 t100 t60 t48 t36 t4 t93 t107 t72 t4 t89 t21 t95 t58 t56 t89 t94 t46 t93 t38 t34 t29 t88 t60 t41 t22 t2 t18 t7 t61 t19 t22 t46 t7 t7 t26 t54 t21 t49,,negative,46
+t32 t30 t0 t90 t107 t82 t76 t84 t82 t107 t69 t87 t104 t61 t80 t97 t33 t75 t8 t82 t100 t0 t106 t7 t21 t12 t104 t51 t74 t15 t40 t4 t26 t104 t81 t108 t80 t12 t42 t45 t97 t88 t44 t84 t36 t21,,negative,46
+t30 t46 t28 t18 t10 t18 t27 t100 t97 t5 t53 t10 t22 t69 t104 t5 t46 t111 t106 t36 t106 t90 t10 t58 t18 t87 t9 t104 t48 t9 t14 t87 t77 t75 t111 t58 t54 t74 t77 t95 t36 t30 t26 t103 t74 t36 t106,21.0,positive,47
+t33 t10 t12 t77 t27 t54 t104 t28 t4 t31 t93 t87 t87 t41 t38 t77 t42 t8 t80 t49 t74 t58 t32 t41 t91 t95 t27 t74 t48 t77 t3 t54 t29 t81 t95 t106 t106 t78 t104 t50 t84 t36 t95 t19 t9 t38 t51,25.0,positive,47
+t51 t69 t106 t2 t36 t111 t28 t106 t45 t107 t45 t77 t3 t34 t27 t111 t104 t29 t18 t48 t77 t104 t36 t100 t69 t84 t2 t58 t111 t93 t104 t107 t74 t3 t95 t93 t111 t2 t44 t40 t44 t50 t67 t111 t44 t54 t41,12.0,positive,47
+t34 t10 t110 t95 t40 t95 t107 t105 t7 t106 t3 t46 t111 t14 t95 t87 t3 t26 t103 t18 t95 t110 t77 t103 t5 t69 t45 t74 t77 t36 t30 t74 t80 t51 t90 t69 t50 t90 t107 t80 t41 t51 t21 t81 t51 t103 t95,18.0,positive,47
+t21 t76 t12 t9 t110 t111 t54 t50 t50 t54 t46 t111 t53 t111 t50 t40 t80 t89 t45 t93 t17 t10 t22 t69 t40 t106 t58 t95 t51 t24 t78 t31 t77 t29 t2 t40 t95 t54 t93 t50 t13 t88 t30 t28 t2 t84 t77,14.0,positive,47
+t34 t27 t90 t38 t2 t76 t2 t12 t2 t40 t28 t90 t107 t2 t87 t29 t69 t80 t41 t100 t50 t40 t31 t27 t41 t93 t0 t111 t10 t80 t58 t87 t8 t2 t27 t28 t38 t50 t31 t93 t100 t30 t41 t95 t14 t67 t36,18.0,positive,47
+t10 t94 t90 t50 t51 t111 t87 t69 t34 t87 t34 t76 t50 t93 t28 t36 t2 t58 t77 t9 t74 t40 t2 t84 t36 t12 t56 t27 t87 t53 t77 t40 t46 t44 t80 t4 t5 t36 t106 t2 t36 t94 t103 t77 t54 t50 t106,18.0,positive,47
+t77 t94 t8 t34 t41 t78 t2 t82 t24 t77 t87 t42 t90 t36 t58 t7 t107 t74 t2 t95 t40 t28 t3 t67 t88 t89 t45 t87 t34 t82 t88 t46 t106 t106 t51 t2 t29 t26 t87 t27 t84 t103 t107 t28 t38 t58 t67,23.0,positive,47
+t19 t36 t100 t42 t51 t90 t107 t2 t28 t106 t60 t30 t13 t111 t84 t104 t106 t18 t50 t40 t77 t87 t74 t104 t15 t69 t50 t44 t93 t93 t8 t19 t69 t84 t46 t78 t74 t13 t2 t4 t93 t80 t45 t58 t31 t103 t18,23.0,positive,47
+t33 t40 t10 t40 t2 t46 t18 t111 t54 t78 t30 t30 t30 t14 t49 t36 t5 t9 t12 t78 t106 t8 t19 t84 t60 t78 t60 t87 t36 t46 t97 t95 t87 t44 t34 t31 t72 t111 t87 t84 t14 t93 t18 t74 t54 t50 t31,17.0,positive,47
+t104 t26 t41 t81 t40 t93 t31 t51 t49 t100 t44 t107 t9 t49 t51 t26 t97 t27 t36 t29 t48 t24 t21 t3 t21 t7 t17 t3 t107 t104 t22 t40 t53 t45 t56 t100 t108 t0 t75 t82 t30 t78 t88 t3 t78 t5 t58,,negative,47
+t13 t89 t17 t38 t21 t67 t82 t44 t73 t107 t13 t87 t34 t103 t17 t80 t69 t100 t3 t105 t29 t24 t58 t38 t46 t2 t49 t9 t100 t13 t38 t10 t72 t67 t81 t41 t46 t10 t18 t77 t103 t34 t82 t24 t106 t38 t100,,negative,47
+t60 t9 t13 t108 t80 t111 t67 t12 t19 t108 t15 t100 t87 t49 t26 t74 t4 t46 t32 t14 t67 t81 t91 t91 t82 t22 t14 t48 t34 t89 t50 t75 t60 t9 t53 t77 t69 t44 t106 t9 t17 t93 t51 t49 t81 t84 t32,,negative,47
+t88 t67 t104 t106 t105 t21 t80 t90 t108 t69 t95 t36 t3 t48 t77 t42 t12 t50 t77 t36 t28 t31 t93 t22 t94 t60 t8 t22 t97 t88 t18 t90 t8 t91 t4 t27 t42 t103 t93 t94 t30 t74 t108 t103 t15 t45 t45,,negative,47
+t74 t54 t45 t106 t100 t60 t8 t104 t100 t91 t67 t82 t34 t27 t13 t48 t28 t84 t89 t54 t75 t58 t61 t13 t108 t13 t73 t103 t5 t22 t95 t103 t78 t89 t45 t69 t49 t29 t60 t107 t12 t14 t17 t36 t45 t18 t26,,negative,47
+t45 t90 t51 t49 t105 t110 t87 t100 t72 t81 t50 t3 t12 t36 t100 t103 t30 t45 t33 t3 t38 t48 t3 t106 t60 t73 t100 t18 t60 t90 t44 t12 t41 t94 t87 t22 t46 t12 t48 t27 t4 t81 t93 t38 t30 t78 t24,,negative,47
+t76 t49 t90 t10 t91 t95 t2 t87 t8 t48 t19 t82 t9 t56 t5 t56 t29 t49 t33 t51 t61 t60 t103 t30 t0 t36 t73 t5 t10 t28 t48 t78 t32 t28 t31 t106 t8 t95 t29 t93 t105 t5 t15 t100 t10 t111 t41,,negative,47
+t107 t40 t12 t60 t46 t81 t49 t4 t24 t76 t44 t60 t73 t77 t61 t106 t90 t22 t104 t12 t88 t111 t106 t72 t18 t12 t46 t42 t61 t15 t18 t48 t110 t12 t24 t29 t12 t9 t26 t100 t5 t93 t50 t48 t103 t97 t46,,negative,47
+t100 t0 t110 t18 t48 t18 t110 t111 t36 t33 t106 t19 t54 t54 t45 t36 t4 t32 t48 t56 t67 t14 t13 t21 t89 t14 t73 t87 t38 t58 t82 t26 t18 t88 t78 t110 t18 t104 t88 t4 t24 t69 t31 t13 t40 t74 t77,,negative,47
+t90 t34 t36 t73 t61 t88 t51 t58 t90 t56 t36 t108 t105 t51 t24 t33 t4 t93 t41 t24 t41 t61 t104 t17 t78 t38 t53 t80 t3 t24 t30 t0 t7 t50 t103 t31 t21 t30 t10 t53 t32 t93 t27 t81 t53 t87 t105,,negative,47
+t80 t108 t9 t45 t58 t3 t74 t77 t3 t24 t36 t14 t93 t54 t87 t111 t104 t2 t56 t88 t15 t89 t54 t46 t76 t69 t77 t87 t111 t95 t77 t9 t74 t9 t27 t58 t50 t40 t87 t44 t10 t13 t36 t95 t18 t78 t58 t18,16.0,positive,48
+t84 t111 t104 t40 t94 t77 t18 t76 t106 t91 t9 t74 t78 t87 t18 t56 t12 t29 t58 t50 t38 t82 t87 t54 t77 t46 t95 t29 t3 t58 t54 t88 t78 t77 t53 t82 t15 t18 t77 t53 t77 t5 t22 t28 t14 t84 t36 t18,29.0,positive,48
+t50 t90 t28 t94 t77 t108 t54 t29 t111 t103 t45 t46 t77 t50 t95 t76 t54 t46 t111 t60 t78 t90 t67 t103 t30 t94 t30 t54 t33 t56 t107 t95 t111 t104 t95 t14 t106 t50 t74 t53 t22 t84 t2 t111 t45 t87 t50 t50,17.0,positive,48
+t111 t84 t9 t104 t2 t78 t75 t41 t72 t50 t87 t103 t8 t22 t44 t72 t8 t18 t14 t97 t30 t69 t24 t45 t67 t9 t58 t87 t94 t90 t107 t78 t76 t50 t73 t77 t87 t9 t41 t58 t93 t45 t18 t50 t40 t40 t87 t36,17.0,positive,48
+t22 t90 t74 t26 t93 t18 t100 t82 t50 t50 t2 t93 t76 t111 t103 t76 t81 t54 t3 t46 t41 t50 t31 t111 t111 t76 t3 t106 t30 t38 t14 t41 t44 t106 t89 t110 t12 t111 t84 t18 t95 t78 t50 t50 t41 t36 t103 t27,23.0,positive,48
+t30 t74 t80 t44 t80 t110 t14 t67 t30 t14 t58 t28 t95 t50 t45 t46 t2 t78 t50 t36 t93 t72 t95 t84 t80 t110 t34 t26 t87 t46 t30 t38 t27 t58 t50 t36 t41 t44 t10 t12 t90 t80 t41 t93 t80 t41 t4 t46,16.0,positive,48
+t87 t14 t103 t42 t74 t77 t95 t29 t104 t111 t78 t94 t111 t87 t50 t50 t111 t51 t2 t104 t104 t30 t38 t29 t54 t9 t84 t104 t30 t103 t50 t30 t40 t42 t78 t29 t88 t50 t93 t48 t2 t4 t74 t8 t44 t80 t54 t58,21.0,positive,48
+t87 t100 t8 t54 t90 t34 t67 t12 t77 t5 t76 t95 t8 t46 t90 t31 t111 t2 t29 t2 t104 t69 t84 t50 t46 t72 t17 t107 t111 t90 t46 t31 t18 t77 t9 t36 t41 t58 t49 t2 t46 t2 t40 t46 t77 t87 t87 t77,19.0,positive,48
+t76 t106 t41 t106 t74 t87 t100 t84 t77 t3 t107 t27 t75 t74 t80 t54 t13 t29 t18 t108 t51 t54 t45 t107 t22 t48 t58 t78 t108 t45 t77 t58 t54 t103 t87 t100 t80 t44 t87 t40 t104 t24 t90 t46 t46 t49 t56 t15,20.0,positive,48
+t73 t45 t107 t22 t95 t74 t61 t103 t104 t24 t42 t104 t34 t50 t41 t9 t28 t38 t2 t36 t30 t9 t49 t74 t78 t9 t3 t77 t69 t87 t93 t53 t28 t44 t28 t95 t58 t78 t22 t103 t46 t111 t24 t46 t87 t94 t17 t41,22.0,positive,48
+t38 t110 t5 t100 t21 t8 t50 t14 t84 t5 t13 t54 t104 t78 t4 t0 t74 t54 t97 t28 t73 t106 t53 t107 t19 t17 t60 t87 t13 t90 t36 t13 t97 t15 t103 t108 t31 t110 t80 t33 t4 t44 t45 t69 t9 t60 t29 t82,,negative,48
+t26 t12 t24 t12 t31 t40 t103 t58 t95 t34 t107 t0 t95 t107 t10 t33 t51 t28 t89 t100 t14 t100 t32 t72 t32 t110 t28 t91 t10 t106 t17 t51 t82 t51 t56 t61 t5 t50 t97 t76 t48 t30 t106 t44 t60 t77 t49 t80,,negative,48
+t97 t89 t53 t19 t61 t33 t3 t75 t0 t12 t24 t90 t53 t73 t22 t94 t15 t13 t44 t80 t67 t31 t45 t21 t42 t5 t50 t104 t0 t33 t32 t45 t72 t108 t38 t88 t60 t100 t80 t60 t27 t5 t38 t10 t110 t104 t41 t60,,negative,48
+t87 t97 t0 t4 t53 t44 t14 t7 t12 t22 t103 t26 t97 t82 t56 t24 t46 t84 t48 t30 t38 t91 t93 t28 t41 t9 t14 t33 t84 t78 t5 t29 t32 t45 t4 t95 t53 t106 t28 t108 t41 t5 t24 t104 t34 t12 t81 t103,,negative,48
+t27 t50 t90 t60 t7 t4 t46 t69 t107 t100 t111 t73 t72 t22 t90 t50 t32 t108 t12 t14 t106 t36 t105 t2 t36 t50 t41 t50 t22 t32 t24 t105 t49 t41 t80 t19 t51 t94 t56 t41 t100 t49 t75 t74 t69 t26 t40 t107,,negative,48
+t19 t19 t9 t4 t36 t2 t74 t22 t26 t34 t56 t13 t27 t15 t34 t50 t74 t27 t82 t48 t61 t97 t49 t95 t60 t72 t44 t72 t24 t77 t5 t60 t42 t26 t94 t0 t90 t88 t32 t33 t38 t93 t22 t14 t13 t80 t67 t17,,negative,48
+t44 t77 t18 t100 t18 t29 t38 t31 t9 t14 t33 t73 t108 t22 t0 t111 t24 t33 t69 t0 t106 t8 t74 t54 t27 t31 t107 t91 t88 t22 t100 t73 t18 t84 t97 t100 t19 t88 t33 t36 t8 t17 t38 t108 t33 t12 t40 t95,,negative,48
+t75 t14 t8 t15 t95 t30 t53 t42 t15 t21 t3 t74 t111 t108 t84 t10 t13 t22 t54 t69 t46 t76 t104 t91 t84 t22 t3 t38 t42 t103 t36 t84 t87 t46 t5 t22 t50 t104 t75 t110 t90 t10 t14 t33 t33 t91 t30 t36,,negative,48
+t34 t87 t41 t73 t61 t33 t94 t74 t82 t74 t60 t30 t26 t17 t29 t26 t106 t87 t40 t95 t78 t41 t46 t5 t27 t78 t5 t0 t30 t24 t2 t40 t54 t21 t3 t50 t42 t78 t27 t106 t103 t48 t45 t53 t82 t40 t29 t27,,negative,48
+t58 t50 t46 t91 t87 t84 t94 t69 t73 t40 t21 t73 t51 t81 t111 t103 t89 t10 t26 t60 t24 t19 t58 t51 t48 t73 t40 t95 t110 t104 t42 t105 t7 t77 t2 t111 t88 t12 t3 t49 t8 t90 t108 t4 t41 t18 t22 t15,,negative,48
+t50 t111 t87 t95 t22 t91 t95 t12 t56 t50 t12 t104 t80 t54 t13 t58 t54 t38 t29 t46 t3 t40 t2 t89 t81 t8 t2 t36 t28 t105 t36 t50 t46 t107 t95 t95 t73 t87 t33 t77 t104 t93 t58 t50 t103 t73 t80 t41 t10,23.0,positive,49
+t19 t32 t72 t74 t95 t27 t78 t31 t87 t58 t27 t94 t103 t3 t34 t77 t87 t67 t87 t41 t76 t8 t103 t45 t103 t14 t81 t36 t46 t104 t87 t36 t95 t88 t60 t78 t111 t105 t9 t67 t29 t54 t58 t50 t10 t107 t32 t80 t76,16.0,positive,49
+t105 t61 t50 t3 t22 t106 t38 t46 t51 t107 t7 t2 t30 t10 t50 t36 t46 t14 t0 t72 t78 t69 t36 t7 t33 t77 t40 t41 t76 t10 t2 t50 t50 t38 t2 t61 t77 t18 t4 t67 t50 t81 t107 t58 t76 t41 t110 t95 t106,23.0,positive,49
+t106 t104 t2 t10 t80 t82 t12 t106 t111 t29 t54 t46 t90 t34 t80 t10 t14 t53 t56 t2 t87 t51 t27 t94 t54 t44 t41 t94 t77 t3 t3 t50 t110 t3 t2 t77 t73 t106 t18 t3 t80 t58 t36 t50 t50 t81 t77 t18 t84,19.0,positive,49
+t107 t10 t44 t30 t105 t87 t76 t30 t31 t81 t94 t76 t104 t95 t58 t90 t58 t2 t74 t78 t32 t45 t60 t2 t76 t18 t2 t84 t18 t72 t56 t3 t90 t50 t50 t4 t36 t90 t93 t22 t104 t81 t15 t90 t54 t76 t56 t46 t51,21.0,positive,49
+t30 t3 t72 t87 t46 t10 t106 t78 t14 t106 t29 t2 t67 t33 t103 t78 t0 t87 t9 t50 t50 t74 t54 t8 t77 t46 t87 t36 t69 t84 t95 t46 t84 t78 t53 t46 t28 t74 t110 t38 t9 t76 t88 t54 t107 t38 t2 t41 t51,17.0,positive,49
+t30 t74 t73 t58 t28 t74 t93 t40 t110 t67 t56 t29 t103 t111 t40 t27 t72 t54 t110 t95 t22 t10 t18 t8 t106 t95 t78 t104 t30 t111 t58 t54 t5 t82 t87 t53 t74 t27 t74 t87 t94 t90 t93 t80 t10 t44 t69 t40 t87,14.0,positive,49
+t103 t84 t27 t60 t87 t21 t2 t50 t34 t77 t69 t44 t29 t111 t45 t58 t91 t50 t103 t50 t3 t95 t28 t9 t103 t2 t91 t50 t12 t46 t3 t45 t87 t46 t28 t34 t87 t90 t107 t53 t2 t21 t45 t50 t31 t18 t44 t106 t77,20.0,positive,49
+t36 t2 t60 t2 t36 t36 t84 t111 t36 t54 t75 t110 t0 t84 t12 t36 t73 t111 t38 t67 t87 t24 t69 t54 t111 t54 t77 t108 t60 t41 t58 t44 t38 t104 t110 t45 t78 t108 t110 t13 t18 t84 t91 t90 t3 t38 t104 t36 t18,21.0,positive,49
+t46 t41 t8 t54 t78 t26 t87 t104 t73 t2 t87 t50 t22 t69 t78 t53 t30 t106 t103 t61 t106 t111 t40 t95 t58 t75 t87 t106 t60 t93 t45 t27 t74 t67 t9 t87 t10 t67 t111 t105 t61 t106 t111 t48 t36 t50 t95 t9 t54,18.0,positive,49
+t41 t72 t73 t80 t24 t4 t42 t76 t77 t26 t61 t22 t18 t18 t14 t31 t9 t89 t0 t84 t0 t76 t54 t111 t60 t56 t44 t18 t56 t103 t22 t26 t84 t38 t87 t42 t84 t111 t24 t2 t76 t60 t87 t31 t56 t9 t18 t4 t33,,negative,49
+t80 t10 t32 t90 t97 t27 t110 t8 t14 t32 t108 t38 t93 t8 t82 t36 t5 t42 t7 t19 t87 t29 t13 t88 t36 t2 t91 t84 t88 t32 t24 t19 t103 t106 t4 t108 t97 t76 t19 t12 t46 t50 t31 t53 t17 t36 t5 t22 t42,,negative,49
+t61 t34 t73 t27 t45 t104 t104 t49 t100 t36 t69 t50 t7 t91 t29 t0 t3 t41 t106 t7 t48 t105 t46 t111 t10 t28 t0 t41 t67 t76 t73 t69 t93 t24 t17 t56 t13 t104 t5 t50 t40 t44 t72 t100 t111 t106 t56 t31 t31,,negative,49
+t78 t13 t67 t40 t19 t100 t32 t17 t32 t56 t61 t69 t17 t29 t24 t78 t67 t18 t111 t27 t30 t40 t14 t105 t24 t81 t28 t106 t8 t26 t42 t19 t72 t56 t80 t81 t31 t56 t22 t75 t32 t110 t67 t29 t74 t22 t32 t0 t36,,negative,49
+t75 t21 t81 t42 t26 t78 t78 t48 t8 t78 t53 t44 t36 t69 t88 t73 t8 t9 t110 t26 t17 t31 t78 t91 t5 t54 t14 t13 t74 t93 t12 t76 t60 t54 t12 t27 t4 t17 t58 t103 t30 t19 t100 t54 t13 t74 t53 t51 t76,,negative,49
+t97 t2 t94 t104 t42 t81 t24 t26 t84 t8 t46 t41 t38 t9 t104 t104 t10 t87 t28 t89 t19 t15 t58 t40 t15 t17 t51 t72 t90 t18 t31 t42 t38 t53 t103 t32 t19 t54 t88 t44 t104 t56 t27 t32 t87 t89 t18 t81 t0,,negative,49
+t54 t78 t26 t111 t97 t54 t3 t30 t8 t40 t9 t4 t8 t2 t10 t69 t27 t4 t93 t46 t3 t17 t30 t48 t95 t18 t108 t80 t48 t42 t17 t76 t82 t110 t50 t41 t73 t104 t14 t0 t24 t54 t77 t90 t105 t19 t21 t26 t17,,negative,49
+t18 t28 t61 t33 t69 t42 t26 t67 t5 t14 t50 t111 t17 t0 t9 t30 t2 t38 t19 t18 t91 t103 t72 t26 t38 t9 t81 t42 t29 t74 t4 t78 t110 t94 t17 t7 t51 t18 t5 t22 t33 t41 t2 t27 t4 t97 t72 t87 t45,,negative,49
+t104 t41 t32 t7 t108 t12 t73 t58 t17 t18 t18 t58 t81 t49 t61 t91 t19 t69 t51 t93 t95 t56 t51 t89 t93 t93 t46 t17 t111 t41 t54 t40 t34 t108 t38 t81 t60 t110 t93 t40 t48 t10 t95 t27 t17 t46 t22 t19 t7,,negative,49
+t87 t14 t8 t13 t88 t41 t49 t17 t97 t100 t90 t8 t21 t91 t91 t89 t26 t48 t111 t89 t91 t38 t69 t21 t48 t36 t106 t106 t10 t8 t36 t3 t74 t108 t19 t60 t17 t107 t36 t97 t84 t91 t26 t80 t21 t88 t84 t51 t32,,negative,49
+t32 t40 t50 t104 t104 t93 t0 t108 t84 t108 t44 t87 t50 t80 t84 t50 t87 t27 t110 t76 t95 t36 t3 t95 t75 t14 t67 t74 t9 t60 t87 t4 t41 t90 t51 t103 t44 t84 t50 t48 t58 t111 t91 t26 t9 t84 t18 t18 t45 t51,20.0,positive,50
+t46 t41 t95 t14 t0 t54 t13 t111 t80 t13 t54 t90 t50 t40 t30 t78 t22 t100 t45 t87 t60 t78 t87 t2 t9 t53 t106 t32 t69 t27 t103 t10 t67 t36 t91 t50 t13 t29 t103 t90 t93 t18 t4 t32 t40 t111 t93 t31 t9 t54,22.0,positive,50
+t32 t36 t91 t40 t110 t45 t42 t94 t77 t44 t95 t40 t5 t74 t87 t77 t87 t36 t27 t24 t41 t46 t29 t95 t10 t2 t46 t95 t110 t81 t15 t46 t3 t54 t111 t80 t45 t13 t80 t111 t45 t80 t103 t111 t104 t12 t77 t84 t58 t106,17.0,positive,50
+t74 t50 t14 t51 t74 t80 t46 t2 t93 t15 t76 t69 t48 t50 t95 t32 t26 t103 t13 t32 t88 t45 t106 t103 t111 t87 t80 t111 t45 t3 t77 t41 t76 t84 t54 t13 t27 t29 t3 t73 t74 t54 t40 t95 t18 t44 t111 t87 t69 t77,23.0,positive,50
+t34 t10 t87 t87 t93 t40 t8 t36 t13 t46 t50 t106 t106 t87 t22 t67 t46 t81 t93 t10 t95 t36 t73 t111 t93 t46 t38 t80 t54 t73 t74 t78 t44 t31 t104 t2 t58 t89 t50 t9 t67 t41 t104 t58 t38 t60 t8 t103 t61 t56,16.0,positive,50
+t106 t76 t87 t46 t69 t95 t75 t78 t106 t30 t50 t14 t87 t22 t26 t2 t10 t50 t40 t106 t19 t104 t95 t58 t107 t67 t95 t10 t76 t38 t58 t36 t51 t72 t104 t30 t31 t106 t44 t45 t58 t95 t100 t58 t107 t74 t56 t78 t40 t104,22.0,positive,50
+t88 t75 t110 t111 t106 t50 t50 t2 t60 t69 t107 t84 t14 t9 t87 t27 t40 t95 t87 t14 t31 t41 t50 t54 t18 t77 t88 t80 t3 t2 t69 t13 t28 t36 t74 t41 t78 t46 t67 t10 t41 t87 t28 t14 t84 t94 t80 t22 t28 t2,17.0,positive,50
+t77 t41 t91 t18 t14 t97 t95 t58 t41 t78 t75 t74 t2 t93 t12 t9 t67 t67 t26 t4 t30 t50 t60 t50 t77 t3 t33 t2 t40 t46 t30 t50 t95 t54 t93 t76 t97 t24 t30 t84 t50 t50 t9 t76 t9 t84 t51 t19 t94 t80,17.0,positive,50
+t45 t58 t30 t9 t21 t46 t111 t105 t18 t10 t87 t78 t26 t41 t93 t33 t84 t54 t61 t2 t45 t29 t46 t108 t58 t106 t78 t14 t111 t10 t80 t3 t90 t110 t30 t103 t41 t110 t111 t45 t50 t69 t84 t78 t104 t111 t95 t56 t14 t10,20.0,positive,50
+t93 t95 t36 t74 t87 t29 t105 t26 t78 t104 t12 t34 t80 t76 t106 t95 t10 t50 t104 t69 t22 t75 t69 t48 t58 t41 t87 t51 t0 t95 t34 t2 t111 t95 t46 t2 t40 t42 t73 t40 t45 t104 t2 t106 t28 t26 t51 t40 t94 t111,23.0,positive,50
+t58 t87 t14 t21 t40 t19 t108 t84 t94 t9 t89 t50 t50 t89 t12 t0 t46 t61 t31 t27 t27 t74 t91 t13 t7 t107 t78 t42 t36 t88 t28 t9 t12 t110 t78 t48 t8 t3 t27 t29 t87 t48 t89 t34 t56 t22 t82 t30 t58 t106,,negative,50
+t82 t41 t28 t58 t74 t18 t94 t31 t100 t94 t21 t30 t100 t81 t15 t8 t30 t5 t5 t104 t22 t21 t77 t77 t3 t24 t36 t87 t45 t110 t50 t69 t73 t27 t2 t53 t54 t60 t15 t107 t95 t48 t94 t105 t9 t32 t4 t67 t82 t94,,negative,50
+t97 t48 t24 t72 t67 t72 t110 t110 t30 t84 t53 t103 t49 t36 t93 t13 t81 t51 t10 t97 t13 t95 t5 t91 t82 t107 t95 t17 t15 t2 t8 t95 t78 t111 t9 t44 t38 t4 t4 t31 t97 t107 t78 t17 t7 t7 t38 t60 t78 t36,,negative,50
+t82 t12 t38 t94 t38 t103 t80 t24 t84 t42 t60 t21 t8 t12 t88 t40 t103 t78 t69 t61 t76 t89 t100 t104 t32 t0 t84 t61 t28 t74 t5 t31 t26 t26 t31 t88 t42 t5 t30 t72 t110 t69 t21 t12 t100 t89 t51 t22 t33 t78,,negative,50
+t32 t53 t22 t3 t13 t34 t106 t32 t5 t10 t67 t34 t5 t36 t94 t84 t45 t67 t107 t38 t7 t30 t50 t100 t8 t2 t93 t32 t49 t34 t91 t107 t10 t44 t48 t53 t73 t49 t61 t49 t28 t5 t104 t38 t48 t90 t78 t31 t0 t67,,negative,50
+t97 t69 t48 t4 t22 t26 t15 t17 t12 t50 t33 t9 t72 t50 t110 t19 t41 t72 t19 t45 t106 t26 t78 t97 t78 t54 t4 t111 t13 t30 t31 t38 t58 t0 t31 t89 t30 t87 t103 t9 t14 t0 t28 t22 t19 t58 t12 t90 t75 t97,,negative,50
+t12 t93 t111 t15 t49 t9 t56 t56 t26 t24 t74 t30 t0 t82 t17 t0 t28 t0 t15 t76 t75 t19 t82 t76 t75 t88 t5 t19 t22 t38 t75 t4 t60 t48 t60 t84 t95 t0 t15 t53 t60 t29 t22 t58 t84 t2 t81 t18 t29 t13,,negative,50
+t78 t50 t91 t77 t84 t24 t21 t107 t58 t7 t9 t49 t24 t76 t72 t105 t30 t82 t51 t5 t29 t108 t40 t18 t89 t7 t36 t31 t90 t76 t97 t13 t74 t75 t12 t73 t18 t76 t8 t8 t74 t30 t89 t77 t97 t17 t54 t54 t105 t22,,negative,50
+t91 t77 t49 t30 t5 t94 t49 t91 t21 t33 t89 t90 t3 t80 t78 t61 t81 t45 t53 t104 t27 t46 t18 t29 t2 t60 t100 t49 t36 t3 t105 t7 t41 t75 t34 t61 t18 t108 t78 t104 t111 t17 t22 t105 t29 t76 t93 t5 t9 t90,,negative,50
+t18 t51 t45 t76 t103 t33 t10 t81 t19 t106 t90 t82 t77 t7 t106 t38 t36 t48 t90 t72 t18 t53 t44 t28 t67 t5 t36 t34 t107 t7 t106 t30 t42 t0 t56 t50 t100 t50 t19 t42 t77 t69 t105 t51 t103 t9 t94 t21 t51 t91,,negative,50
