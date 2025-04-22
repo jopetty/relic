@@ -1,0 +1,10 @@
+{
+    "uncompressed_size": 47890,
+    "compressed_size": 8867,
+    "compression_ratio": 5.400924777264013,
+    "mean_positive_depth": 14.670967741935485,
+    "median_positive_depth": 15.0,
+    "coverage": 0.965,
+    "total_samples": 965,
+    "total_possible_samples": 1000
+}
