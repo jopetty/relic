@@ -8,18 +8,18 @@ while IFS= read -r line; do
 done < data/small_subset.txt
 
 # Subsample for testing
-grammar_names=("${grammar_names[@]:5:5}")
+grammar_names=("${grammar_names[@]:70:30}")
 
 echo "Read in ${#grammar_names[@]} grammars from data/small_subset.txt"
 
 # Check to see if the batch exists
 for g_name in "${grammar_names[@]}"; do
-  if [[ ! -f "data/grammars/$g_name/${g_name}_o3_batched_0-shot.jsonl" ]]; then
-    uv run scripts/generate.py openai_batch --grammar_name="$g_name" --model="o3"
+  if [[ ! -f "data/grammars/$g_name/${g_name}_o4-mini_batched_0-shot.jsonl" ]]; then
+    uv run scripts/generate.py openai_batch --grammar_name="$g_name" --model="o4-mini"
   fi
 done
 
 for g_name in "${grammar_names[@]}"; do
   echo "Processing grammar: $g_name"
-  uv run scripts/upload.py openai_batch --grammar_name="$g_name" --model="o3"
+  uv run scripts/upload.py openai_batch --grammar_name="$g_name" --model="o4-mini"
 done
