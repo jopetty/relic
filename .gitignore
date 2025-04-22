@@ -135,7 +135,6 @@ backups/
 # Allow data/backups
 !data/grammars
 
-data/grammars/**/*.jsonl
 data/grammars/**/*_samples.txt
 data/grammars/**/*.log
 data/grammars/**/*.txt.gz

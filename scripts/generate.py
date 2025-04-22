@@ -488,6 +488,7 @@ def openai_batch(
     grammar_name: str,
     model: str = "gpt-4o-mini",
     n_shots: int = 0,
+    subsample_n: int | None = None,
 ):
     assert n_shots >= 0
 
@@ -506,6 +507,16 @@ def openai_batch(
 
     pos_samples = samples_df[samples_df["type"] == "positive"].reset_index(drop=True)
     neg_samples = samples_df[samples_df["type"] == "negative"].reset_index(drop=True)
+
+    if subsample_n is not None:
+        # group samples_df by type and length, and keep only the first
+        # `subsample_n` samples
+        samples_df = samples_df.groupby(
+            ["type", "length"], group_keys=False, observed=True
+        ).apply(
+            lambda x: x.sample(min(len(x), subsample_n)),
+            include_groups=True,
+        )
 
     samples_df["prompt"] = ""
 
