@@ -19,7 +19,7 @@ for g_name in "${grammar_names[@]}"; do
   fi
 done
 
-# for g_name in "${grammar_names[@]}"; do
-#   echo "Processing grammar: $g_name"
-#   uv run scripts/upload.py openai_batch --grammar_name="$g_name" --model="o3"
-# done
+for g_name in "${grammar_names[@]}"; do
+  echo "Processing grammar: $g_name"
+  uv run scripts/upload.py openai_batch --grammar_name="$g_name" --model="o3"
+done
