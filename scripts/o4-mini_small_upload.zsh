@@ -1,16 +1,16 @@
 #!/bin/zsh
 
-# Read in the list of grammar names from data/large_subset.txt into an array
+# Read in the list of grammar names from data/small_subset.txt into an array
 # read each line into an array
 grammar_names=()
 while IFS= read -r line; do
   grammar_names+=("$line")
-done < data/large_subset.txt
+done < data/small_subset.txt
 
 # Subsample for testing
-grammar_names=("${grammar_names[@]:70:10}")
+grammar_names=("${grammar_names[@]:70:30}")
 
-echo "Read in ${#grammar_names[@]} grammars from data/large_subset.txt"
+echo "Read in ${#grammar_names[@]} grammars from data/small_subset.txt"
 
 # Check to see if the batch exists
 for g_name in "${grammar_names[@]}"; do
