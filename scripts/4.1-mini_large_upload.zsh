@@ -8,7 +8,7 @@ while IFS= read -r line; do
 done < data/large_subset.txt
 
 # Subsample for testing
-grammar_names=("${grammar_names[@]:0:40}")
+grammar_names=("${grammar_names[@]:80:40}")
 
 echo "Read in ${#grammar_names[@]} grammars from data/large_subset.txt"
 
