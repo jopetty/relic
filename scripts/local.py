@@ -8,7 +8,6 @@ import logging
 import datasets
 import dotenv
 import fire
-import mlx_lm
 import pyrootutils
 import torch
 import transformers
@@ -30,98 +29,6 @@ PROJECT_ROOT = path = pyrootutils.find_root(
 dotenv.load_dotenv(PROJECT_ROOT / ".env")
 
 
-def run_mlx(
-    # Grammar parameters
-    grammar_name: str,
-    n_shots: int = 0,
-    # Model parameters
-    model: str = "google/gemma-2-2b-it",
-    # Pipeline parameters
-    max_new_tokens: int = None,
-    batch_size: int = 1,
-):
-    grammars_dir = PROJECT_ROOT / "data" / "grammars"
-    grammar_path = grammars_dir / f"{grammar_name}"
-
-    model_pathsafe_name = model.replace("/", "_")
-    batch_jsonl_filename = (
-        f"{grammar_name}_{model_pathsafe_name}_batched_{2*n_shots}-shot.jsonl"
-    )
-    batch_jsonl_path = grammar_path / batch_jsonl_filename
-
-    batch_id_hash = hashlib.md5(str(batch_jsonl_filename).encode()).hexdigest()
-    batch_id = f"batch_{batch_id_hash}"
-
-    results_filename = f"{batch_id}_results.jsonl"
-    results_path = grammar_path / results_filename
-    inputs_filename = f"{batch_id}_inputs.jsonl"
-    inputs_path = grammar_path / inputs_filename
-
-    if not batch_jsonl_path.exists():
-        raise ValueError(f"Batch file {batch_jsonl_path} does not exist.")
-
-    log.info(f"Running local evaluation from {batch_jsonl_path}")
-
-    # Load the dataset
-    dataset = datasets.load_dataset("json", data_files=str(batch_jsonl_path))
-    dataset = dataset["train"]
-
-    def flatten_body(example):
-        return example["body"]
-
-    def flatten_messages(example):
-        return example["messages"][0]
-
-    def flatten_metadata(example):
-        example["body"]["metadata"] = example["metadata"]
-        return example
-
-    def create_input(example):
-        example["prompt"] = example["content"]
-        return example
-
-    def create_response(example):
-        example["response"] = {"body": example["body"]}
-        return example
-
-    dataset = (
-        dataset.map(flatten_body)
-        .map(flatten_messages)
-        .map(flatten_metadata)
-        .map(create_input)
-        .remove_columns(
-            [
-                "method",
-                "url",
-                "store",
-                "model",
-                "messages",
-                "content",
-                "role",
-                "metadata",
-            ]
-        )
-    )
-
-    log.info(f"Dataset loaded: {dataset}")
-    log.info(f"Writing inputs to {inputs_path}")
-    dataset.to_json(str(inputs_path), lines=True)
-
-    # To match the format of the OpenAI responses, we need to take all the `body`
-    # fields and put them inside a `response` field.
-    dataset = dataset.map(create_response).remove_columns(["body"])
-
-    log.info(f"Loading model {model}")
-
-    model_mlx, tokenizer = mlx_lm.load(model)
-
-    prompt = "Write me a story: It was a dark and stormy night..."
-    print(prompt)
-
-    response = mlx_lm.generate(model_mlx, tokenizer, prompt=prompt, verbose=True)
-    print(response)
-
-
 def run(
     # Grammar parameters
     grammar_name: str,
@@ -130,7 +37,7 @@ def run(
     model: str = "google/gemma-2-2b-it",
     # Pipeline parameters
     max_new_tokens: int = None,
-    batch_size: int = 2,
+    batch_size: int = 10,
 ):
     grammars_dir = PROJECT_ROOT / "data" / "grammars"
     grammar_path = grammars_dir / f"{grammar_name}"
