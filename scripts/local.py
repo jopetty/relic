@@ -8,10 +8,10 @@ import logging
 import datasets
 import dotenv
 import fire
-import mlx_lm
 import pyrootutils
 import torch
 import transformers
+from tqdm import tqdm  # Add tqdm for progress bar
 
 import formal_gym.utils.utils as fg_utils
 
@@ -30,98 +30,6 @@ PROJECT_ROOT = path = pyrootutils.find_root(
 dotenv.load_dotenv(PROJECT_ROOT / ".env")
 
 
-def run_mlx(
-    # Grammar parameters
-    grammar_name: str,
-    n_shots: int = 0,
-    # Model parameters
-    model: str = "google/gemma-2-2b-it",
-    # Pipeline parameters
-    max_new_tokens: int = None,
-    batch_size: int = 1,
-):
-    grammars_dir = PROJECT_ROOT / "data" / "grammars"
-    grammar_path = grammars_dir / f"{grammar_name}"
-
-    model_pathsafe_name = model.replace("/", "_")
-    batch_jsonl_filename = (
-        f"{grammar_name}_{model_pathsafe_name}_batched_{2*n_shots}-shot.jsonl"
-    )
-    batch_jsonl_path = grammar_path / batch_jsonl_filename
-
-    batch_id_hash = hashlib.md5(str(batch_jsonl_filename).encode()).hexdigest()
-    batch_id = f"batch_{batch_id_hash}"
-
-    results_filename = f"{batch_id}_results.jsonl"
-    results_path = grammar_path / results_filename
-    inputs_filename = f"{batch_id}_inputs.jsonl"
-    inputs_path = grammar_path / inputs_filename
-
-    if not batch_jsonl_path.exists():
-        raise ValueError(f"Batch file {batch_jsonl_path} does not exist.")
-
-    log.info(f"Running local evaluation from {batch_jsonl_path}")
-
-    # Load the dataset
-    dataset = datasets.load_dataset("json", data_files=str(batch_jsonl_path))
-    dataset = dataset["train"]
-
-    def flatten_body(example):
-        return example["body"]
-
-    def flatten_messages(example):
-        return example["messages"][0]
-
-    def flatten_metadata(example):
-        example["body"]["metadata"] = example["metadata"]
-        return example
-
-    def create_input(example):
-        example["prompt"] = example["content"]
-        return example
-
-    def create_response(example):
-        example["response"] = {"body": example["body"]}
-        return example
-
-    dataset = (
-        dataset.map(flatten_body)
-        .map(flatten_messages)
-        .map(flatten_metadata)
-        .map(create_input)
-        .remove_columns(
-            [
-                "method",
-                "url",
-                "store",
-                "model",
-                "messages",
-                "content",
-                "role",
-                "metadata",
-            ]
-        )
-    )
-
-    log.info(f"Dataset loaded: {dataset}")
-    log.info(f"Writing inputs to {inputs_path}")
-    dataset.to_json(str(inputs_path), lines=True)
-
-    # To match the format of the OpenAI responses, we need to take all the `body`
-    # fields and put them inside a `response` field.
-    dataset = dataset.map(create_response).remove_columns(["body"])
-
-    log.info(f"Loading model {model}")
-
-    model_mlx, tokenizer = mlx_lm.load(model)
-
-    prompt = "Write me a story: It was a dark and stormy night..."
-    print(prompt)
-
-    response = mlx_lm.generate(model_mlx, tokenizer, prompt=prompt, verbose=True)
-    print(response)
-
-
 def run(
     # Grammar parameters
     grammar_name: str,
@@ -130,7 +38,7 @@ def run(
     model: str = "google/gemma-2-2b-it",
     # Pipeline parameters
     max_new_tokens: int = None,
-    batch_size: int = 2,
+    batch_size: int = 8,
 ):
     grammars_dir = PROJECT_ROOT / "data" / "grammars"
     grammar_path = grammars_dir / f"{grammar_name}"
@@ -203,40 +111,98 @@ def run(
     # fields and put them inside a `response` field.
     dataset = dataset.map(create_response).remove_columns(["body"])
 
-    # subsample
-    dataset = dataset.select(range(10))
-
     log.info(f"Loading model {model}")
 
-    pipe = transformers.pipeline(
-        "text-generation",
-        model=model,
-        model_kwargs={"torch_dtype": torch.bfloat16},
-        device_map="auto",
-        return_full_text=False,
-        batch_size=batch_size,
-        max_new_tokens=max_new_tokens,
+    # Determine device
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    log.info(f"Using device: {device}")
+
+    tokenizer = transformers.AutoTokenizer.from_pretrained(
+        model,
+        use_fast=True,
+        padding_side="left",
     )
+    # Set pad token if it doesn't exist
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+        log.info("Setting pad_token to eos_token")
 
-    outputs = iter(pipe((_ for _ in dataset["prompt"])))
+    model = transformers.AutoModelForCausalLM.from_pretrained(
+        model,
+        torch_dtype=torch.bfloat16,
+        device_map="auto",  # Automatically distribute model across available devices
+    )
+    model.eval()  # Set model to evaluation mode
 
-    def get_response(example):
-        output = next(outputs)[0]["generated_text"].strip()
-        old_response = example["response"]
-        old_response["body"]["choices"] = [{"message": {"content": output}}]
-        example["response"] = old_response
-        return example
+    log.info("Starting generation...")
 
-    dataset = dataset.map(
-        get_response,
-        desc="get_response",
-        batch_size=batch_size,
-    ).remove_columns(["prompt"])
+    results = []
+    # Process dataset in batches
+    for i in tqdm(range(0, len(dataset), batch_size), desc="Generating responses"):
+        batch_prompts = dataset[i : i + batch_size]["prompt"]
+
+        # Tokenize the batch
+        inputs = tokenizer(
+            batch_prompts,
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
+            max_length=2048,  # Adjust max_length as needed, or remove if prompts are short
+        ).to(model.device)  # Move inputs to the same device as the model
+
+        # Generate responses
+        with torch.no_grad():
+            outputs = model.generate(
+                **inputs,
+                max_new_tokens=max_new_tokens,
+                pad_token_id=tokenizer.pad_token_id,
+                eos_token_id=tokenizer.eos_token_id,
+            )
+
+        # Decode generated tokens, skipping special tokens and prompt
+        # We need to slice the output tensors to only get the generated part
+        generated_ids = outputs[:, inputs.input_ids.shape[1] :]
+        batch_responses = tokenizer.batch_decode(
+            generated_ids,
+            skip_special_tokens=True,
+        )
+
+        # Store results for this batch
+        for j, response_text in enumerate(batch_responses):
+            original_example = dataset[i + j]
+            old_response = original_example["response"]
+            old_response["body"]["choices"] = [
+                {"message": {"content": response_text.strip()}}
+            ]
+            results.append(
+                {
+                    **original_example,  # Keep original fields
+                    "response": old_response,
+                }
+            )
+
+    # Create a new dataset from the results
+    # Ensure all columns from the original dataset (except 'prompt') are included
+    # Get columns from the first result item, excluding 'prompt'
+    if results:
+        final_columns = list(results[0].keys())
+        if "prompt" in final_columns:
+            final_columns.remove("prompt")
+        # Convert list of dicts to dict of lists for datasets.Dataset.from_dict
+        results_dict = {col: [item[col] for item in results] for col in final_columns}
+        processed_dataset = datasets.Dataset.from_dict(results_dict)
+    else:
+        # Handle empty results case
+        processed_dataset = dataset.remove_columns(
+            ["prompt"]
+        )  # Or create an empty dataset with correct schema
+
     log.info(f"Writing responses to {results_path}")
-    dataset.to_json(str(results_path), lines=True)
+    processed_dataset.to_json(str(results_path), lines=True)
 
-    del pipe
-    del dataset
+    del model
+    del tokenizer
+    del processed_dataset
 
 
 if __name__ == "__main__":
