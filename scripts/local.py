@@ -11,6 +11,7 @@ import fire
 import pyrootutils
 import torch
 import transformers
+from tqdm import tqdm # Add tqdm for progress bar
 
 import formal_gym.utils.utils as fg_utils
 
@@ -37,7 +38,7 @@ def run(
     model: str = "google/gemma-2-2b-it",
     # Pipeline parameters
     max_new_tokens: int = None,
-    batch_size: int = 10,
+    batch_size: int = 2,
 ):
     grammars_dir = PROJECT_ROOT / "data" / "grammars"
     grammar_path = grammars_dir / f"{grammar_name}"
@@ -110,41 +111,97 @@ def run(
     # fields and put them inside a `response` field.
     dataset = dataset.map(create_response).remove_columns(["body"])
 
-    # subsample
-    dataset = dataset.select(range(10))
-
     log.info(f"Loading model {model}")
 
-    pipe = transformers.pipeline(
-        "text-generation",
-        model=model,
-        model_kwargs={"torch_dtype": torch.bfloat16},
-        device_map="auto",
-        return_full_text=False,
-        batch_size=batch_size,
-        max_new_tokens=max_new_tokens,
+    # Determine device
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    log.info(f"Using device: {device}")
+
+    tokenizer = transformers.AutoTokenizer.from_pretrained(
+        model,
+        use_fast=True,
+        padding_side="left",
     )
+    # Set pad token if it doesn't exist
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+        log.info("Setting pad_token to eos_token")
 
-    outputs = iter(pipe((_ for _ in dataset["prompt"])))
 
-    def get_response(example):
-        output = next(outputs)[0]["generated_text"].strip()
-        old_response = example["response"]
-        old_response["body"]["choices"] = [{"message": {"content": output}}]
-        example["response"] = old_response
-        return example
+    model = transformers.AutoModelForCausalLM.from_pretrained(
+        model,
+        torch_dtype=torch.bfloat16,
+        device_map="auto", # Automatically distribute model across available devices
+    )
+    model.eval() # Set model to evaluation mode
 
-    dataset = dataset.map(
-        get_response,
-        desc="get_response",
-        batch_size=batch_size,
-    ).remove_columns(["prompt"])
+    log.info("Starting generation...")
+
+    results = []
+    # Process dataset in batches
+    for i in tqdm(range(0, len(dataset), batch_size), desc="Generating responses"):
+        batch_prompts = dataset[i : i + batch_size]["prompt"]
+
+        # Tokenize the batch
+        inputs = tokenizer(
+            batch_prompts,
+            return_tensors="pt",
+            padding=True,
+            truncation=True,
+            max_length=2048, # Adjust max_length as needed, or remove if prompts are short
+        ).to(model.device) # Move inputs to the same device as the model
+
+        # Generate responses
+        with torch.no_grad():
+            outputs = model.generate(
+                **inputs,
+                max_new_tokens=max_new_tokens,
+                pad_token_id=tokenizer.pad_token_id,
+                eos_token_id=tokenizer.eos_token_id,
+            )
+
+        # Decode generated tokens, skipping special tokens and prompt
+        # We need to slice the output tensors to only get the generated part
+        generated_ids = outputs[:, inputs.input_ids.shape[1]:]
+        batch_responses = tokenizer.batch_decode(
+            generated_ids,
+            skip_special_tokens=True,
+        )
+
+        # Store results for this batch
+        for j, response_text in enumerate(batch_responses):
+            original_example = dataset[i + j]
+            old_response = original_example["response"]
+            old_response["body"]["choices"] = [{"message": {"content": response_text.strip()}}]
+            results.append(
+                {
+                    **original_example, # Keep original fields
+                    "response": old_response,
+                }
+            )
+
+    # Create a new dataset from the results
+    # Ensure all columns from the original dataset (except 'prompt') are included
+    # Get columns from the first result item, excluding 'prompt'
+    if results:
+        final_columns = list(results[0].keys())
+        if "prompt" in final_columns:
+            final_columns.remove("prompt")
+        # Convert list of dicts to dict of lists for datasets.Dataset.from_dict
+        results_dict = {col: [item[col] for item in results] for col in final_columns}
+        processed_dataset = datasets.Dataset.from_dict(results_dict)
+    else:
+        # Handle empty results case
+        processed_dataset = dataset.remove_columns(["prompt"]) # Or create an empty dataset with correct schema
+
+
     log.info(f"Writing responses to {results_path}")
-    dataset.to_json(str(results_path), lines=True)
+    processed_dataset.to_json(str(results_path), lines=True)
 
-    del pipe
-    del dataset
+    del model
+    del tokenizer
+    del processed_dataset
 
 
 if __name__ == "__main__":
-    fire.Fire()
+    fire.Fire(run)

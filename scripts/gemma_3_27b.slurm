@@ -8,7 +8,7 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 #SBATCH --gres=gpu:1
-#SBATCH --mem=8G
+#SBATCH --mem=16G
 #SBATCH --time=01:00:00
 #SBATCH --array=0
 
