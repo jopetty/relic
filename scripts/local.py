@@ -147,7 +147,6 @@ def run(
             return_tensors="pt",
             padding=True,
             truncation=True,
-            max_length=2048,  # Adjust max_length as needed, or remove if prompts are short
         ).to(model.device)  # Move inputs to the same device as the model
 
         # Generate responses
@@ -199,11 +198,7 @@ def run(
 
     log.info(f"Writing responses to {results_path}")
     processed_dataset.to_json(str(results_path), lines=True)
-    processed_dataset.to_json(str(results_path), lines=True)
 
-    del model
-    del tokenizer
-    del processed_dataset
     del model
     del tokenizer
     del processed_dataset
