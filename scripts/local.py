@@ -38,7 +38,7 @@ def run(
     model: str = "google/gemma-2-2b-it",
     # Pipeline parameters
     max_new_tokens: int = None,
-    batch_size: int = 8,
+    batch_size: int = 2,
 ):
     grammars_dir = PROJECT_ROOT / "data" / "grammars"
     grammar_path = grammars_dir / f"{grammar_name}"
@@ -147,7 +147,6 @@ def run(
             return_tensors="pt",
             padding=True,
             truncation=True,
-            max_length=2048,  # Adjust max_length as needed, or remove if prompts are short
         ).to(model.device)  # Move inputs to the same device as the model
 
         # Generate responses
@@ -206,4 +205,4 @@ def run(
 
 
 if __name__ == "__main__":
-    fire.Fire()
+    fire.Fire(run)
