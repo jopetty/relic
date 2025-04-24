@@ -11,7 +11,7 @@ import fire
 import pyrootutils
 import torch
 import transformers
-from tqdm import tqdm # Add tqdm for progress bar
+from tqdm import tqdm  # Add tqdm for progress bar
 
 import formal_gym.utils.utils as fg_utils
 
@@ -127,13 +127,12 @@ def run(
         tokenizer.pad_token = tokenizer.eos_token
         log.info("Setting pad_token to eos_token")
 
-
     model = transformers.AutoModelForCausalLM.from_pretrained(
         model,
         torch_dtype=torch.bfloat16,
-        device_map="auto", # Automatically distribute model across available devices
+        device_map="auto",  # Automatically distribute model across available devices
     )
-    model.eval() # Set model to evaluation mode
+    model.eval()  # Set model to evaluation mode
 
     log.info("Starting generation...")
 
@@ -148,8 +147,8 @@ def run(
             return_tensors="pt",
             padding=True,
             truncation=True,
-            max_length=2048, # Adjust max_length as needed, or remove if prompts are short
-        ).to(model.device) # Move inputs to the same device as the model
+            max_length=2048,  # Adjust max_length as needed, or remove if prompts are short
+        ).to(model.device)  # Move inputs to the same device as the model
 
         # Generate responses
         with torch.no_grad():
@@ -162,7 +161,7 @@ def run(
 
         # Decode generated tokens, skipping special tokens and prompt
         # We need to slice the output tensors to only get the generated part
-        generated_ids = outputs[:, inputs.input_ids.shape[1]:]
+        generated_ids = outputs[:, inputs.input_ids.shape[1] :]
         batch_responses = tokenizer.batch_decode(
             generated_ids,
             skip_special_tokens=True,
@@ -172,10 +171,12 @@ def run(
         for j, response_text in enumerate(batch_responses):
             original_example = dataset[i + j]
             old_response = original_example["response"]
-            old_response["body"]["choices"] = [{"message": {"content": response_text.strip()}}]
+            old_response["body"]["choices"] = [
+                {"message": {"content": response_text.strip()}}
+            ]
             results.append(
                 {
-                    **original_example, # Keep original fields
+                    **original_example,  # Keep original fields
                     "response": old_response,
                 }
             )
@@ -192,12 +193,17 @@ def run(
         processed_dataset = datasets.Dataset.from_dict(results_dict)
     else:
         # Handle empty results case
-        processed_dataset = dataset.remove_columns(["prompt"]) # Or create an empty dataset with correct schema
-
+        processed_dataset = dataset.remove_columns(
+            ["prompt"]
+        )  # Or create an empty dataset with correct schema
 
     log.info(f"Writing responses to {results_path}")
     processed_dataset.to_json(str(results_path), lines=True)
+    processed_dataset.to_json(str(results_path), lines=True)
 
+    del model
+    del tokenizer
+    del processed_dataset
     del model
     del tokenizer
     del processed_dataset
