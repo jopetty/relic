@@ -146,7 +146,6 @@ def run(
             batch_prompts,
             return_tensors="pt",
             padding=True,
-            truncation=True,
         ).to(model.device)  # Move inputs to the same device as the model
 
         # Generate responses
