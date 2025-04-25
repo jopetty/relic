@@ -37,7 +37,7 @@ def run(
     # Model parameters
     model: str = "google/gemma-2-2b-it",
     # Pipeline parameters
-    max_new_tokens: int = None,
+    max_new_tokens: int = 200,
     batch_size: int = 2,
 ):
     grammars_dir = PROJECT_ROOT / "data" / "grammars"
@@ -129,9 +129,10 @@ def run(
 
     model = transformers.AutoModelForCausalLM.from_pretrained(
         model,
-        torch_dtype=torch.bfloat16,
-        device_map="auto",  # Automatically distribute model across available devices
+        torch_dtype="auto",
+        device_map="auto",
     )
+
     model.eval()  # Set model to evaluation mode
 
     log.info("Starting generation...")
@@ -146,7 +147,6 @@ def run(
             batch_prompts,
             return_tensors="pt",
             padding=True,
-            truncation=True,
         ).to(model.device)  # Move inputs to the same device as the model
 
         # Generate responses
