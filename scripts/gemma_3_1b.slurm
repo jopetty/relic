@@ -8,7 +8,7 @@
 #SBATCH --gres=gpu:1
 #SBATCH --mem=16G
 #SBATCH --time=01:00:00
-#SBATCH --array=51-100
+#SBATCH --array=51-199
 
 MODEL_NAME="google/gemma-3-1b-it"
 
