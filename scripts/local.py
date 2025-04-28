@@ -36,10 +36,28 @@ def run(
     n_shots: int = 0,
     # Model parameters
     model: str = "google/gemma-2-2b-it",
-    # Pipeline parameters
+    attn_implementation: str = "sdpa",
+    torch_dtype: str = "auto",
+    device_map: str = "auto",
+    # Generation parameters
     max_new_tokens: int = 200,
+    do_sample: bool = True,
     batch_size: int = 2,
 ):
+    # Build dict of all parameters
+    params = {
+        "grammar_name": grammar_name,
+        "n_shots": n_shots,
+        "model": model,
+        "attn_implementation": attn_implementation,
+        "torch_dtype": torch_dtype,
+        "device_map": device_map,
+        "max_new_tokens": max_new_tokens,
+        "do_sample": do_sample,
+        "batch_size": batch_size,
+    }
+    log.info(f"Running local inference with {params=}")
+
     grammars_dir = PROJECT_ROOT / "data" / "grammars"
     grammar_path = grammars_dir / f"{grammar_name}"
 
@@ -111,7 +129,7 @@ def run(
     # fields and put them inside a `response` field.
     dataset = dataset.map(create_response).remove_columns(["body"])
 
-    log.info(f"Loading model {model}")
+    log.info(f"Loading model {model=}")
 
     # Determine device
     device: str = (
@@ -132,25 +150,24 @@ def run(
 
     model = transformers.AutoModelForCausalLM.from_pretrained(
         model,
-        torch_dtype="auto",
-        device_map="auto",
-        attn_implementation="spda",
+        torch_dtype=torch_dtype,
+        device_map=device_map,
+        attn_implementation=attn_implementation,
     )
 
     generation_config = transformers.GenerationConfig(
         max_new_tokens=max_new_tokens,
         do_sample=True,
-        # cache_implementation="static",
     )
 
-    log.info(f"Generating with config: {generation_config}")
+    log.info(f"Loaded model {model=}")
+    log.info(f"Generating with {generation_config=}")
 
     model.eval()
 
     log.info("Starting generation...")
 
     results = []
-    # Process dataset in batches
     for i in tqdm(range(0, len(dataset), batch_size), desc="Generating responses"):
         batch_prompts = dataset[i : i + batch_size]["prompt"]
 
