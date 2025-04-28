@@ -114,7 +114,14 @@ def run(
     log.info(f"Loading model {model}")
 
     # Determine device
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device: str = (
+        "cuda"
+        if torch.cuda.is_available()
+        else "mps"
+        if torch.backends.mps.is_available()
+        else "cpu"
+    )
+
     log.info(f"Using device: {device}")
 
     tokenizer = transformers.AutoTokenizer.from_pretrained(
@@ -122,18 +129,23 @@ def run(
         use_fast=True,
         padding_side="left",
     )
-    # Set pad token if it doesn't exist
-    if tokenizer.pad_token is None:
-        tokenizer.pad_token = tokenizer.eos_token
-        log.info("Setting pad_token to eos_token")
 
     model = transformers.AutoModelForCausalLM.from_pretrained(
         model,
         torch_dtype="auto",
         device_map="auto",
+        attn_implementation="spda",
     )
 
-    model.eval()  # Set model to evaluation mode
+    generation_config = transformers.GenerationConfig(
+        max_new_tokens=max_new_tokens,
+        do_sample=True,
+        # cache_implementation="static",
+    )
+
+    log.info(f"Generating with config: {generation_config}")
+
+    model.eval()
 
     log.info("Starting generation...")
 
@@ -154,9 +166,7 @@ def run(
         with torch.no_grad():
             outputs = model.generate(
                 **inputs,
-                max_new_tokens=max_new_tokens,
-                pad_token_id=tokenizer.pad_token_id,
-                eos_token_id=tokenizer.eos_token_id,
+                generation_config=generation_config,
             )
 
         # Decode generated tokens, skipping special tokens and prompt
@@ -181,9 +191,10 @@ def run(
                 }
             )
 
+    del model
+    del tokenizer
+
     # Create a new dataset from the results
-    # Ensure all columns from the original dataset (except 'prompt') are included
-    # Get columns from the first result item, excluding 'prompt'
     if results:
         final_columns = list(results[0].keys())
         if "prompt" in final_columns:
@@ -192,16 +203,11 @@ def run(
         results_dict = {col: [item[col] for item in results] for col in final_columns}
         processed_dataset = datasets.Dataset.from_dict(results_dict)
     else:
-        # Handle empty results case
-        processed_dataset = dataset.remove_columns(
-            ["prompt"]
-        )  # Or create an empty dataset with correct schema
+        raise ValueError("No results generated. Check the model and dataset.")
 
     log.info(f"Writing responses to {results_path}")
     processed_dataset.to_json(str(results_path), lines=True)
 
-    del model
-    del tokenizer
     del processed_dataset
 
 
