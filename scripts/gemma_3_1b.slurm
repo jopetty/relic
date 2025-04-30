@@ -10,6 +10,9 @@
 #SBATCH --time=01:00:00
 #SBATCH --array=199
 
+export UV_CACHE_DIR="/scratch/jp6664/flicr/.cache/uv"
+export HF_HOME="/scratch/jp6664/flicr/.cache/hf"
+
 MODEL_NAME="google/gemma-3-1b-it"
 
 mapfile -t combined_array < <(cat data/large_subset.txt data/small_subset.txt)

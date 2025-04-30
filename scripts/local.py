@@ -11,7 +11,7 @@ import fire
 import pyrootutils
 import torch
 import transformers
-from tqdm import tqdm  # Add tqdm for progress bar
+from tqdm import tqdm
 
 import formal_gym.utils.utils as fg_utils
 
@@ -35,7 +35,7 @@ def run(
     grammar_name: str,
     n_shots: int = 0,
     # Model parameters
-    model: str = "google/gemma-2-2b-it",
+    model: str = "google/gemma-3-1b-it",
     attn_implementation: str = "sdpa",
     torch_dtype: str = "auto",
     device_map: str = "auto",
@@ -156,7 +156,7 @@ def run(
         torch.bfloat16
         if torch_dtype == "torch.bfloat16"
         else torch.float16
-        if torch_type == "torch.float16"
+        if torch_dtype == "torch.float16"
         else "auto"
     )
 
@@ -178,21 +178,26 @@ def run(
     log.info(f"Loaded model {model=}")
     log.info(f"Generating with {generation_config=}")
 
+    log.info("Tokenzing inputs")
+    tokenized_inputs = tokenizer(
+        dataset["prompt"],
+        return_tensors="pt",
+        padding=True,
+        pad_to_multiple_of=8,
+    )
+    tokenized_inputs = {k: v.to(model.device) for k, v in tokenized_inputs.items()}
+
     model.eval()
 
     log.info("Starting generation...")
 
     results = []
     for i in tqdm(range(0, len(dataset), batch_size), desc="Generating responses"):
-        batch_prompts = dataset[i : i + batch_size]["prompt"]
 
-        # Tokenize the batch
-        inputs = tokenizer(
-            batch_prompts,
-            return_tensors="pt",
-            padding=True,
-            pad_to_multiple_of=8,
-        ).to(model.device)  # Move inputs to the same device as the model
+        inputs = {
+            "input_ids": tokenized_inputs["input_ids"][i : i + batch_size],
+            "attention_mask": tokenized_inputs["attention_mask"][i : i + batch_size],
+        }
 
         # Generate responses
         with torch.inference_mode():
@@ -203,7 +208,7 @@ def run(
 
         # Decode generated tokens, skipping special tokens and prompt
         # We need to slice the output tensors to only get the generated part
-        generated_ids = outputs[:, inputs.input_ids.shape[1] :]
+        generated_ids = outputs[:, inputs["input_ids"].shape[1] :]
         batch_responses = tokenizer.batch_decode(
             generated_ids,
             skip_special_tokens=True,
@@ -245,3 +250,4 @@ def run(
 
 if __name__ == "__main__":
     fire.Fire(run)
+
