@@ -39,6 +39,8 @@ def run(
     attn_implementation: str = "sdpa",
     torch_dtype: str = "auto",
     device_map: str = "auto",
+    do_compile: bool = True,
+    compile_mode: str = "default",
     # Generation parameters
     max_new_tokens: int = 200,
     do_sample: bool = True,
@@ -55,6 +57,8 @@ def run(
         "max_new_tokens": max_new_tokens,
         "do_sample": do_sample,
         "batch_size": batch_size,
+        "compile": do_compile,
+        "compile_mode": compile_mode,
     }
     log.info(f"Running local inference with {params=}")
 
@@ -148,12 +152,23 @@ def run(
         padding_side="left",
     )
 
+    torch_dtype_val = (
+        torch.bfloat16
+        if torch_dtype == "torch.bfloat16"
+        else torch.float16
+        if torch_type == "torch.float16"
+        else "auto"
+    )
+
     model = transformers.AutoModelForCausalLM.from_pretrained(
         model,
-        torch_dtype=torch_dtype,
+        torch_dtype=torch_dtype_val,
         device_map=device_map,
         attn_implementation=attn_implementation,
     )
+
+    if do_compile:
+        model = torch.compile(model, mode=compile_mode)
 
     generation_config = transformers.GenerationConfig(
         max_new_tokens=max_new_tokens,
@@ -180,7 +195,7 @@ def run(
         ).to(model.device)  # Move inputs to the same device as the model
 
         # Generate responses
-        with torch.no_grad():
+        with torch.inference_mode():
             outputs = model.generate(
                 **inputs,
                 generation_config=generation_config,
