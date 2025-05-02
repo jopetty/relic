@@ -257,11 +257,11 @@ if __name__ == "__main__":  # DO NOT EDIT THIS LINE
     pprint.pprint(asdict(english_params))  # DO NOT EDIT THIS LINE
     english_grammar_str = generate_cfg(english_params)  # DO NOT EDIT THIS LINE
     english_grammar = fg_grammar.Grammar.from_string(  # DO NOT EDIT THIS LINE
-        english_grammar_str,
-        grammar_type=GType.CFG,
-    )
-    print(english_grammar.as_cfg)
-    for _ in range(2):
-        s = english_grammar.generate_tree()
-        print(s["string"])
+        english_grammar_str,  # DO NOT EDIT THIS LINE
+        grammar_type=GType.CFG,  # DO NOT EDIT THIS LINE
+    )  # DO NOT EDIT THIS LINE
+    print(english_grammar.as_cfg)  # DO NOT EDIT THIS LINE
+    for _ in range(2):  # DO NOT EDIT THIS LINE
+        s = english_grammar.generate_tree()  # DO NOT EDIT THIS LINE
+        print(s["string"])  # DO NOT EDIT THIS LINE
 # END FG BLOCK
