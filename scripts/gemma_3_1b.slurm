@@ -9,7 +9,7 @@
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=32G
 #SBATCH --time=02:00:00
-#SBATCH --array=0
+#SBATCH --array=1-50
 
 export UV_CACHE_DIR="/scratch/jp6664/flicr/.cache/uv"
 export HF_HOME="/scratch/jp6664/flicr/.cache/hf"
