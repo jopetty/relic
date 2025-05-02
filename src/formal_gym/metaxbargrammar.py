@@ -1,6 +1,7 @@
 # metaxbargrammar.py
 
-from dataclasses import dataclass, field
+import pprint
+from dataclasses import asdict, dataclass, field
 from typing import List, Optional
 
 # BEGIN FG BLOCK: CUSTOM IMPORTS. **DO NOT EDIT**
@@ -9,6 +10,43 @@ import formal_gym.grammar as fg_grammar
 
 GType = fg_grammar.Grammar.Type
 # END FG BLOCK
+
+
+# ------------------------------------------------------------------
+#  HELPER: BUILD LARSON‑STYLE SHELL RULES (CNF)
+# ------------------------------------------------------------------
+
+
+def _shell_rules(
+    phrase: str,
+    spec: str,
+    head: str,
+    comp: str,
+    *,
+    head_initial: bool = True,
+    spec_first: bool = True,
+):
+    """Return the two CNF rules for a Larson shell.
+
+    XP -> SPEC XBAR   /  XBAR SPEC
+    XBAR -> X⁰ COMP   /  COMP X⁰
+    """
+    xbar = f"{head.upper()}BAR"  # unique bar label
+    rules = []
+
+    # specifier placement
+    if spec_first:
+        rules.append(f"{phrase} -> {spec} {xbar}")
+    else:
+        rules.append(f"{phrase} -> {xbar} {spec}")
+
+    # head direction
+    if head_initial:
+        rules.append(f"{xbar} -> {head} {comp}")
+    else:
+        rules.append(f"{xbar} -> {comp} {head}")
+
+    return rules
 
 
 # ------------------------------------------------------------------
@@ -49,6 +87,7 @@ class GrammarParams:
     n_wh: int = field(init=False, default=2)
 
     def __post_init__(self):
+        # auto‑fill lexicons if missing
         if self.verb_lex is None:
             self.verb_lex = [f"verb{i}" for i in range(self.n_verbs)]
         else:
@@ -79,6 +118,7 @@ class GrammarParams:
         else:
             self.n_wh = len(self.wh_lex)
 
+    # handy english preset
     @classmethod
     def english(cls):
         return cls(
@@ -101,8 +141,18 @@ class GrammarParams:
         )
 
 
+# ------------------------------------------------------------------
+#  LEXICAL RULE GENERATOR
+# ------------------------------------------------------------------
+
+
 def _lex(pos: str, words: List[str]) -> List[str]:
     return [f"{pos} -> '{w}'" for w in words]
+
+
+# ------------------------------------------------------------------
+#  CFG GENERATOR
+# ------------------------------------------------------------------
 
 
 def generate_cfg(p: GrammarParams) -> str:
@@ -111,115 +161,103 @@ def generate_cfg(p: GrammarParams) -> str:
     # ----- CP / S layer -----
     rules.append("S -> CP")
 
-    # root wh‑question (binary) and root declarative via NULL complementizer
+    # wh‑root vs declarative root
     if p.wh_movement:
-        rules.append("CP -> WH TP")  # wh fronting, no overt C
-    # root declarative: CP -> CNULL TP (binary, CNF)
-    rules.append("CP -> CNULL TP")
-
-    # optional overt complementizer in embeds (still CNF)
-    if p.comp_initial:
-        rules.append("CP -> C TP")
+        # CP shell with wh spec and null C head
+        rules += _shell_rules(
+            "CP", "WH", "CNULL", "TP", head_initial=p.comp_initial, spec_first=True
+        )
     else:
-        rules.append("CP -> TP C")
+        # declarative only: CP shell with null C head
+        rules += _shell_rules(
+            "CP", "CNULL", "CNULL", "TP", head_initial=p.comp_initial, spec_first=True
+        )
 
-    # ----- TP -----
-    rules.append("TP -> NP_SUBJ T_BAR")
+    # embedded CP with overt C (binary)
+    rules.append("CP -> C TP" if p.comp_initial else "CP -> TP C")
+
+    # ----- TP shell -----
+    rules += _shell_rules(
+        "TP", "NP_SUBJ", "T_HEAD", "VP", head_initial=p.verb_raise, spec_first=True
+    )
+    # T_HEAD expands to T (and optional AGR_S if rich)
+    if p.rich_agreement:
+        rules += [
+            "T_HEAD -> T AGR_S" if p.verb_raise else "T_HEAD -> AGR_S T",
+        ]
+    else:
+        rules.append("T_HEAD -> T")
+
+    # subject licensing
     rules.append("NP_SUBJ -> PRO | NP" if p.pro_drop else "NP_SUBJ -> NP")
 
-    # ----- T_BAR (+AgrS) -----
-    if p.rich_agreement:
-        if p.verb_raise:
-            rules += [
-                "T_BAR -> AGR_S_NODE VP",
-                "AGR_S_NODE -> T AGR_S",
-            ]
-        else:
-            rules += [
-                "T_BAR -> VP AGR_S_NODE",
-                "AGR_S_NODE -> AGR_S T",
-            ]
-    else:
-        rules.append("T_BAR -> T VP" if p.verb_raise else "T_BAR -> VP T")
-
-    # ----- VP backbone -----
-    rules += ["VP -> ASP_PHRASE", "ASP_PHRASE -> ASP little_vP"]
-
-    # ---------------- object position & little_vP ------------------
-    if p.object_shift:
-        rules += [
-            "little_vP -> AGR_OP V_BAR",
-            "AGR_OP -> NP_OBJ AGR_O_NODE",
-            "AGR_O_NODE -> AGR_O NP_OBJ_INNER",
-            "NP_OBJ -> NP",
-            "NP_OBJ_INNER -> EPS_OBJ",
-        ]
-        if p.rich_agreement:
-            rules += [
-                "V_BAR -> V_AGR",
-                "V_AGR -> V AGR_O",
-            ]
-        else:
-            rules.append("V_BAR -> V")
-    else:
-        rules.append("little_vP -> V_BAR")
-        if p.rich_agreement:
-            order = "V_AGR OBJ" if p.head_initial else "OBJ V_AGR"
-            rules += [f"V_BAR -> {order}", "V_AGR -> V AGR_O"]
-        else:
-            order = "V OBJ" if p.head_initial else "OBJ V"
-            rules.append(f"V_BAR -> {order}")
-        rules.append("OBJ -> NP")
-
-    if p.object_shift:
-        rules.append("EPS_OBJ -> '∅'")
-
-    # ----- noun phrase -----
-    if p.spec_first:
-        rules += [
-            "NP -> DET N_BAR",
-            "N_BAR -> N",
-            "N_BAR -> ADJLIST N",
-        ]
-    else:
-        rules += [
-            "NP -> N_BAR DET",
-            "N_BAR -> N",
-            "N_BAR -> N ADJLIST",
-        ]
-
-    # proper names
-    if p.proper_with_det:
-        rules.append("NP -> DET PROPN")
-    else:
-        rules.append("NP -> PROPN")
-
-    # adjective recursion
-    rules += ["ADJLIST -> ADJ", "ADJLIST -> ADJ ADJLIST"]
-
-    # ----- lexicon collection -----
-    dets = p.det_lex if p.det_lex else [f"det{i}" for i in range(2)]
-    verbs = p.verb_lex if p.verb_lex else [f"verb{i}" for i in range(p.n_verbs)]
-    nouns = p.noun_lex if p.noun_lex else [f"noun{i}" for i in range(p.n_nouns)]
-    propns = (
-        p.propn_lex
-        if p.propn_lex is not None
-        else [f"name{i}" for i in range(p.n_propns)]
+    # ----- VP shell (AspP spec) -----
+    rules += _shell_rules(
+        "VP",
+        "ASP",
+        "V_HEAD",
+        "OBJ_PHRASE",
+        head_initial=p.head_initial,
+        spec_first=True,
     )
-    adjs = p.adj_lex if p.adj_lex else [f"adj{i}" for i in range(p.n_adjs)]
-    comps = p.comp_lex if p.comp_lex else [f"c{i}" for i in range(p.n_comps)]
-    whs = p.wh_lex if p.wh_lex else [f"wh{i}" for i in range(p.n_wh)]
 
-    rules += _lex("DET", dets)
+    # V_HEAD expands depending on agreement
+    if p.rich_agreement:
+        rules.append("V_HEAD -> V AGR_O")
+    else:
+        rules.append("V_HEAD -> V")
+
+    # OBJ_PHRASE may shift out (object_shift parameter)
+    if p.object_shift:
+        # object raises: little_vP shell handles it; here OBJ_PHRASE is empty
+        rules.append("OBJ_PHRASE -> EPS_OBJ")
+        rules.append("EPS_OBJ -> '∅'")
+    else:
+        # object stays
+        rules.append("OBJ_PHRASE -> NP")
+
+    # ----- Nominal shells (NP) -----
+    # determiner + N shell
+    if p.proper_with_det:
+        # allow DET PROPN variant
+        rules += _shell_rules(
+            "NP", "DET", "N_HEAD", "ADJLIST", head_initial=False, spec_first=True
+        )
+        rules.append("N_HEAD -> PROPN")
+    else:
+        rules += _shell_rules(
+            "NP", "DET", "N_HEAD", "ADJLIST", head_initial=False, spec_first=True
+        )
+        rules.append("N_HEAD -> N | PROPN")
+
+    # adjectives recurse
+    rules += [
+        "ADJLIST -> ADJ",
+        "ADJLIST -> ADJ ADJLIST",
+    ]
+
+    # ----- “little vP” shell for object shift (optional) -----
+    if p.object_shift:
+        rules += _shell_rules(
+            "little_vP",
+            "NP",
+            "V_HEAD",
+            "EPS_OBJ",
+            head_initial=p.head_initial,
+            spec_first=True,
+        )
+
+    # ----- Lexicon -----
+    rules += _lex("DET", p.det_lex if p.det_lex else [f"det{i}" for i in range(2)])
     rules += _lex("T", [f"t_{x}" for x in p.tense_lex])
     rules += _lex("ASP", [f"asp_{x}" for x in p.asp_lex])
-    rules += _lex("C", comps)  # overt complementizers (embedded)
-    rules += _lex("CNULL", ["∅C"])  # null root comp for declaratives
-    rules += _lex("WH", whs)
-    rules += _lex("V", verbs)
-    rules += _lex("N", nouns)
-    rules += _lex("PROPN", propns)
-    rules += _lex("ADJ", adjs if adjs else ["dummy_adj"])
+    rules += _lex("C", p.comp_lex)
+    rules += _lex("CNULL", ["∅C"])
+    rules += _lex("WH", p.wh_lex)
+    rules += _lex("V", p.verb_lex)
+    rules += _lex("N", p.noun_lex)
+    rules += _lex("PROPN", p.propn_lex)
+    rules += _lex("ADJ", p.adj_lex if p.adj_lex else ["dummy_adj"])
 
     if p.rich_agreement:
         rules += _lex("AGR_S", p.agrs_lex)
@@ -238,8 +276,13 @@ def generate_cfg(p: GrammarParams) -> str:
 # BEGIN FG BLOCK: CUSTOM IMPORTS. **DO NOT EDIT**
 # **DO NOT EVEN EDIT THE COMMENTS**
 if __name__ == "__main__":  # DO NOT EDIT THIS LINE
+    english_params = GrammarParams.english()  # DO NOT EDIT THIS LINE
+    print("Running with params:")  # DO NOT EDIT THIS LINE
+    pprint.pprint(asdict(english_params))  # DO NOT EDIT THIS LINE
+    english_grammar_str = generate_cfg(english_params)  # DO NOT EDIT THIS LINE
+    # print(english_grammar_str)  # DO NOT EDIT THIS LINE
     english_grammar = fg_grammar.Grammar.from_string(  # DO NOT EDIT THIS LINE
-        generate_cfg(GrammarParams.english()),  # DO NOT EDIT THIS LINE
+        english_grammar_str,  # DO NOT EDIT THIS LINE
         grammar_type=GType.CFG,  # DO NOT EDIT THIS LINE
     )  # DO NOT EDIT THIS LINE
 
