@@ -20,14 +20,14 @@ class GrammarParams:
     head_initial: bool = True
     spec_first: bool = True
     comp_initial: bool = True
-    wh_movement: bool = True  # allow wh‑fronting rules
+    wh_movement: bool = True
     pro_drop: bool = False
     verb_raise: bool = False
     object_shift: bool = False
     rich_agreement: bool = False
-    proper_with_det: bool = False  # article w/ proper names?
+    proper_with_det: bool = False
 
-    # lexicon (override lists to customise)
+    # lexical items
     verb_lex: Optional[List[str]] = None
     noun_lex: Optional[List[str]] = None
     propn_lex: Optional[List[str]] = None
@@ -35,21 +35,50 @@ class GrammarParams:
     det_lex: Optional[List[str]] = None
     comp_lex: Optional[List[str]] = None
     wh_lex: Optional[List[str]] = None
-
     tense_lex: List[str] = field(default_factory=lambda: ["past", "pres"])
     asp_lex: List[str] = field(default_factory=lambda: ["prog", "perf"])
     agrs_lex: List[str] = field(default_factory=lambda: ["agrS0", "agrS1"])
     agro_lex: List[str] = field(default_factory=lambda: ["agrO0", "agrO1"])
 
     # fallback sizes
-    n_verbs: int = 3
-    n_nouns: int = 3
-    n_propns: int = 3
-    n_adjs: int = 2
-    n_comps: int = 2
-    n_wh: int = 2
+    n_verbs: int = field(init=False, default=3)
+    n_nouns: int = field(init=False, default=3)
+    n_propns: int = field(init=False, default=3)
+    n_adjs: int = field(init=False, default=2)
+    n_comps: int = field(init=False, default=2)
+    n_wh: int = field(init=False, default=2)
 
-    # english preset ------------------------------------------------
+    def __post_init__(self):
+        if self.verb_lex is None:
+            self.verb_lex = [f"verb{i}" for i in range(self.n_verbs)]
+        else:
+            self.n_verbs = len(self.verb_lex)
+
+        if self.noun_lex is None:
+            self.noun_lex = [f"noun{i}" for i in range(self.n_nouns)]
+        else:
+            self.n_nouns = len(self.noun_lex)
+
+        if self.propn_lex is None:
+            self.propn_lex = [f"name{i}" for i in range(self.n_propns)]
+        else:
+            self.n_propns = len(self.propn_lex)
+
+        if self.adj_lex is None:
+            self.adj_lex = [f"adj{i}" for i in range(self.n_adjs)]
+        else:
+            self.n_adjs = len(self.adj_lex)
+
+        if self.comp_lex is None:
+            self.comp_lex = [f"c{i}" for i in range(self.n_comps)]
+        else:
+            self.n_comps = len(self.comp_lex)
+
+        if self.wh_lex is None:
+            self.wh_lex = [f"wh{i}" for i in range(self.n_wh)]
+        else:
+            self.n_wh = len(self.wh_lex)
+
     @classmethod
     def english(cls):
         return cls(
