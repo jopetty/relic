@@ -20,15 +20,17 @@ class GrammarParams:
     head_initial: bool = True
     spec_first: bool = True
     comp_initial: bool = True
-    wh_movement: bool = True
+    wh_movement: bool = True  # allow wh‑fronting rules
     pro_drop: bool = False
     verb_raise: bool = False
     object_shift: bool = False
     rich_agreement: bool = False
+    proper_with_det: bool = False  # article w/ proper names?
 
-    # lexicon (explicit lists optional)
+    # lexicon (override lists to customise)
     verb_lex: Optional[List[str]] = None
     noun_lex: Optional[List[str]] = None
+    propn_lex: Optional[List[str]] = None
     adj_lex: Optional[List[str]] = None
     det_lex: Optional[List[str]] = None
     comp_lex: Optional[List[str]] = None
@@ -42,6 +44,7 @@ class GrammarParams:
     # fallback sizes
     n_verbs: int = 3
     n_nouns: int = 3
+    n_propns: int = 3
     n_adjs: int = 2
     n_comps: int = 2
     n_wh: int = 2
@@ -58,8 +61,10 @@ class GrammarParams:
             verb_raise=False,
             object_shift=False,
             rich_agreement=False,
+            proper_with_det=False,
             verb_lex=["eat", "see", "love", "give"],
             noun_lex=["tree", "horse", "dog", "cat", "apple"],
+            propn_lex=["john", "mary", "london"],
             adj_lex=["big", "small", "red", "green", "blue", "fuzzy"],
             det_lex=["the", "a"],
             comp_lex=["that"],
@@ -76,10 +81,18 @@ def generate_cfg(p: GrammarParams) -> str:
 
     # ----- CP / S layer -----
     rules.append("S -> CP")
+
+    # root wh‑question (binary) and root declarative via NULL complementizer
     if p.wh_movement:
-        rules.append("CP -> WH TP")  # root wh: no overt C
+        rules.append("CP -> WH TP")  # wh fronting, no overt C
+    # root declarative: CP -> CNULL TP (binary, CNF)
+    rules.append("CP -> CNULL TP")
+
+    # optional overt complementizer in embeds (still CNF)
+    if p.comp_initial:
+        rules.append("CP -> C TP")
     else:
-        rules.append("CP -> C TP" if p.comp_initial else "CP -> TP C")
+        rules.append("CP -> TP C")
 
     # ----- TP -----
     rules.append("TP -> NP_SUBJ T_BAR")
@@ -105,15 +118,13 @@ def generate_cfg(p: GrammarParams) -> str:
 
     # ---------------- object position & little_vP ------------------
     if p.object_shift:
-        # object raises to spec‑AgrOP; V̄ lacks internal OBJ
         rules += [
             "little_vP -> AGR_OP V_BAR",
             "AGR_OP -> NP_OBJ AGR_O_NODE",
-            "AGR_O_NODE -> AGR_O NP_OBJ_INNER",  # CNF helper
-            "NP_OBJ -> NP",  # moved object
-            "NP_OBJ_INNER -> EPS_OBJ",  # placeholder (λ‑pos)
+            "AGR_O_NODE -> AGR_O NP_OBJ_INNER",
+            "NP_OBJ -> NP",
+            "NP_OBJ_INNER -> EPS_OBJ",
         ]
-        # V_BAR for shifted languages – no OBJ inside
         if p.rich_agreement:
             rules += [
                 "V_BAR -> V_AGR",
@@ -122,7 +133,6 @@ def generate_cfg(p: GrammarParams) -> str:
         else:
             rules.append("V_BAR -> V")
     else:
-        # no shift ⇒ only one object inside V̄
         rules.append("little_vP -> V_BAR")
         if p.rich_agreement:
             order = "V_AGR OBJ" if p.head_initial else "OBJ V_AGR"
@@ -132,9 +142,8 @@ def generate_cfg(p: GrammarParams) -> str:
             rules.append(f"V_BAR -> {order}")
         rules.append("OBJ -> NP")
 
-    # Still need alias when object_shift = True and OBJ category used elsewhere
     if p.object_shift:
-        rules.append("EPS_OBJ -> '∅'")  # pronounced null placeholder
+        rules.append("EPS_OBJ -> '∅'")
 
     # ----- noun phrase -----
     if p.spec_first:
@@ -150,29 +159,37 @@ def generate_cfg(p: GrammarParams) -> str:
             "N_BAR -> N ADJLIST",
         ]
 
+    # proper names
+    if p.proper_with_det:
+        rules.append("NP -> DET PROPN")
+    else:
+        rules.append("NP -> PROPN")
+
+    # adjective recursion
     rules += ["ADJLIST -> ADJ", "ADJLIST -> ADJ ADJLIST"]
 
-    dets = p.det_lex if p.det_lex is not None else [f"det{i}" for i in range(2)]
-    verbs = (
-        p.verb_lex if p.verb_lex is not None else [f"verb{i}" for i in range(p.n_verbs)]
+    # ----- lexicon collection -----
+    dets = p.det_lex if p.det_lex else [f"det{i}" for i in range(2)]
+    verbs = p.verb_lex if p.verb_lex else [f"verb{i}" for i in range(p.n_verbs)]
+    nouns = p.noun_lex if p.noun_lex else [f"noun{i}" for i in range(p.n_nouns)]
+    propns = (
+        p.propn_lex
+        if p.propn_lex is not None
+        else [f"name{i}" for i in range(p.n_propns)]
     )
-    nouns = (
-        p.noun_lex if p.noun_lex is not None else [f"noun{i}" for i in range(p.n_nouns)]
-    )
-    adjs = p.adj_lex if p.adj_lex is not None else [f"adj{i}" for i in range(p.n_adjs)]
-    comps = (
-        p.comp_lex if p.comp_lex is not None else [f"c{i}" for i in range(p.n_comps)]
-    )
-    whs = p.wh_lex if p.wh_lex is not None else [f"wh{i}" for i in range(p.n_wh)]
+    adjs = p.adj_lex if p.adj_lex else [f"adj{i}" for i in range(p.n_adjs)]
+    comps = p.comp_lex if p.comp_lex else [f"c{i}" for i in range(p.n_comps)]
+    whs = p.wh_lex if p.wh_lex else [f"wh{i}" for i in range(p.n_wh)]
 
     rules += _lex("DET", dets)
     rules += _lex("T", [f"t_{x}" for x in p.tense_lex])
     rules += _lex("ASP", [f"asp_{x}" for x in p.asp_lex])
-    if not p.wh_movement:
-        rules += _lex("C", comps)
+    rules += _lex("C", comps)  # overt complementizers (embedded)
+    rules += _lex("CNULL", ["∅C"])  # null root comp for declaratives
     rules += _lex("WH", whs)
     rules += _lex("V", verbs)
     rules += _lex("N", nouns)
+    rules += _lex("PROPN", propns)
     rules += _lex("ADJ", adjs if adjs else ["dummy_adj"])
 
     if p.rich_agreement:
@@ -186,20 +203,21 @@ def generate_cfg(p: GrammarParams) -> str:
     # DO NOT ATTEMPT TO DO ANYTHING WITH fg_grammar HERE
     # SIMPLY RETURN THE STRING, THAT IS ALL
     # **DO NOT EDIT THE COMMENTS**
-    return grammar_str
+    return grammar_str  # DO NOT EDIT THIS LINE
 
 
 # BEGIN FG BLOCK: CUSTOM IMPORTS. **DO NOT EDIT**
 # **DO NOT EVEN EDIT THE COMMENTS**
-if __name__ == "__main__":
-    english_grammar = fg_grammar.Grammar.from_string(
-        generate_cfg(GrammarParams.english()), grammar_type=GType.CFG
-    )
+if __name__ == "__main__":  # DO NOT EDIT THIS LINE
+    english_grammar = fg_grammar.Grammar.from_string(  # DO NOT EDIT THIS LINE
+        generate_cfg(GrammarParams.english()),  # DO NOT EDIT THIS LINE
+        grammar_type=GType.CFG,  # DO NOT EDIT THIS LINE
+    )  # DO NOT EDIT THIS LINE
 
-    print(english_grammar.as_cfg)
+    print(english_grammar.as_cfg)  # DO NOT EDIT THIS LINE
 
-    for _ in range(5):
-        sample = english_grammar.generate_tree()
-        print(sample["string"])
-        print(sample["parse"])
+    for _ in range(2):  # DO NOT EDIT THIS LINE
+        sample = english_grammar.generate_tree()  # DO NOT EDIT THIS LINE
+        print(sample["string"])  # DO NOT EDIT THIS LINE
+        print(sample["parse"])  # DO NOT EDIT THIS LINE
 # END FG BLOCK
