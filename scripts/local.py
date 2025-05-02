@@ -37,14 +37,14 @@ def run(
     # Model parameters
     model: str = "google/gemma-3-1b-it",
     attn_implementation: str = "sdpa",
-    torch_dtype: str = "auto",
+    torch_dtype: str = "torch.bfloat16",
     device_map: str = "auto",
     do_compile: bool = True,
     compile_mode: str = "default",
     # Generation parameters
-    max_new_tokens: int = 200,
+    max_new_tokens: int = 2_000,
     do_sample: bool = True,
-    batch_size: int = 2,
+    batch_size: int = 16,
 ):
     # Build dict of all parameters
     params = {
