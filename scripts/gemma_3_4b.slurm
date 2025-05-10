@@ -8,8 +8,8 @@
 #SBATCH --cpus-per-task=2
 #SBATCH --gres=gpu:2
 #SBATCH --mem=32G
-#SBATCH --time=03:00:00
-#SBATCH --array=0
+#SBATCH --time=06:00:00
+#SBATCH --array=100-200
 
 MODEL_NAME="google/gemma-3-4b-it"
 
