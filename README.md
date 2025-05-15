@@ -1,6 +1,15 @@
-# formal-gym
+# RELIC: Recognizing Languages In-Context
 
-Generating formal languages.
+RELIC is an evaluation framework to measure how well large language models (LLMs) can
+perform compositional instruction following by prompting models with a context-free
+formal grammar (CFG) and a string generated from the grammar's terminal symbols and
+asking the model to determine if the string is in the language defined by the CFG.
+
+RELIC stochastically generates context-free grammars of a specified level of complexity,
+and then generates positive and negative examples for each grammar. The synthetic
+nature of the framework means that RELIC mitigates issues of dataset contamination
+(since new datasets can be generated on the fly) and saturation (since the grammars
+and examples can be generated with increasing complexity as models improve).
 
 ## Installation
 
@@ -19,20 +28,50 @@ uv run src/sample.py  # Runs sample.py inside a virtual environment managed by u
 
 ## Usage
 
-### Generating Grammars
+### Generating new datasets
 
-```bash
-uv run scripts/gen_grammar.py \
-    --n_terminals=5 \
-    --n_nonterminals=6 \
-    --n_binary_rules=6 \
-    --n_lexical_rules=5
+To generate a new grammar, run
+
+```shell
+uv run scripts/generate.py grammar --n_terminals <int> --n_nonterminals <int> --n_lexical_rules <int> --n_nonlexical_rules <int>
 ```
 
-This process may result in an empty final grammar, in which case you'll need to re-run this until a non-empty one is generated. Once a non-empty grammar is found, it will be saved to `data/grammars/` with as `sample_trim_DATETIME.cfg`.
+where `n_terminals`, `n_nonterminals`, `n_lexical_rules`, and `n_nonlexical_rules` are
+the generating hyperparameters for the grammar. This will create a new random grammar
+with hyperparameters less than or equal to the specified values. The grammar will be
+saved in `data/grammars/<grammar_name>/`.
 
-### Generating Positive Samples
+### Generating new examples
 
-```bash
-uv run scripts/gen_samples.py --grammar_file sample_trim_DATETIME.cfg
+To generate new examples from a grammar, run
+
+```shell
+uv run scripts/generate.py samples --grammar_name <str> --max_length <int> --samples_per_length <int>
 ```
+
+See the method definition for additional arguments.
+
+To filter existing examples to include on a fixed number of examples per length and type,
+run
+
+```shell
+uv run scripts/generate.py filter_samples --grammar_name <str> --max_length <int> --samples_per_length <int>
+```
+
+### Generating batch files for evaluation
+
+To generate a batch file compatible with OpenAI's batch API, run
+
+```shell
+uv run scripts/generate.py openai_batch --grammar_name <str> --model <str> (--subsample_n <int>)
+```
+
+where `model` is the name of the model to use (e.g., `o4-mini`) and `subsample_n` is the
+number of examples per type per length to include in the batch file. If this argument
+is not passed, all examples from the filtered set will be included.
+
+## RELIC-400
+
+As a demonstration of the framework, we include a set of 200 grammars called RELIC-400,
+whose hyperparameters are all bounded above by 400. These grammars are already present,
+along with filtered examples, in the `data/grammars/` directory.
