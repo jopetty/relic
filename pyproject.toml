@@ -57,3 +57,9 @@ convention = "google"
 
 [tool.uv]
 cache-dir = "./.uv_cache"
+
+[dependency-groups]
+dev = [
+    "pre-commit>=3.8.0",
+    "ty>=0.0.1a3",
+]
