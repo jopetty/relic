@@ -70,8 +70,8 @@ where `model` is the name of the model to use (e.g., `o4-mini`) and `subsample_n
 number of examples per type per length to include in the batch file. If this argument
 is not passed, all examples from the filtered set will be included.
 
-## RELIC-400
+## RELIC-500
 
-As a demonstration of the framework, we include a set of 200 grammars called RELIC-400,
-whose hyperparameters are all bounded above by 400. These grammars are already present,
+As a demonstration of the framework, we include a set of 200 grammars called RELIC-500,
+whose hyperparameters are all bounded above by 500. These grammars are already present,
 along with filtered examples, in the `data/grammars/` directory.
