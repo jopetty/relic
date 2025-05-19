@@ -16,9 +16,13 @@ dependencies = [
     "accelerate>=1.4.0",
     "anthropic>=0.37.1",
     "datasets>=3.3.2",
+    "editables>=0.5",
     "exrex>=0.11.0",
     "fire>=0.6.0",
+    "flash-attn>=2.7.4.post1",
+    "flashinfer-python>=0.2.5",
     "google-generativeai>=0.8.3",
+    "hatchling>=1.27.0",
     "ipykernel>=6.29.5",
     "ipywidgets>=8.1.5",
     "lark>=1.2.2",
@@ -36,7 +40,9 @@ dependencies = [
     "tables>=3.10.2",
     "torch>=2.6.0",
     "transformers>=4.51.1",
+    "vllm>=0.8.5.post1",
     "wandb>=0.18.1",
+    "xformers>=0.0.29.post2",
 ]
 
 [build-system]
