@@ -7,26 +7,39 @@ set -euo pipefail
 MAX_TOKENS=4096
 MODEL="deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
 GRAMMAR_NAME="grammar_20250218222557"
-SUBSAMPLE_N=""
 
 usage() {
-     echo "usage: $0 [-M model] [-G grammar_name] [-k max_tokens] [-n subsampled]" >&2
+     echo "usage: $0 [-M model] [-G grammar_name] [-k max_tokens]" >&2
      exit 1
 }
 
 # ------------- flag parsing ---------------
-while getopts ":M:G:k:n:" opt; do
+while getopts ":M:G:k:" opt; do
      case "$opt" in
           M) MODEL="$OPTARG" ;;
           G) GRAMMAR_NAME="$OPTARG" ;;
 	  k) MAX_TOKENS="$OPTARG" ;;
-	  n) SUBSAMPLE_N="$OPTARG" ;;
           *) usage ;;
      esac
 done
 
+
+# -------------- derived values --------------
+
 MODEL_PATH_NAME="${MODEL//\//_}"
-INPUT_FILE="data/grammars/grammar_20250218222557/${GRAMMAR_NAME}_${MODEL_PATH_NAME}_batched_0-shot.jsonl"
+INPUT_FILE="data/grammars/${GRAMMAR_NAME}/${GRAMMAR_NAME}_${MODEL_PATH_NAME}_batched_0-shot.jsonl"
+OUTPUT_FILENAME=""
+
+# ---------- output file ----------
+if [[ -z "$OUTPUT_FILENAME" ]]; then
+     if command -v sha1sum &>/dev/null; then
+          HASH=$(printf '%s' "${MODEL}${GRAMMAR_NAME}" | sha1sum | awk '{print $1}' | head -c 8)
+     else  # macos /bsd fallback
+          HASH=$(printf '%s' "${MODEL}${GRAMMAR_NAME}" | shasum | awk '{print $1}' | head -c 8)
+     fi
+     OUTPUT_FILENAME="batch_${HASH}_results.jsonl"
+fi
+OUTPUT_FILE="data/grammars/${GRAMMAR_NAME}/${OUTPUT_FILENAME}"
 
 # To use all available GPUs on the current slurm node, we extract the
 # number of accelerators available and pass this value to vllm. 
@@ -55,14 +68,13 @@ echo "Starting vllm with $NUM_GPUS GPU(s)"
 echo "Running $MODEL_PATH_NAME"
 
 set -a && source .env && set +a && \
-uv run scripts/generate.py \
+uv run scripts/generate.py openai_batch \
      --model $MODEL \
-     --grammar_name $GRAMMAR_NAME \
-     ${SUBSAMPLE_n:+--subsample_n="$SUBSAMPLE_N"} && \
+     --grammar_name $GRAMMAR_NAME &&
 uv run python \
      -m vllm.entrypoints.openai.run_batch \
      -i $INPUT_FILE \
-     -o results-g3-4b.jsonl \
+     -o $OUTPUT_FILE \
      --model $MODEL \
      --tensor-parallel-size $NUM_GPUS \
      ${DTYPE_FLAG}
