@@ -39,4 +39,3 @@ srun --gres="$GRES" \
      --mem="${MEM}G" \
      --time="$TIME" \
      --pty /bin/bash
-

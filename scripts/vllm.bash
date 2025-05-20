@@ -43,7 +43,7 @@ fi
 OUTPUT_FILE="data/grammars/${GRAMMAR_NAME}/${OUTPUT_FILENAME}"
 
 # To use all available GPUs on the current slurm node, we extract the
-# number of accelerators available and pass this value to vllm. 
+# number of accelerators available and pass this value to vllm.
 if   [[ -n "${SLURM_STEP_GPUS:-}" ]];            then gpu_env="$SLURM_STEP_GPUS"
 elif [[ -n "${SLURM_JOB_GPUS:-}"  ]];            then gpu_env="$SLURM_JOB_GPUS"
 elif [[ -n "${CUDA_VISIBLE_DEVICES:-}" ]];       then gpu_env="$CUDA_VISIBLE_DEVICES"
@@ -90,4 +90,3 @@ echo "Starting vLLM with $NUM_GPUS GPU(s) for $MODEL_PATH_NAME"
 "${VLLM_CMD[@]}"
 
 echo "Results written to $OUTPUT_FILE"
-
