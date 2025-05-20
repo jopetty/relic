@@ -29,13 +29,18 @@ done
 
 TIME=$(printf "%02d:00:00" "$HOURS")
 
-GRES="gpu:${GPUS}"
+# build slurm options
+declare -a SRUN_OPTS
+SRUN_OPTS+=(--mem="${MEM}G" --time="$TIME")
 
-echo "requesting ${GPUS} gpu(s)${GPU_TYPE:+ (constraint: $GPU_TYPE)} | ${MEM}g mem | ${HOURS}h"
+if (( GPUS == 0 )); then
+  SRUN_OPTS+=(--cpus-per-task=1)
+  echo "requesting 1 cpu | ${MEM}g mem | ${HOURS}h"
+else
+  GRES="gpu:${GPUS}"
+  [[ -n "$GPU_TYPE" ]] && { GRES="gpu:${GPU_TYPE}:${GPUS}"; SRUN_OPTS+=(--constraint="$GPU_TYPE"); }
+  SRUN_OPTS+=(--gres="$GRES" --cpus-per-task="$GPUS")
+  echo "requesting ${GPUS} gpu(s)${GPU_TYPE:+ (constraint: $GPU_TYPE)} | ${MEM}g mem | ${HOURS}h"
+fi
 
-srun --gres="$GRES" \
-     ${GPU_TYPE:+--constraint="$GPU_TYPE"} \
-     --cpus-per-task="$GPUS" \
-     --mem="${MEM}G" \
-     --time="$TIME" \
-     --pty /bin/bash
+srun "${SRUN_OPTS[@]}" --pty /bin/bash
