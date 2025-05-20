@@ -18,7 +18,6 @@ class ChatCompletionResponse:
                 "body": {
                     "model": model,
                     "messages": [
-                        # {"role": "system", "content": self.system_prompt},
                         {"role": "user", "content": self.user_prompt},
                     ],
                     "max_tokens": self.max_new_tokens,
