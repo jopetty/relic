@@ -4,25 +4,26 @@ set -euo pipefail
 
 # --------- defaults ----------------------------------------------------------
 
-MAX_TOKENS=4096
+MAX_TOKENS=$((1<<14))
 MODEL="deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
 GRAMMAR_NAME="grammar_20250218222557"
+SUBSAMPLE_N=""
 
 usage() {
-     echo "usage: $0 [-M model] [-G grammar_name] [-k max_tokens]" >&2
+     echo "usage: $0 [-M model] [-G grammar_name] [-k max_tokens] [-n subsample]" >&2
      exit 1
 }
 
 # ------------- flag parsing ---------------
-while getopts ":M:G:k:" opt; do
+while getopts ":M:G:k:n:" opt; do
      case "$opt" in
           M) MODEL="$OPTARG" ;;
           G) GRAMMAR_NAME="$OPTARG" ;;
 	  k) MAX_TOKENS="$OPTARG" ;;
+	  n) SUBSAMPLE_N="$OPTARG" ;;
           *) usage ;;
      esac
 done
-
 
 # -------------- derived values --------------
 
@@ -64,18 +65,29 @@ if (( MAJOR < 8 )); then
      DTYPE_FLAG="--dtype half"   # fp16
 fi
 
-echo "Starting vllm with $NUM_GPUS GPU(s)"
-echo "Running $MODEL_PATH_NAME"
+# ---------------- BUILD COMMANDS ----------------------
 
-set -a && source .env && set +a && \
-uv run scripts/generate.py openai_batch \
-     --model $MODEL \
-     --grammar_name $GRAMMAR_NAME &&
-uv run python \
-     -m vllm.entrypoints.openai.run_batch \
-     -i $INPUT_FILE \
-     -o $OUTPUT_FILE \
-     --model $MODEL \
-     --tensor-parallel-size $NUM_GPUS \
-     ${DTYPE_FLAG}
+GEN_CMD=(uv run scripts/generate.py openai_batch
+     --model "$MODEL"
+     --grammar_name "$GRAMMAR_NAME"
+     --max_new_tokens "$MAX_TOKENS")
+[[ -n "$SUBSAMPLE_N" ]] && GEN_CMD+=(--subsample_n "$SUBSAMPLE_N")
+
+VLLM_CMD=(uv run python
+     -m vllm.entrypoints.openai.run_batch
+     -i "$INPUT_FILE"
+     -o "$OUTPUT_FILE"
+     --model "$MODEL"
+     --tensor-parallel-size "$NUM_GPUS")
+[[ -n "$DTYPE_FLAG" ]] && VLLM_CMD+=("$DTYPE_FLAG")
+
+set -a && source .env && set +a
+
+echo "Generating prompts..."
+"${GEN_CMD[@]}"
+
+echo "Starting vLLM with $NUM_GPUS GPU(s) for $MODEL_PATH_NAME"
+"${VLLM_CMD[@]}"
+
+echo "Results written to $OUTPUT_FILE"
 
