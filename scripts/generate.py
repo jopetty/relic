@@ -489,7 +489,10 @@ def openai_batch(
     model: str = "gpt-4o-mini",
     n_shots: int = 0,
     subsample_n: int | None = None,
+    max_new_tokens: int | None = None,
+    seed: int = 42,
 ):
+    fg_utils.set_all_seeds(seed)
     assert n_shots >= 0
 
     grammars_dir = PROJECT_ROOT / "data" / "grammars"
@@ -560,6 +563,7 @@ def openai_batch(
     samples_df[f"{model}_batched_json"] = samples_df.apply(
         lambda row: fg_prompt.ChatCompletionResponse(
             user_prompt=row["prompt"],
+            max_new_tokens=max_new_tokens,
             metadata={
                 "sample_type": row["type"],
                 "sample": row["sample"],
