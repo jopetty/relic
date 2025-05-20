@@ -14,13 +14,10 @@ authors = [
 
 dependencies = [
     "accelerate>=1.4.0",
-    "anthropic>=0.37.1",
     "datasets>=3.3.2",
     "editables>=0.5",
     "exrex>=0.11.0",
     "fire>=0.6.0",
-    "flash-attn>=2.7.4.post1",
-    "flashinfer-python>=0.2.5",
     "google-generativeai>=0.8.3",
     "hatchling>=1.27.0",
     "ipykernel>=6.29.5",
@@ -42,7 +39,10 @@ dependencies = [
     "transformers>=4.51.1",
     "vllm>=0.8.5.post1",
     "wandb>=0.18.1",
-    "xformers>=0.0.29.post2",
+    "flash-attn>=2.7.4.post1;           platform_system == 'Linux' and platform_machine == 'x86_64'",
+    "flashinfer-python>=0.2.5;          platform_system == 'Linux' and platform_machine == 'x86_64'",
+    "xformers>=0.0.29.post2;            platform_system == 'Linux' and platform_machine == 'x86_64'",
+    "vllm>=0.8.5.post1;                 platform_system == 'Linux' and platform_machine == 'x86_64'",
 ]
 
 [build-system]
@@ -62,4 +62,3 @@ select = ["E", "F", "I", "N"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
-
