@@ -4,6 +4,8 @@
 
 import hashlib
 import logging
+from pathlib import Path
+from typing import Any
 
 import datasets
 import dotenv
@@ -47,7 +49,7 @@ def run(
     batch_size: int = 16,
 ):
     # Build dict of all parameters
-    params = {
+    params: dict[str, Any] = {
         "grammar_name": grammar_name,
         "n_shots": n_shots,
         "model": model,
@@ -62,22 +64,22 @@ def run(
     }
     log.info(f"Running local inference with {params=}")
 
-    grammars_dir = PROJECT_ROOT / "data" / "grammars"
-    grammar_path = grammars_dir / f"{grammar_name}"
+    grammars_dir: Path = PROJECT_ROOT / "data" / "grammars"
+    grammar_path: Path = grammars_dir / f"{grammar_name}"
 
-    model_pathsafe_name = model.replace("/", "_")
-    batch_jsonl_filename = (
+    model_pathsafe_name: str = model.replace("/", "_")
+    batch_jsonl_filename: str = (
         f"{grammar_name}_{model_pathsafe_name}_batched_{2*n_shots}-shot.jsonl"
     )
-    batch_jsonl_path = grammar_path / batch_jsonl_filename
+    batch_jsonl_path: Path = grammar_path / batch_jsonl_filename
 
-    batch_id_hash = hashlib.md5(str(batch_jsonl_filename).encode()).hexdigest()
-    batch_id = f"batch_{batch_id_hash}"
+    batch_id_hash: str = hashlib.md5(str(batch_jsonl_filename).encode()).hexdigest()
+    batch_id: str = f"batch_{batch_id_hash}"
 
-    results_filename = f"{batch_id}_results.jsonl"
-    results_path = grammar_path / results_filename
-    inputs_filename = f"{batch_id}_inputs.jsonl"
-    inputs_path = grammar_path / inputs_filename
+    results_filename: str = f"{batch_id}_results.jsonl"
+    results_path: Path = grammar_path / results_filename
+    inputs_filename: str = f"{batch_id}_inputs.jsonl"
+    inputs_path: Path = grammar_path / inputs_filename
 
     if not batch_jsonl_path.exists():
         raise ValueError(f"Batch file {batch_jsonl_path} does not exist.")
@@ -85,8 +87,10 @@ def run(
     log.info(f"Running local evaluation from {batch_jsonl_path}")
 
     # Load the dataset
-    dataset = datasets.load_dataset("json", data_files=str(batch_jsonl_path))
-    dataset = dataset["train"]
+    dataset: datasets.DatasetDict = datasets.load_dataset(
+        "json", data_files=str(batch_jsonl_path)
+    )
+    dataset: datasets.Dataset = dataset["train"]
 
     def flatten_body(example):
         return example["body"]
@@ -106,7 +110,7 @@ def run(
         example["response"] = {"body": example["body"]}
         return example
 
-    dataset = (
+    dataset: datasets.Dataset = (
         dataset.map(flatten_body)
         .map(flatten_messages)
         .map(flatten_metadata)
@@ -131,7 +135,7 @@ def run(
 
     # To match the format of the OpenAI responses, we need to take all the `body`
     # fields and put them inside a `response` field.
-    dataset = dataset.map(create_response).remove_columns(["body"])
+    dataset: datasets.Dataset = dataset.map(create_response).remove_columns(["body"])
 
     log.info(f"Loading model {model=}")
 
