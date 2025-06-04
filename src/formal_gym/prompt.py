@@ -6,6 +6,8 @@ import json
 class ChatCompletionResponse:
     user_prompt: str
     metadata: dict[str, str]
+    # system_prompt: str = "You are a helpful assistant."
+    max_new_tokens: int | None = None
 
     def to_openai_batched_json(self, model: str, custom_id: str) -> str:
         return json.dumps(
@@ -18,6 +20,8 @@ class ChatCompletionResponse:
                     "messages": [
                         {"role": "user", "content": self.user_prompt},
                     ],
+                    "max_tokens": self.max_new_tokens,
+                    # "max_tokens": self.max_tokens,
                     "metadata": self.metadata,
                     "store": True if self.metadata else False,
                 },

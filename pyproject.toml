@@ -14,6 +14,7 @@ authors = [
 
 dependencies = [
     "datasets>=3.3.2",
+    "editables>=0.5",
     "exrex>=0.11.0",
     "fire>=0.6.0",
     "hatchling>=1.27.0",
