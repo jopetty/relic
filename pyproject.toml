@@ -13,12 +13,10 @@ authors = [
 ]
 
 dependencies = [
-    "accelerate>=1.4.0",
     "datasets>=3.3.2",
     "editables>=0.5",
     "exrex>=0.11.0",
     "fire>=0.6.0",
-    "google-generativeai>=0.8.3",
     "hatchling>=1.27.0",
     "ipykernel>=6.29.5",
     "ipywidgets>=8.1.5",
@@ -27,7 +25,6 @@ dependencies = [
     "nltk>=3.9.1",
     "openai>=1.52.0",
     "pandas>=2.2.3",
-    "polars>=1.6.0",
     "pyrootutils>=1.0.4",
     "python-dotenv>=1.0.1",
     "scikit-learn>=1.5.2",
@@ -35,6 +32,11 @@ dependencies = [
     "sentencepiece>=0.2.0",
     "statsmodels>=0.14.4",
     "tables>=3.10.2",
+]
+
+[dependency-groups]
+gpu = [
+    "accelerate>=1.4.0",
     "torch>=2.6.0",
     "transformers>=4.51.1",
     "vllm>=0.8.5.post1",
@@ -44,13 +46,14 @@ dependencies = [
     "xformers>=0.0.29.post2;            platform_system == 'Linux' and platform_machine == 'x86_64'",
     "vllm>=0.8.5.post1;                 platform_system == 'Linux' and platform_machine == 'x86_64'",
 ]
+dev = [
+    "pre-commit>=3.8.0",
+    "ty>=0.0.1a3",
+]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
-
-[project.optional-dependencies]
-dev = ["pre-commit"]
 
 [tool.ruff]
 line-length = 88

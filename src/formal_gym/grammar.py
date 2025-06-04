@@ -13,6 +13,7 @@ from typing import List, Optional, Set
 import lark
 import nltk
 import pyrootutils
+from lark.exceptions import LarkError
 
 Terminal = str
 Nonterminal = nltk.Nonterminal
@@ -292,14 +293,14 @@ class Grammar:
         else:
             return sep.join(result)
 
-    def generate_tree(self, sep: str = " ", max_depth: int = 50) -> dict:
-        """Generates a single sample from the grammar and returns both the string and its parse tree.
+    def generate_tree(self, sep: str = " ", max_depth: int = 50) -> dict | None:
+        """Samples a string and its parse tree.
 
         Args:
             sep: Separator to use between symbols.
             max_depth: Maximum depth of recursion.
         Returns:
-            A dictionary with keys "string" and "parse" representing the sampled string and its parse tree.
+            A dictionary with keys "string" and "parse".
         """
 
         def _sample_recursive(symbol: Nonterminal, depth: int):
@@ -382,7 +383,7 @@ class Grammar:
         try:
             parse_tree = self.parser.parse(sample)
             return clean_parse_tree(parse_tree, sample)
-        except lark.exceptions.LarkError:
+        except LarkError:
             return None
 
     def test_sample(self, sample: str) -> bool:
