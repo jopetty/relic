@@ -151,6 +151,20 @@ wheels = [
 ]
 
 [[package]]
+name = "bitsandbytes"
+version = "0.46.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+    { name = "torch" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/70/39/aa68b7bd28b091a96795be18810b2325ce9263ba8db087f6f196a663f03a/bitsandbytes-0.46.0-py3-none-manylinux_2_24_aarch64.whl", hash = "sha256:010709b56c85b0355f47fefbb37fe9058e8b18b9bf275bd576c5bd95a0d14d0c", size = 25533201, upload-time = "2025-05-27T21:25:27.601Z" },
+    { url = "https://files.pythonhosted.org/packages/72/27/ec6ee3408e09e01ab05db07af5a97dc76db7bc18824cf5f5dbc98e1e08a4/bitsandbytes-0.46.0-py3-none-manylinux_2_24_x86_64.whl", hash = "sha256:ef38883cfd26f36a0dfff1715f620f87cee3813431f33e10e9658205160cb89b", size = 67047276, upload-time = "2025-05-27T21:25:31.299Z" },
+    { url = "https://files.pythonhosted.org/packages/f3/06/2ef5f6b28d8fa442c670b5acc1eb09dd57d4edb00b435b35529c3f09936c/bitsandbytes-0.46.0-py3-none-win_amd64.whl", hash = "sha256:121820a6df80ae3b7e361f7ef193279c3204c361a7e21eb43b5ffa7293403979", size = 66452401, upload-time = "2025-05-27T21:25:35.552Z" },
+]
+
+[[package]]
 name = "blake3"
 version = "1.0.5"
 source = { registry = "https://pypi.org/simple" }
@@ -684,6 +698,7 @@ dev = [
 ]
 gpu = [
     { name = "accelerate" },
+    { name = "bitsandbytes" },
     { name = "flash-attn", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
     { name = "flashinfer-python", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
     { name = "torch" },
@@ -725,6 +740,7 @@ dev = [
 ]
 gpu = [
     { name = "accelerate", specifier = ">=1.4.0" },
+    { name = "bitsandbytes", specifier = ">=0.46.0" },
     { name = "flash-attn", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'", specifier = ">=2.7.4.post1" },
     { name = "flashinfer-python", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'", specifier = ">=0.2.5" },
     { name = "torch", specifier = "==2.6.0" },
@@ -3271,12 +3287,12 @@ name = "xgrammar"
 version = "0.1.18"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "ninja" },
-    { name = "pydantic" },
-    { name = "sentencepiece" },
-    { name = "tiktoken" },
-    { name = "torch" },
-    { name = "transformers" },
+    { name = "ninja", marker = "platform_machine == 'aarch64' or platform_machine == 'x86_64' or sys_platform != 'linux'" },
+    { name = "pydantic", marker = "platform_machine == 'aarch64' or platform_machine == 'x86_64' or sys_platform != 'linux'" },
+    { name = "sentencepiece", marker = "platform_machine == 'aarch64' or platform_machine == 'x86_64' or sys_platform != 'linux'" },
+    { name = "tiktoken", marker = "platform_machine == 'aarch64' or platform_machine == 'x86_64' or sys_platform != 'linux'" },
+    { name = "torch", marker = "platform_machine == 'aarch64' or platform_machine == 'x86_64' or sys_platform != 'linux'" },
+    { name = "transformers", marker = "platform_machine == 'aarch64' or platform_machine == 'x86_64' or sys_platform != 'linux'" },
     { name = "triton", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/8f/c3/22c9eeab6ee1dd6d0513d227e9d307fd20a0491db58f1f04bc5d566d13dc/xgrammar-0.1.18.tar.gz", hash = "sha256:a0438a0f9262fff1d0e4f184268eb759f094243edce92b67eb7aa5f245c47471", size = 1697230, upload-time = "2025-04-08T09:34:20.504Z" }

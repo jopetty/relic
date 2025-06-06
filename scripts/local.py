@@ -36,6 +36,7 @@ def run(
     # Grammar parameters
     grammar_name: str,
     n_shots: int = 0,
+    evaluation: str = "",
     # Model parameters
     model: str = "google/gemma-3-1b-it",
     attn_implementation: str = "sdpa",
@@ -43,6 +44,7 @@ def run(
     device_map: str = "auto",
     do_compile: bool = True,
     compile_mode: str = "default",
+    do_quantize: bool = False,
     # Generation parameters
     max_new_tokens: int = 2_000,
     do_sample: bool = True,
@@ -61,6 +63,7 @@ def run(
         "batch_size": batch_size,
         "compile": do_compile,
         "compile_mode": compile_mode,
+        "do_quantize": do_quantize,
     }
     log.info(f"Running local inference with {params=}")
 
@@ -68,9 +71,9 @@ def run(
     grammar_path: Path = grammars_dir / f"{grammar_name}"
 
     model_pathsafe_name: str = model.replace("/", "_")
-    batch_jsonl_filename: str = (
-        f"{grammar_name}_{model_pathsafe_name}_batched_{2*n_shots}-shot.jsonl"
-    )
+    if evaluation:
+        evaluation = f"_{evaluation}"
+    batch_jsonl_filename: str = f"{grammar_name}_{model_pathsafe_name}_batched_{2 * n_shots}-shot{evaluation}.jsonl"
     batch_jsonl_path: Path = grammar_path / batch_jsonl_filename
 
     batch_id_hash: str = hashlib.md5(str(batch_jsonl_filename).encode()).hexdigest()
@@ -164,11 +167,21 @@ def run(
         else "auto"
     )
 
+    if do_quantize:
+        quantization_config = transformers.BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_compute_dtype=torch_dtype_val,
+        )
+    else:
+        quantization_config = None
+
     model = transformers.AutoModelForCausalLM.from_pretrained(
         model,
         torch_dtype=torch_dtype_val,
         device_map=device_map,
         attn_implementation=attn_implementation,
+        quantization_config=quantization_config,
     )
 
     if do_compile:

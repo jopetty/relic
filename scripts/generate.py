@@ -14,12 +14,12 @@ import logging
 import pprint
 import random
 import shutil
+from typing import Literal
 
 import fire
 import pandas as pd
 import pyrootutils
 import tqdm
-from typing import Literal
 
 import formal_gym.grammar as fg_grammar
 import formal_gym.metagrammar as fg_metagrammar
@@ -46,11 +46,11 @@ N_NONLEXICAL_RULES = 2000
 
 
 def grammar(
-        n_terminals=N_TERMINALS,
-        n_nonterminals=N_NONTERMINALS,
-        n_lexical_rules=N_LEXICAL_RULES,
-        n_nonlexical_rules=N_NONLEXICAL_RULES,
-        type: str = "cfg",
+    n_terminals=N_TERMINALS,
+    n_nonterminals=N_NONTERMINALS,
+    n_lexical_rules=N_LEXICAL_RULES,
+    n_nonlexical_rules=N_NONLEXICAL_RULES,
+    type: str = "cfg",
 ):
     grammars_dir = PROJECT_ROOT / "data" / "grammars"
 
@@ -108,10 +108,10 @@ def grammars():
 
     new_grammars = []
     for (
-            n_terminals,
-            n_nonterminals,
-            n_lexical_rules,
-            n_nonlexical_rules,
+        n_terminals,
+        n_nonterminals,
+        n_lexical_rules,
+        n_nonlexical_rules,
     ) in tqdm.tqdm(
         itertools.product(
             n_terminals_range,
@@ -146,14 +146,14 @@ def grammars():
 
 
 def samples(
-        grammar_name: str,
-        max_length: int = 50,
-        samples_per_length: int = 10,
-        gen_positive: bool = True,
-        gen_negative: bool = True,
-        max_tries_per_sample: int = 10,
-        max_recursion_depth: int = 100,
-        pos_multiplier: int = 100,
+    grammar_name: str,
+    max_length: int = 50,
+    samples_per_length: int = 10,
+    gen_positive: bool = True,
+    gen_negative: bool = True,
+    max_tries_per_sample: int = 10,
+    max_recursion_depth: int = 100,
+    pos_multiplier: int = 100,
 ):
     grammars_dir = PROJECT_ROOT / "data" / "grammars"
 
@@ -203,7 +203,7 @@ def samples(
         n_terminals: int = g.n_terminals
         test_sample_len: int = 1
 
-        while (n_terminals ** test_sample_len < 5_000) and (test_sample_len < 50):
+        while (n_terminals**test_sample_len < 5_000) and (test_sample_len < 50):
             log.info(f"Testing short strings of length {test_sample_len}")
             for possible_sample in itertools.product(terminals, repeat=test_sample_len):
                 sample = " ".join(possible_sample)
@@ -249,7 +249,7 @@ def samples(
         log.info(f"Generating positive samples for {grammar_file}")
 
         total_iterations = (
-                samples_per_length * max_length * max_tries_per_sample * pos_multiplier
+            samples_per_length * max_length * max_tries_per_sample * pos_multiplier
         )
 
         new_samples = []
@@ -276,9 +276,9 @@ def samples(
 
 
 def filtered_samples(
-        grammar_name: str,
-        max_length: int = 50,
-        samples_per_length: int = 10,
+    grammar_name: str,
+    max_length: int = 50,
+    samples_per_length: int = 10,
 ):
     def read_lines_up_to_length(filename, length):
         with open(filename, "r") as f:
@@ -418,7 +418,7 @@ def filtered_samples(
     coverage = total_samples / float(total_possible_samples)
 
     counts_df["num_strings_of_length"] = (
-            n_terminals ** counts_df.index.get_level_values("length")
+        n_terminals ** counts_df.index.get_level_values("length")
     )
     counts_df["maxed_out"] = counts_df["sample"] == counts_df["num_strings_of_length"]
 
@@ -486,13 +486,13 @@ def filtered_samples(
 
 
 def openai_batch(
-        grammar_name: str,
-        model: str = "gpt-4o-mini",
-        n_shots: int = 0,
-        subsample_n: int | None = None,
-        max_new_tokens: int | None = None,
-        evaluation: Literal["parse", "generate"] = "parse",
-        seed: int = 42,
+    grammar_name: str,
+    model: str = "gpt-4o-mini",
+    n_shots: int = 0,
+    subsample_n: int | None = None,
+    max_new_tokens: int | None = None,
+    evaluation: Literal["parse", "generate"] = "parse",
+    seed: int = 42,
 ):
     fg_utils.set_all_seeds(seed)
     assert n_shots >= 0
@@ -591,9 +591,7 @@ def openai_batch(
     )
 
     model_pathsafe_name = model.replace("/", "_")
-    batch_jsonl_filename = (
-        f"{grammar_name}_{model_pathsafe_name}_batched_{2 * n_shots}-shot_{evaluation}.jsonl"
-    )
+    batch_jsonl_filename = f"{grammar_name}_{model_pathsafe_name}_batched_{2 * n_shots}-shot_{evaluation}.jsonl"
     batch_jsonl_path = grammar_path / batch_jsonl_filename
     log.info(f"Writing batch job to {batch_jsonl_path}")
     with open(batch_jsonl_path, "w") as f:
@@ -602,21 +600,21 @@ def openai_batch(
 
 
 def all_rand(
-        # Grammar params
-        h_low: int = 5,
-        h_high: int = 100,
-        lambda_: float = 0.01,
-        # Sample params
-        max_length: int = 50,
-        samples_per_length: int = 10,
-        gen_positive: bool = True,
-        gen_negative: bool = True,
-        max_tries_per_sample: int = 10,
-        max_recursion_depth: int = 10000,
-        pos_multiplier: int = 100,
-        # Batch params
-        models: list[str] = ["gpt-4o-mini", "gpt-4o", "o3-mini"],
-        n_shots: list[int] = [0],
+    # Grammar params
+    h_low: int = 5,
+    h_high: int = 100,
+    lambda_: float = 0.01,
+    # Sample params
+    max_length: int = 50,
+    samples_per_length: int = 10,
+    gen_positive: bool = True,
+    gen_negative: bool = True,
+    max_tries_per_sample: int = 10,
+    max_recursion_depth: int = 10000,
+    pos_multiplier: int = 100,
+    # Batch params
+    models: list[str] = ["gpt-4o-mini", "gpt-4o", "o3-mini"],
+    n_shots: list[int] = [0],
 ):
     n_terminals = int(min(max(random.expovariate(lambda_), h_low), h_high))
     n_nonterminals = int(min(max(random.expovariate(lambda_), h_low), h_high))
@@ -665,21 +663,21 @@ def all_rand(
 
 
 def all_grid(
-        # Grammar params
-        h_low: int = 10,
-        h_high: int = 100,
-        sweep_id: int = 0,
-        # Sample params
-        max_length: int = 50,
-        samples_per_length: int = 10,
-        gen_positive: bool = True,
-        gen_negative: bool = True,
-        max_tries_per_sample: int = 10,
-        max_recursion_depth: int = 10000,
-        pos_multiplier: int = 100,
-        # Batch params
-        models: list[str] = ["gpt-4o-mini", "gpt-4o", "o3-mini"],
-        n_shots: list[int] = [0],
+    # Grammar params
+    h_low: int = 10,
+    h_high: int = 100,
+    sweep_id: int = 0,
+    # Sample params
+    max_length: int = 50,
+    samples_per_length: int = 10,
+    gen_positive: bool = True,
+    gen_negative: bool = True,
+    max_tries_per_sample: int = 10,
+    max_recursion_depth: int = 10000,
+    pos_multiplier: int = 100,
+    # Batch params
+    models: list[str] = ["gpt-4o-mini", "gpt-4o", "o3-mini"],
+    n_shots: list[int] = [0],
 ):
     # This will construct an HPARAM space of 256 different HPARAM combinations.
 
@@ -687,7 +685,7 @@ def all_grid(
     hp_space = list(itertools.product(*hp_space))
     HPSPACE_LEN = len(hp_space)
 
-    hp_space = hp_space[sweep_id:: len(hp_space)]
+    hp_space = hp_space[sweep_id :: len(hp_space)]
     n_terminals, n_nonterminals, n_lexical_rules, n_nonlexical_rules = hp_space[0]
 
     log.info(f"Hyperparameter space: {hp_space}")
