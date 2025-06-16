@@ -516,25 +516,3 @@ def generate_scfg(sp: SyncGrammarParams) -> str:
         rules += _sync_lex("PRO", ["pro"], ["pro"])
 
     return "\n".join(rules)
-
-
-if __name__ == "__main__":
-    english_params = GrammarParams.english()
-    print("Running with params:")
-    pprint.pprint(asdict(english_params))
-    english_grammar_str = generate_cfg(english_params)
-    english_grammar = fg_grammar.Grammar.from_string(
-        english_grammar_str,
-        grammar_type=GType.CFG,
-    )
-    print(english_grammar.as_cfg)
-    for _ in range(2):
-        s = english_grammar.generate_tree()
-        print(s["string"])
-
-    print("\n" + "=" * 50)
-    print("SYNCHRONOUS CFG EXAMPLE:")
-    print("=" * 50)
-    sync_params = SyncGrammarParams.english_german()
-    scfg_str = generate_scfg(sync_params)
-    print(scfg_str)

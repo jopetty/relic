@@ -14,6 +14,7 @@ import logging
 import pprint
 import random
 import shutil
+from dataclasses import asdict
 
 import fire
 import pandas as pd
@@ -22,8 +23,12 @@ import tqdm
 
 import formal_gym.grammar as fg_grammar
 import formal_gym.metagrammar as fg_metagrammar
+import formal_gym.metaxbargrammar as fg_mxg
 import formal_gym.prompt as fg_prompt
 import formal_gym.utils.utils as fg_utils
+
+GType = fg_grammar.Grammar.Type
+GrammarParams = fg_mxg.GrammarParams
 
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
@@ -713,6 +718,26 @@ def all_grid(
                 model=model,
                 n_shots=n_shot,
             )
+
+
+def xbar_grammar():
+    english_params = fg_mxg.GrammarParams.english()
+    print("Running with params:")
+    pprint.pprint(asdict(english_params))
+    english_grammar_str = fg_mxg.generate_cfg(english_params)
+    english_grammar = fg_grammar.Grammar.from_string(
+        english_grammar_str, grammar_type=GType.CFG
+    )
+    print(english_grammar.as_cfg)
+    for _ in range(2):
+        s = english_grammar.generate_tree()
+        print(s["string"])
+
+
+def scfg():
+    en_de_params = fg_mxg.SyncGrammarParams.english_german()
+    scfg_str = fg_mxg.generate_scfg(en_de_params)
+    print(scfg_str)
 
 
 if __name__ == "__main__":
