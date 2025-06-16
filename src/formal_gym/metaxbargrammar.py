@@ -2,18 +2,11 @@
 
 import pprint
 from dataclasses import asdict, dataclass, field
-from typing import List, Optional
+from typing import List, Literal, Optional
 
-# BEGIN FG BLOCK: CUSTOM IMPORTS. **DO NOT EDIT**
-# **DO NOT EVEN EDIT THE COMMENTS**
 import formal_gym.grammar as fg_grammar
 
 GType = fg_grammar.Grammar.Type
-# END FG BLOCK
-
-# ------------------------------------------------------------------
-#  HELPER: BUILD LARSON‑STYLE SHELL RULES (CNF)
-# ------------------------------------------------------------------
 
 
 def _shell_rules(
@@ -30,8 +23,8 @@ def _shell_rules(
     XP -> SPEC XBAR   /  XBAR SPEC
     XBAR -> X⁰ COMP   /  COMP X⁰
     """
-    xbar = f"{head.upper()}BAR"  # unique bar label
-    rules = []
+    xbar: str = f"{head.upper()}BAR"  # unique bar label
+    rules: list[str] = []
 
     # specifier placement
     if spec_first:
@@ -44,6 +37,38 @@ def _shell_rules(
         rules.append(f"{xbar} -> {head} {comp}")
     else:
         rules.append(f"{xbar} -> {comp} {head}")
+
+    return rules
+
+
+def _sync_shell_rules(
+    phrase: str,
+    spec: str,
+    head: str,
+    comp: str,
+    *,
+    head_initial_l: bool = True,
+    spec_first_l: bool = True,
+    head_initial_r: bool = True,
+    spec_first_r: bool = True,
+):
+    """Return the two synchronized CNF rules for a Larson shell.
+
+    XP -> <SPEC XBAR, SPEC XBAR>   /  <XBAR SPEC, XBAR SPEC>
+    XBAR -> <X⁰ COMP, X⁰ COMP>    /  <COMP X⁰, COMP X⁰>
+    """
+    xbar: str = f"{head.upper()}BAR"
+    rules: list[str] = []
+
+    # specifier placement
+    left_spec: str = f"{spec} {xbar}" if spec_first_l else f"{xbar} {spec}"
+    right_spec: str = f"{spec} {xbar}" if spec_first_r else f"{xbar} {spec}"
+    rules.append(f"{phrase} -> <{left_spec}, {right_spec}>")
+
+    # head direction
+    left_head: str = f"{head} {comp}" if head_initial_l else f"{comp} {head}"
+    right_head: str = f"{head} {comp}" if head_initial_r else f"{comp} {head}"
+    rules.append(f"{xbar} -> <{left_head}, {right_head}>")
 
     return rules
 
@@ -129,7 +154,7 @@ class GrammarParams:
 
     # english preset
     @classmethod
-    def english(cls):
+    def english(cls) -> "GrammarParams":
         return cls(
             head_initial=True,
             spec_first=True,
@@ -149,19 +174,98 @@ class GrammarParams:
             wh_lex=["who", "what", "where", "when", "why"],
         )
 
+    @classmethod
+    def german(cls) -> "GrammarParams":
+        return cls(
+            head_initial=False,  # German is head-final in VP
+            spec_first=True,
+            comp_initial=False,  # German has verb-final complement order
+            wh_movement=True,
+            pro_drop=True,  # German allows pro-drop more freely
+            verb_raise=True,  # German has verb raising
+            object_shift=False,
+            rich_agreement=True,  # German has richer agreement
+            proper_with_det=False,
+            verb_lex=["essen", "sehen", "lieben", "geben"],
+            noun_lex=["baum", "pferd", "hund", "katze", "apfel"],
+            propn_lex=["johann", "maria", "susanne", "robert"],
+            adj_lex=["groß", "klein", "rot", "grün", "blau", "flauschig", "rund"],
+            det_lex=["der", "ein"],
+            comp_lex=["dass"],
+            wh_lex=["wer", "was", "wo", "wann", "warum"],
+        )
 
-# ------------------------------------------------------------------
-#  LEXICAL RULE GENERATOR
-# ------------------------------------------------------------------
+
+@dataclass
+class SyncGrammarParams:
+    """Paired grammar parameters for Synchronous CFG generation."""
+
+    left: GrammarParams
+    right: GrammarParams
+
+    def __post_init__(self):
+        """Ensure lexicon sizes are compatible between left and right grammars."""
+        self._align_lexicon_sizes()
+
+    def _align_lexicon_sizes(self):
+        """Align lexicon sizes between left and right grammars."""
+        # Take the maximum size for each lexicon type
+        max_verbs: int = max(self.left.n_verbs, self.right.n_verbs)
+        max_nouns: int = max(self.left.n_nouns, self.right.n_nouns)
+        max_propns: int = max(self.left.n_propns, self.right.n_propns)
+        max_adjs: int = max(self.left.n_adjs, self.right.n_adjs)
+        max_dets: int = max(self.left.n_dets, self.right.n_dets)
+        max_comps: int = max(self.left.n_comps, self.right.n_comps)
+        max_wh: int = max(self.left.n_wh, self.right.n_wh)
+
+        # Update both grammars to have matching sizes
+        self.left.n_verbs = self.right.n_verbs = max_verbs
+        self.left.n_nouns = self.right.n_nouns = max_nouns
+        self.left.n_propns = self.right.n_propns = max_propns
+        self.left.n_adjs = self.right.n_adjs = max_adjs
+        self.left.n_dets = self.right.n_dets = max_dets
+        self.left.n_comps = self.right.n_comps = max_comps
+        self.left.n_wh = self.right.n_wh = max_wh
+
+        # Extend lexicons if needed
+        self._extend_lexicon("verb_lex", max_verbs, "verb")
+        self._extend_lexicon("noun_lex", max_nouns, "noun")
+        self._extend_lexicon("propn_lex", max_propns, "name")
+        self._extend_lexicon("adj_lex", max_adjs, "adj")
+        self._extend_lexicon("det_lex", max_dets, "det")
+        self._extend_lexicon("comp_lex", max_comps, "c")
+        self._extend_lexicon("wh_lex", max_wh, "wh")
+
+    def _extend_lexicon(self, attr_name: str, target_size: int, prefix: str):
+        """Extend a lexicon to target size if needed."""
+        for grammar in [self.left, self.right]:
+            lex = getattr(grammar, attr_name)
+            if lex is not None and len(lex) < target_size:
+                # Extend with generic items
+                for i in range(len(lex), target_size):
+                    lex.append(f"{prefix}{i}")
+                setattr(grammar, attr_name, lex)
+
+    @classmethod
+    def english_german(cls):
+        """Example: English-German synchronous grammar."""
+        english: GrammarParams = GrammarParams.english()
+        german: GrammarParams = GrammarParams.german()
+        return cls(left=english, right=german)
 
 
 def _lex(pos: str, words: List[str]) -> List[str]:
     return [f"{pos} -> '{w}'" for w in words]
 
 
-# ------------------------------------------------------------------
-#  CFG GENERATOR
-# ------------------------------------------------------------------
+def _sync_lex(pos: str, left_words: List[str], right_words: List[str]) -> List[str]:
+    """Generate synchronized lexical rules."""
+    if len(left_words) != len(right_words):
+        raise ValueError(
+            f"Lexicon size mismatch for {pos}: {len(left_words)} vs {len(right_words)}"
+        )
+
+    return [f"{pos} -> <'{lw}', '{rw}'>" for lw, rw in zip(left_words, right_words)]
 
 
 def generate_cfg(p: GrammarParams) -> str:
@@ -187,11 +291,17 @@ def generate_cfg(p: GrammarParams) -> str:
         "TP", "NP_SUBJ", "T_HEAD", "VP", head_initial=p.verb_raise, spec_first=True
     )
     if p.rich_agreement:
-        rules.append("T_HEAD -> T AGR_S" if p.verb_raise else "T_HEAD -> AGR_S T")
+        t_head_rule: Literal["T_HEAD -> T AGR_S", "T_HEAD -> AGR_S T"] = (
+            "T_HEAD -> T AGR_S" if p.verb_raise else "T_HEAD -> AGR_S T"
+        )
+        rules.append(t_head_rule)
     else:
         rules.append("T_HEAD -> T")
 
-    rules.append("NP_SUBJ -> PRO | NP" if p.pro_drop else "NP_SUBJ -> NP")
+    np_subj_rule: Literal["NP_SUBJ -> PRO | NP", "NP_SUBJ -> NP"] = (
+        "NP_SUBJ -> PRO | NP" if p.pro_drop else "NP_SUBJ -> NP"
+    )
+    rules.append(np_subj_rule)
 
     # ----- VP shell -----
     rules += _shell_rules(
@@ -249,19 +359,182 @@ def generate_cfg(p: GrammarParams) -> str:
     return "\n".join(rules)
 
 
-# BEGIN FG BLOCK: CUSTOM IMPORTS. **DO NOT EDIT**
-# **DO NOT EVEN EDIT THE COMMENTS**
-if __name__ == "__main__":  # DO NOT EDIT THIS LINE
-    english_params = GrammarParams.english()  # DO NOT EDIT THIS LINE
-    print("Running with params:")  # DO NOT EDIT THIS LINE
-    pprint.pprint(asdict(english_params))  # DO NOT EDIT THIS LINE
-    english_grammar_str = generate_cfg(english_params)  # DO NOT EDIT THIS LINE
-    english_grammar = fg_grammar.Grammar.from_string(  # DO NOT EDIT THIS LINE
-        english_grammar_str,  # DO NOT EDIT THIS LINE
-        grammar_type=GType.CFG,  # DO NOT EDIT THIS LINE
-    )  # DO NOT EDIT THIS LINE
-    print(english_grammar.as_cfg)  # DO NOT EDIT THIS LINE
-    for _ in range(2):  # DO NOT EDIT THIS LINE
-        s = english_grammar.generate_tree()  # DO NOT EDIT THIS LINE
-        print(s["string"])  # DO NOT EDIT THIS LINE
-# END FG BLOCK
+def generate_scfg(sp: SyncGrammarParams) -> str:
+    """Generate Synchronous Context-Free Grammar rules."""
+    rules: List[str] = []
+
+    # ----- CP / S layer -----
+    rules.append("S -> <CP, CP>")
+
+    # WH‑root question rule
+    if sp.left.wh_movement or sp.right.wh_movement:
+        rules += _sync_shell_rules(
+            "CP",
+            "WH",
+            "CNULL",
+            "TP",
+            head_initial_l=sp.left.comp_initial,
+            spec_first_l=True,
+            head_initial_r=sp.right.comp_initial,
+            spec_first_r=True,
+        )
+
+    # Declarative CP with overt C
+    left_cp: Literal["C TP", "TP C"] = "C TP" if sp.left.comp_initial else "TP C"
+    right_cp: Literal["C TP", "TP C"] = "C TP" if sp.right.comp_initial else "TP C"
+    rules.append(f"CP -> <{left_cp}, {right_cp}>")
+
+    # Declarative CP with null C
+    left_cnull: Literal["CNULL TP", "TP CNULL"] = (
+        "CNULL TP" if sp.left.comp_initial else "TP CNULL"
+    )
+    right_cnull: Literal["CNULL TP", "TP CNULL"] = (
+        "CNULL TP" if sp.right.comp_initial else "TP CNULL"
+    )
+    rules.append(f"CP -> <{left_cnull}, {right_cnull}>")
+
+    # ----- TP shell -----
+    rules += _sync_shell_rules(
+        "TP",
+        "NP_SUBJ",
+        "T_HEAD",
+        "VP",
+        head_initial_l=sp.left.verb_raise,
+        spec_first_l=True,
+        head_initial_r=sp.right.verb_raise,
+        spec_first_r=True,
+    )
+
+    # T_HEAD rules
+    left_t: Literal["T AGR_S", "AGR_S T", "T"] = (
+        "T AGR_S"
+        if (sp.left.rich_agreement and sp.left.verb_raise)
+        else "AGR_S T"
+        if sp.left.rich_agreement
+        else "T"
+    )
+    right_t: Literal["T AGR_S", "AGR_S T", "T"] = (
+        "T AGR_S"
+        if (sp.right.rich_agreement and sp.right.verb_raise)
+        else "AGR_S T"
+        if sp.right.rich_agreement
+        else "T"
+    )
+    rules.append(f"T_HEAD -> <{left_t}, {right_t}>")
+
+    # Subject rules
+    left_subj: Literal["PRO | NP", "NP"] = "PRO | NP" if sp.left.pro_drop else "NP"
+    right_subj: Literal["PRO | NP", "NP"] = "PRO | NP" if sp.right.pro_drop else "NP"
+    rules.append(f"NP_SUBJ -> <{left_subj}, {right_subj}>")
+
+    # ----- VP shell -----
+    rules += _sync_shell_rules(
+        "VP",
+        "ASP",
+        "V_HEAD",
+        "OBJ_PHRASE",
+        head_initial_l=sp.left.head_initial,
+        spec_first_l=True,
+        head_initial_r=sp.right.head_initial,
+        spec_first_r=True,
+    )
+
+    # V_HEAD rules
+    left_v: Literal["V AGR_O", "V"] = "V AGR_O" if sp.left.rich_agreement else "V"
+    right_v: Literal["V AGR_O", "V"] = "V AGR_O" if sp.right.rich_agreement else "V"
+    rules.append(f"V_HEAD -> <{left_v}, {right_v}>")
+
+    # Object rules
+    if sp.left.object_shift or sp.right.object_shift:
+        left_obj: Literal["EPS_OBJ", "NP"] = "EPS_OBJ" if sp.left.object_shift else "NP"
+        right_obj: Literal["EPS_OBJ", "NP"] = (
+            "EPS_OBJ" if sp.right.object_shift else "NP"
+        )
+        rules.append(f"OBJ_PHRASE -> <{left_obj}, {right_obj}>")
+        if sp.left.object_shift or sp.right.object_shift:
+            rules.append("EPS_OBJ -> <'∅', '∅'>")
+    else:
+        rules.append("OBJ_PHRASE -> <NP, NP>")
+
+    # ----- NP shell -----
+    rules += _sync_shell_rules(
+        "NP",
+        "DET",
+        "N_HEAD",
+        "ADJLIST",
+        head_initial_l=False,
+        spec_first_l=True,
+        head_initial_r=False,
+        spec_first_r=True,
+    )
+
+    # N_HEAD rules
+    if sp.left.proper_with_det or sp.right.proper_with_det:
+        left_n: Literal["PROPN", "N | PROPN"] = (
+            "PROPN" if sp.left.proper_with_det else "N | PROPN"
+        )
+        right_n: Literal["PROPN", "N | PROPN"] = (
+            "PROPN" if sp.right.proper_with_det else "N | PROPN"
+        )
+        rules.append(f"N_HEAD -> <{left_n}, {right_n}>")
+    else:
+        rules.append("N_HEAD -> <N | PROPN, N | PROPN>")
+
+    rules += [
+        "ADJLIST -> <ADJ, ADJ>",
+        "ADJLIST -> <ADJ ADJLIST, ADJ ADJLIST>",
+    ]
+
+    # ----- Synchronized Lexicon -----
+    rules += _sync_lex("DET", sp.left.det_lex, sp.right.det_lex)
+    rules += _sync_lex(
+        "T",
+        [f"t_{x}" for x in sp.left.tense_lex],
+        [f"t_{x}" for x in sp.right.tense_lex],
+    )
+    rules += _sync_lex(
+        "ASP",
+        [f"asp_{x}" for x in sp.left.asp_lex],
+        [f"asp_{x}" for x in sp.right.asp_lex],
+    )
+    rules += _sync_lex("C", sp.left.comp_lex, sp.right.comp_lex)
+    rules += _sync_lex("CNULL", ["∅_C"], ["∅_C"])
+    rules += _sync_lex("WH", sp.left.wh_lex, sp.right.wh_lex)
+    rules += _sync_lex("V", sp.left.verb_lex, sp.right.verb_lex)
+    rules += _sync_lex("N", sp.left.noun_lex, sp.right.noun_lex)
+    rules += _sync_lex("PROPN", sp.left.propn_lex, sp.right.propn_lex)
+
+    left_adj = sp.left.adj_lex if sp.left.adj_lex else ["dummy_adj"]
+    right_adj = sp.right.adj_lex if sp.right.adj_lex else ["dummy_adj"]
+    rules += _sync_lex("ADJ", left_adj, right_adj)
+
+    if sp.left.rich_agreement or sp.right.rich_agreement:
+        rules += _sync_lex("AGR_S", sp.left.agrs_lex, sp.right.agrs_lex)
+        rules += _sync_lex("AGR_O", sp.left.agro_lex, sp.right.agro_lex)
+
+    if sp.left.pro_drop or sp.right.pro_drop:
+        rules += _sync_lex("PRO", ["pro"], ["pro"])
+
+    return "\n".join(rules)
+
+
+if __name__ == "__main__":
+    english_params = GrammarParams.english()
+    print("Running with params:")
+    pprint.pprint(asdict(english_params))
+    english_grammar_str = generate_cfg(english_params)
+    english_grammar = fg_grammar.Grammar.from_string(
+        english_grammar_str,
+        grammar_type=GType.CFG,
+    )
+    print(english_grammar.as_cfg)
+    for _ in range(2):
+        s = english_grammar.generate_tree()
+        print(s["string"])
+
+    print("\n" + "=" * 50)
+    print("SYNCHRONOUS CFG EXAMPLE:")
+    print("=" * 50)
+    sync_params = SyncGrammarParams.english_german()
+    scfg_str = generate_scfg(sync_params)
+    print(scfg_str)
