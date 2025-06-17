@@ -1,8 +1,7 @@
 # metaxbargrammar.py
 
-import pprint
-from dataclasses import asdict, dataclass, field
-from typing import List, Literal, Optional
+from dataclasses import dataclass, field
+from typing import List, Literal
 
 import formal_gym.grammar as fg_grammar
 
@@ -87,7 +86,6 @@ class GrammarParams:
     Attributes:
         head_initial: Whether the head is initial in the shell.
         spec_first: Whether the specifier is first in the shell.
-        pro_drop: Whether to allow pro-drop.
         proper_with_det: Whether proper nouns take determiners.
         verb: List of verbs or number of verbs to generate.
         noun: List of nouns or number of nouns to generate.
@@ -140,18 +138,14 @@ class GrammarParams:
     def n_asp_lex(self) -> int:
         return len(self.asp_lex)
 
-    @property
-    def n_agrs_lex(self) -> int:
-        return len(self.agrs_lex)
-
-    @property
-    def n_agro_lex(self) -> int:
-        return len(self.agro_lex)
-
+    # Parameters
+    # ---------
     head_initial: bool = True
     spec_first: bool = True
     proper_with_det: bool = False
 
+    # Lexicon
+    # -------
     verbs: list[str] | int = 3
     nouns: list[str] | int = 3
     propns: list[str] | int = 3
@@ -163,6 +157,13 @@ class GrammarParams:
     asps: List[str] = field(default_factory=lambda: ["∅_Asp_prog"])
 
     def __post_init__(self):
+        """Instantiates the grammar lexicon.
+
+        If a list of strings are passed in for a particular parameter (eg 'nouns')
+        then we use those; otherwise, we generate the appropriate number of lexical
+        items for that parameter.
+        """
+
         # Helper to resolve int or list to list
         def resolve(val, prefix):
             if isinstance(val, int):
@@ -179,7 +180,8 @@ class GrammarParams:
         self.tense_lex = resolve(self.tenses, "tense")
         self.asp_lex = resolve(self.asps, "asp")
 
-    def to_cfg_str(self) -> str:
+    def as_cfg_str(self) -> str:
+        """Generate a CFG string from the grammar parameters."""
         rules: List[str] = []
 
         # ----- S layer: matrix clause with null complementizer -----
@@ -255,6 +257,7 @@ class GrammarParams:
 
     @classmethod
     def english(cls) -> "GrammarParams":
+        """English grammar parameters."""
         return cls(
             head_initial=True,
             spec_first=True,
@@ -270,6 +273,7 @@ class GrammarParams:
 
     @classmethod
     def german(cls) -> "GrammarParams":
+        """German grammar parameters."""
         return cls(
             head_initial=False,  # German is head-final in VP
             spec_first=True,
