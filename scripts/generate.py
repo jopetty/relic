@@ -731,22 +731,21 @@ def xbar(
         g_params = fg_mxg.GrammarParams.english()
     elif lang == "german":
         g_params = fg_mxg.GrammarParams.german()
+    elif lang == "spanish":
+        g_params = fg_mxg.GrammarParams.spanish()
     else:
         raise ValueError(f"Unknown language: {lang}")
 
     if verbose:
         print("Running with params:")
         pprint.pprint(asdict(g_params))
-    grammar_str: str = g_params.as_cfg_str()
-    grammar: fg_grammar.Grammar = fg_grammar.Grammar.from_string(
-        grammar_str, grammar_type=GType.CFG
-    )
+    grammar: fg_mxg.XBarGrammar = fg_mxg.XBarGrammar.from_params(g_params)
     if verbose:
         print(grammar.as_cfg)
 
     for _ in range(n_samples):
         s: dict[str, Any] = grammar.generate_tree()
-        print(s["string"])
+        print(s["phonetic_string"])
 
 
 def scfg():

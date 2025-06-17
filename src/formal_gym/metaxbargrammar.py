@@ -1,7 +1,7 @@
 # metaxbargrammar.py
 
 from dataclasses import dataclass, field
-from typing import List, Literal
+from typing import Any, List, Literal
 
 import formal_gym.grammar as fg_grammar
 
@@ -86,20 +86,20 @@ class GrammarParams:
     Attributes:
         head_initial: Whether the head is initial in the shell.
         spec_first: Whether the specifier is first in the shell.
+        pro_drop: Whether to allow pro-drop (null pronominal subject).
         proper_with_det: Whether proper nouns take determiners.
         verb: List of verbs or number of verbs to generate.
         noun: List of nouns or number of nouns to generate.
         propn: List of proper nouns or number of proper nouns to generate.
+        pron: List of pronouns or number of pronouns to generate.
         adj: List of adjectives or number of adjectives to generate.
         det_def: List of definite determiners or number of definite determiners
                 to generate.
         det_indef: List of indefinite determiners or number of indefinite
             determiners to generate.
         comp: List of complementizers or number of complementizers to generate.
-        tense_lex: List of tense labels or number of tense labels to generate.
-        asp_lex: List of aspect labels or number of aspect labels to generate.
-        agrs_lex: List of agreement labels or number of agreement labels to generate.
-        agro_lex: List of agreement labels or number of agreement labels to generate.
+        tenses: List of tense labels or number of tense labels to generate.
+        asps: List of aspect labels or number of aspect labels to generate.
     """
 
     @property
@@ -142,6 +142,7 @@ class GrammarParams:
     # ---------
     head_initial: bool = True
     spec_first: bool = True
+    pro_drop: bool = False
     proper_with_det: bool = False
 
     # Lexicon
@@ -149,6 +150,7 @@ class GrammarParams:
     verbs: list[str] | int = 3
     nouns: list[str] | int = 3
     propns: list[str] | int = 3
+    prons: list[str] | int = 2
     adjs: list[str] | int = 2
     det_def: list[str] | int = 2
     det_indef: list[str] | int = 2
@@ -173,6 +175,7 @@ class GrammarParams:
         self.verb_lex = resolve(self.verbs, "verb")
         self.noun_lex = resolve(self.nouns, "noun")
         self.propn_lex = resolve(self.propns, "name")
+        self.pron_lex = resolve(self.prons, "pron")
         self.adj_lex = resolve(self.adjs, "adj")
         self.det_def_lex = resolve(self.det_def, "det_def")
         self.det_indef_lex = resolve(self.det_indef, "det_indef")
@@ -202,7 +205,11 @@ class GrammarParams:
         )
 
         # NP_SUBJ: subjects
+        #  if pro_drop, allow PRO too
         #  if proper_with_det=False, also allow bare proper nouns
+        if self.pro_drop:
+            rules.append("NP_SUBJ -> PRO")
+        rules.append("NP_SUBJ -> PRON")
         if not self.proper_with_det:
             rules.append("NP_SUBJ -> PROPN")
         rules.append("NP_SUBJ -> DP")
@@ -249,9 +256,12 @@ class GrammarParams:
         rules += _lex("V", list(self.verb_lex))
         rules += _lex("N", list(self.noun_lex))
         rules += _lex("PROPN", list(self.propn_lex))
+        rules += _lex("PRON", list(self.pron_lex))
         rules += _lex("ADJ", list(self.adj_lex) if self.adj_lex else ["dummy_adj"])
         rules += _lex("C", list(self.comp_lex))
         rules.append("CNULL -> '∅'")
+        if self.pro_drop:
+            rules.append("PRO -> '∅'")
 
         return "\n".join(rules)
 
@@ -261,10 +271,12 @@ class GrammarParams:
         return cls(
             head_initial=True,
             spec_first=True,
+            pro_drop=False,
             proper_with_det=False,
             verbs=["eats", "sees", "loves", "hears"],
             nouns=["tree", "horse", "dog", "cat", "apple"],
             propns=["john", "mary", "sue", "bob"],
+            prons=["he", "she", "they", "it"],
             adjs=["big", "small", "red", "green", "blue", "fuzzy", "round"],
             det_def=["the"],
             det_indef=["a"],
@@ -277,15 +289,53 @@ class GrammarParams:
         return cls(
             head_initial=False,  # German is head-final in VP
             spec_first=True,
+            pro_drop=False,  # Set to False for now; can be changed if needed
             proper_with_det=False,
             verbs=["essen", "sehen", "lieben", "geben"],
             nouns=["baum", "pferd", "hund", "katze", "apfel"],
             propns=["johann", "maria", "susanne", "robert"],
+            prons=["er", "sie", "es", "wir"],
             adjs=["groß", "klein", "rot", "grün", "blau", "flauschig", "rund"],
             det_def=["der"],
             det_indef=["ein"],
             comps=["dass"],
         )
+
+    @classmethod
+    def spanish(cls) -> "GrammarParams":
+        """Spanish grammar parameters."""
+        return cls(
+            head_initial=True,
+            spec_first=True,
+            pro_drop=True,
+            proper_with_det=False,
+            verbs=["come", "ve", "ama", "escucha"],
+            nouns=["árbol", "caballo", "perro", "gato", "manzana"],
+            propns=["juan", "maría", "susana", "roberto"],
+            prons=["él", "ella", "ellos", "ellas"],
+            adjs=["grande", "pequeño", "rojo", "verde", "azul", "suave", "redondo"],
+            det_def=["el"],
+            det_indef=["un"],
+            comps=["que"],
+        )
+
+
+class XBarGrammar(fg_grammar.Grammar):
+    @classmethod
+    def from_params(cls, params: GrammarParams) -> "XBarGrammar":
+        """Create a grammar from parameters."""
+        return cls.from_string(params.as_cfg_str(), grammar_type=GType.CFG)
+
+    def generate_tree(self, **kwargs) -> dict[str, Any]:
+        """Generate a tree from the grammar."""
+        gen_dict: dict[str, Any] = super().generate_tree(**kwargs)
+        # add a "phonetic_string" field which takes the generated string
+        # and removes every word beginning with the null symbol (∅)
+        phonetic_string: str = " ".join(
+            [w for w in gen_dict["string"].split(" ") if not w.startswith("∅")]
+        )
+        gen_dict["phonetic_string"] = phonetic_string
+        return gen_dict
 
 
 @dataclass
