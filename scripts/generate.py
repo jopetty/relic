@@ -737,7 +737,7 @@ def xbar(
     if verbose:
         print("Running with params:")
         pprint.pprint(asdict(g_params))
-    grammar_str: str = fg_mxg.generate_cfg(g_params)
+    grammar_str: str = g_params.to_cfg_str()
     grammar: fg_grammar.Grammar = fg_grammar.Grammar.from_string(
         grammar_str, grammar_type=GType.CFG
     )

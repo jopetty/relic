@@ -15,8 +15,9 @@ def _shell_rules(
     head: str,
     comp: str,
     *,
-    head_initial,
-    spec_first,
+    head_initial: bool,
+    spec_first: bool,
+    null_spec: bool = False,
 ):
     """Return the two CNF rules for a Larson shell.
 
@@ -37,6 +38,9 @@ def _shell_rules(
         rules.append(f"{xbar} -> {head} {comp}")
     else:
         rules.append(f"{xbar} -> {comp} {head}")
+
+    if null_spec:
+        rules.append(f"{spec} -> '∅'")
 
     return rules
 
@@ -146,10 +150,8 @@ class GrammarParams:
 
     head_initial: bool = True
     spec_first: bool = True
-    pro_drop: bool = False
     proper_with_det: bool = False
 
-    # Unified lexical items: can be int (auto-generate) or list of strings
     verbs: list[str] | int = 3
     nouns: list[str] | int = 3
     propns: list[str] | int = 3
@@ -157,14 +159,8 @@ class GrammarParams:
     det_def: list[str] | int = 2
     det_indef: list[str] | int = 2
     comps: list[str] | int = 2
-    tense_lex: List[str] = field(default_factory=lambda: ["∅_T_past", "∅_T_pres"])
-    asp_lex: List[str] = field(default_factory=lambda: ["∅_Asp_prog", "∅_Asp_perf"])
-    agrs_lex: List[str] = field(
-        default_factory=lambda: ["∅_Agrs_agrS0", "∅_Agrs_agrS1"]
-    )
-    agro_lex: List[str] = field(
-        default_factory=lambda: ["∅_AgrO_agrO0", "∅_AgrO_agrO1"]
-    )
+    tenses: List[str] = field(default_factory=lambda: ["∅_T_pres"])
+    asps: List[str] = field(default_factory=lambda: ["∅_Asp_prog"])
 
     def __post_init__(self):
         # Helper to resolve int or list to list
@@ -180,14 +176,88 @@ class GrammarParams:
         self.det_def_lex = resolve(self.det_def, "det_def")
         self.det_indef_lex = resolve(self.det_indef, "det_indef")
         self.comp_lex = resolve(self.comps, "c")
+        self.tense_lex = resolve(self.tenses, "tense")
+        self.asp_lex = resolve(self.asps, "asp")
 
-    # english preset
+    def to_cfg_str(self) -> str:
+        rules: List[str] = []
+
+        # ----- S layer: matrix clause with null complementizer -----
+        rules.append("S -> CP_matrix")
+        rules.append("CP_matrix -> CNULL TP")
+
+        # ----- Embedded CP for object clauses (with overt complementizer) -----
+        rules.append("CP_embed -> C TP")
+
+        # ----- TP shell -----
+        rules += _shell_rules(
+            phrase="TP",
+            spec="NP_SUBJ",
+            head="T",
+            comp="VP",
+            head_initial=self.head_initial,
+            spec_first=self.spec_first,
+        )
+
+        # NP_SUBJ: subjects
+        #  if proper_with_det=False, also allow bare proper nouns
+        if not self.proper_with_det:
+            rules.append("NP_SUBJ -> PROPN")
+        rules.append("NP_SUBJ -> DP")
+
+        # ----- VP shell -----
+        rules.append("VP -> V_HEAD OBJ_PHRASE")
+        rules.append("V_HEAD -> V")
+        # objects can be full DPs or embedded CPs
+        rules.append("OBJ_PHRASE -> DP")
+        rules.append("OBJ_PHRASE -> CP_embed")
+
+        # ----- DP shell -----
+        rules.append("DP -> DP_def | DP_indef")
+        rules.append("DP_def -> DET_def NP")
+        rules.append("DP_indef -> DET_indef NP")
+        if self.proper_with_det:
+            rules.append("DP_def -> DET_def PROPN")
+        else:
+            rules.append("DP_def -> PROPN")
+
+        # NP → N_HEAD          (bare N‐bar; includes PROPN or N)
+        #    → AdjP NP         (adjoin adjectives)
+        rules.append("NP -> N_HEAD")
+        rules.append("NP -> AdjP NP")
+
+        # N_HEAD → N | PROPN
+        if self.proper_with_det:
+            rules.append("N_HEAD -> PROPN")
+        else:
+            rules.append("N_HEAD -> N | PROPN")
+
+        # AdjP projection
+        rules.append("AdjP -> ADJ")
+
+        # NP_COMMON (no PROPN) for indefinite DPs
+        rules.append("NP_COMMON -> N")
+        rules.append("NP_COMMON -> AdjP NP_COMMON")
+
+        # ----- Lexicon (including complementizers) -----
+        rules += _lex("DET_def", list(self.det_def_lex))
+        rules += _lex("DET_indef", list(self.det_indef_lex))
+        rules += _lex("T", [f"{x}" for x in self.tense_lex])
+        rules += _lex("ASP", [f"{x}" for x in self.asp_lex])
+        rules += _lex("V", list(self.verb_lex))
+        rules += _lex("N", list(self.noun_lex))
+        rules += _lex("PROPN", list(self.propn_lex))
+        rules += _lex("ADJ", list(self.adj_lex) if self.adj_lex else ["dummy_adj"])
+        rules += _lex("C", list(self.comp_lex))
+        rules.append("CNULL -> '∅'")
+
+        return "\n".join(rules)
+
     @classmethod
     def english(cls) -> "GrammarParams":
         return cls(
             head_initial=True,
             spec_first=True,
-            pro_drop=False,
             proper_with_det=False,
             verbs=["eats", "sees", "loves", "hears"],
             nouns=["tree", "horse", "dog", "cat", "apple"],
@@ -203,7 +273,6 @@ class GrammarParams:
         return cls(
             head_initial=False,  # German is head-final in VP
             spec_first=True,
-            pro_drop=True,  # German allows pro-drop more freely
             proper_with_det=False,
             verbs=["essen", "sehen", "lieben", "geben"],
             nouns=["baum", "pferd", "hund", "katze", "apfel"],
@@ -270,81 +339,6 @@ def _sync_lex(pos: str, left_words: List[str], right_words: List[str]) -> List[s
         )
 
     return [f"{pos} -> <'{lw}', '{rw}'>" for lw, rw in zip(left_words, right_words)]
-
-
-def generate_cfg(p: GrammarParams) -> str:
-    rules: List[str] = []
-
-    # ----- S layer: direct matrix clause, no complementizer or WH
-    rules.append("S -> TP")
-
-    # ----- TP shell -----
-    rules += _shell_rules(
-        phrase="TP",
-        spec="NP_SUBJ",
-        head="T_HEAD",
-        comp="VP",
-        head_initial=p.head_initial,
-        spec_first=p.spec_first,
-    )
-    rules.append("T_HEAD -> T")
-
-    # NP_SUBJ: subjects
-    #  if pro-drop, allow PRO too
-    #  if proper_with_det=False, also allow bare proper nouns
-    if p.pro_drop:
-        rules.append("NP_SUBJ -> PRO")
-    if not p.proper_with_det:
-        rules.append("NP_SUBJ -> PROPN")
-    rules.append("NP_SUBJ -> DP")
-
-    # ----- VP shell -----
-    rules.append("VP -> V_HEAD OBJ_PHRASE")
-    rules.append("V_HEAD -> V")
-    # objects are full DPs
-    rules.append("OBJ_PHRASE -> DP")
-
-    # ----- DP shell -----
-    rules.append("DP -> DP_def | DP_indef")
-    rules.append("DP_def -> DET_def NP")
-    rules.append("DP_indef -> DET_indef NP")
-    if p.proper_with_det:
-        rules.append("DP_def -> DET_def PROPN")
-    else:
-        rules.append("DP_def -> PROPN")
-
-    # NP → N_HEAD          (bare N‐bar; includes PROPN or N)
-    #    → AdjP NP         (adjoin adjectives)
-    rules.append("NP -> N_HEAD")
-    rules.append("NP -> AdjP NP")
-
-    # N_HEAD → N | PROPN
-    if p.proper_with_det:
-        rules.append("N_HEAD -> PROPN")
-    else:
-        rules.append("N_HEAD -> N | PROPN")
-
-    # AdjP projection
-    rules.append("AdjP -> ADJ")
-
-    # NP_COMMON (no PROPN) for indefinite DPs
-    rules.append("NP_COMMON -> N")
-    rules.append("NP_COMMON -> AdjP NP_COMMON")
-
-    # ----- Lexicon (no WH, no complementizer) -----
-    rules += _lex("DET_def", list(p.det_def_lex))
-    rules += _lex("DET_indef", list(p.det_indef_lex))
-    rules += _lex("T", [f"t_{x}" for x in p.tense_lex])
-    rules += _lex("ASP", [f"asp_{x}" for x in p.asp_lex])
-    rules += _lex("V", list(p.verb_lex))
-    rules += _lex("N", list(p.noun_lex))
-    rules += _lex("PROPN", list(p.propn_lex))
-    rules += _lex("ADJ", list(p.adj_lex) if p.adj_lex else ["dummy_adj"])
-
-    if p.pro_drop:
-        rules += _lex("PRO", ["pro"])
-
-    return "\n".join(rules)
 
 
 def generate_scfg(sp: SyncGrammarParams) -> str:
