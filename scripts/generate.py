@@ -721,22 +721,30 @@ def all_grid(
             )
 
 
-def xbar(lang: str = "english"):
+def xbar(
+    lang: str = "english",
+    n_samples: int = 2,
+    verbose: bool = False,
+):
+    g_params: GrammarParams
     if lang == "english":
-        g_params: GrammarParams = fg_mxg.GrammarParams.english()
+        g_params = fg_mxg.GrammarParams.english()
     elif lang == "german":
-        g_params: GrammarParams = fg_mxg.GrammarParams.german()
+        g_params = fg_mxg.GrammarParams.german()
     else:
         raise ValueError(f"Unknown language: {lang}")
 
-    print("Running with params:")
-    pprint.pprint(asdict(g_params))
+    if verbose:
+        print("Running with params:")
+        pprint.pprint(asdict(g_params))
     grammar_str: str = fg_mxg.generate_cfg(g_params)
     grammar: fg_grammar.Grammar = fg_grammar.Grammar.from_string(
         grammar_str, grammar_type=GType.CFG
     )
-    print(grammar.as_cfg)
-    for _ in range(2):
+    if verbose:
+        print(grammar.as_cfg)
+
+    for _ in range(n_samples):
         s: dict[str, Any] = grammar.generate_tree()
         print(s["string"])
 
