@@ -15,6 +15,7 @@ import pprint
 import random
 import shutil
 from dataclasses import asdict
+from typing import Any
 
 import fire
 import pandas as pd
@@ -720,17 +721,23 @@ def all_grid(
             )
 
 
-def xbar_grammar():
-    english_params = fg_mxg.GrammarParams.english()
+def xbar(lang: str = "english"):
+    if lang == "english":
+        g_params: GrammarParams = fg_mxg.GrammarParams.english()
+    elif lang == "german":
+        g_params: GrammarParams = fg_mxg.GrammarParams.german()
+    else:
+        raise ValueError(f"Unknown language: {lang}")
+
     print("Running with params:")
-    pprint.pprint(asdict(english_params))
-    english_grammar_str = fg_mxg.generate_cfg(english_params)
-    english_grammar = fg_grammar.Grammar.from_string(
-        english_grammar_str, grammar_type=GType.CFG
+    pprint.pprint(asdict(g_params))
+    grammar_str: str = fg_mxg.generate_cfg(g_params)
+    grammar: fg_grammar.Grammar = fg_grammar.Grammar.from_string(
+        grammar_str, grammar_type=GType.CFG
     )
-    print(english_grammar.as_cfg)
+    print(grammar.as_cfg)
     for _ in range(2):
-        s = english_grammar.generate_tree()
+        s: dict[str, Any] = grammar.generate_tree()
         print(s["string"])
 
 

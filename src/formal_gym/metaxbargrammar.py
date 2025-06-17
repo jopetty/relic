@@ -78,22 +78,85 @@ def _sync_shell_rules(
 # ------------------------------------------------------------------
 @dataclass
 class GrammarParams:
-    # syntactic switches
+    """Grammar parameters for an x-bar style grammar.
+
+    Attributes:
+        head_initial: Whether the head is initial in the shell.
+        spec_first: Whether the specifier is first in the shell.
+        pro_drop: Whether to allow pro-drop.
+        proper_with_det: Whether proper nouns take determiners.
+        verb: List of verbs or number of verbs to generate.
+        noun: List of nouns or number of nouns to generate.
+        propn: List of proper nouns or number of proper nouns to generate.
+        adj: List of adjectives or number of adjectives to generate.
+        det_def: List of definite determiners or number of definite determiners
+                to generate.
+        det_indef: List of indefinite determiners or number of indefinite
+            determiners to generate.
+        comp: List of complementizers or number of complementizers to generate.
+        tense_lex: List of tense labels or number of tense labels to generate.
+        asp_lex: List of aspect labels or number of aspect labels to generate.
+        agrs_lex: List of agreement labels or number of agreement labels to generate.
+        agro_lex: List of agreement labels or number of agreement labels to generate.
+    """
+
+    @property
+    def n_verbs(self) -> int:
+        return len(self.verb_lex)
+
+    @property
+    def n_nouns(self) -> int:
+        return len(self.noun_lex)
+
+    @property
+    def n_propns(self) -> int:
+        return len(self.propn_lex)
+
+    @property
+    def n_adjs(self) -> int:
+        return len(self.adj_lex)
+
+    @property
+    def n_det_defs(self) -> int:
+        return len(self.det_def_lex)
+
+    @property
+    def n_det_indefs(self) -> int:
+        return len(self.det_indef_lex)
+
+    @property
+    def n_comps(self) -> int:
+        return len(self.comp_lex)
+
+    @property
+    def n_tense_lex(self) -> int:
+        return len(self.tense_lex)
+
+    @property
+    def n_asp_lex(self) -> int:
+        return len(self.asp_lex)
+
+    @property
+    def n_agrs_lex(self) -> int:
+        return len(self.agrs_lex)
+
+    @property
+    def n_agro_lex(self) -> int:
+        return len(self.agro_lex)
+
     head_initial: bool = True
     spec_first: bool = True
     pro_drop: bool = False
-    # verb_raise: bool = False
-    # object_shift: bool = False
-    # rich_agreement: bool = False
     proper_with_det: bool = False
 
-    # lexical items
-    verb_lex: Optional[List[str]] = None
-    noun_lex: Optional[List[str]] = None
-    propn_lex: Optional[List[str]] = None
-    adj_lex: Optional[List[str]] = None
-    det_lex: Optional[List[str]] = None
-    comp_lex: Optional[List[str]] = None
+    # Unified lexical items: can be int (auto-generate) or list of strings
+    verbs: list[str] | int = 3
+    nouns: list[str] | int = 3
+    propns: list[str] | int = 3
+    adjs: list[str] | int = 2
+    det_def: list[str] | int = 2
+    det_indef: list[str] | int = 2
+    comps: list[str] | int = 2
     tense_lex: List[str] = field(default_factory=lambda: ["∅_T_past", "∅_T_pres"])
     asp_lex: List[str] = field(default_factory=lambda: ["∅_Asp_prog", "∅_Asp_perf"])
     agrs_lex: List[str] = field(
@@ -103,45 +166,20 @@ class GrammarParams:
         default_factory=lambda: ["∅_AgrO_agrO0", "∅_AgrO_agrO1"]
     )
 
-    # fallback sizes
-    n_verbs: int = 3
-    n_nouns: int = 3
-    n_propns: int = 3
-    n_adjs: int = 2
-    n_dets: int = 2
-    n_comps: int = 2
-
     def __post_init__(self):
-        # auto‑fill lexicons if missing
-        if self.verb_lex is None:
-            self.verb_lex = [f"verb{i}" for i in range(self.n_verbs)]
-        else:
-            self.n_verbs = len(self.verb_lex)
+        # Helper to resolve int or list to list
+        def resolve(val, prefix):
+            if isinstance(val, int):
+                return [f"{prefix}{i}" for i in range(val)]
+            return list(val)
 
-        if self.noun_lex is None:
-            self.noun_lex = [f"noun{i}" for i in range(self.n_nouns)]
-        else:
-            self.n_nouns = len(self.noun_lex)
-
-        if self.propn_lex is None:
-            self.propn_lex = [f"name{i}" for i in range(self.n_propns)]
-        else:
-            self.n_propns = len(self.propn_lex)
-
-        if self.adj_lex is None:
-            self.adj_lex = [f"adj{i}" for i in range(self.n_adjs)]
-        else:
-            self.n_adjs = len(self.adj_lex)
-
-        if self.det_lex is None:
-            self.det_lex = [f"det{i}" for i in range(self.n_dets)]
-        else:
-            self.n_dets = len(self.det_lex)
-
-        if self.comp_lex is None:
-            self.comp_lex = [f"c{i}" for i in range(self.n_comps)]
-        else:
-            self.n_comps = len(self.comp_lex)
+        self.verb_lex = resolve(self.verbs, "verb")
+        self.noun_lex = resolve(self.nouns, "noun")
+        self.propn_lex = resolve(self.propns, "name")
+        self.adj_lex = resolve(self.adjs, "adj")
+        self.det_def_lex = resolve(self.det_def, "det_def")
+        self.det_indef_lex = resolve(self.det_indef, "det_indef")
+        self.comp_lex = resolve(self.comps, "c")
 
     # english preset
     @classmethod
@@ -150,16 +188,14 @@ class GrammarParams:
             head_initial=True,
             spec_first=True,
             pro_drop=False,
-            # verb_raise=False,
-            # object_shift=False,
-            # rich_agreement=False,
             proper_with_det=False,
-            verb_lex=["eats", "sees", "loves", "hears"],
-            noun_lex=["tree", "horse", "dog", "cat", "apple"],
-            propn_lex=["john", "mary", "sue", "bob"],
-            adj_lex=["big", "small", "red", "green", "blue", "fuzzy", "round"],
-            det_lex=["the", "a"],
-            comp_lex=["that"],
+            verbs=["eats", "sees", "loves", "hears"],
+            nouns=["tree", "horse", "dog", "cat", "apple"],
+            propns=["john", "mary", "sue", "bob"],
+            adjs=["big", "small", "red", "green", "blue", "fuzzy", "round"],
+            det_def=["the"],
+            det_indef=["a"],
+            comps=["that"],
         )
 
     @classmethod
@@ -167,20 +203,15 @@ class GrammarParams:
         return cls(
             head_initial=False,  # German is head-final in VP
             spec_first=True,
-            comp_initial=False,  # German has verb-final complement order
-            wh_movement=True,
             pro_drop=True,  # German allows pro-drop more freely
-            verb_raise=True,  # German has verb raising
-            object_shift=False,
-            rich_agreement=True,  # German has richer agreement
             proper_with_det=False,
-            verb_lex=["essen", "sehen", "lieben", "geben"],
-            noun_lex=["baum", "pferd", "hund", "katze", "apfel"],
-            propn_lex=["johann", "maria", "susanne", "robert"],
-            adj_lex=["groß", "klein", "rot", "grün", "blau", "flauschig", "rund"],
-            det_lex=["der", "ein"],
-            comp_lex=["dass"],
-            wh_lex=["wer", "was", "wo", "wann", "warum"],
+            verbs=["essen", "sehen", "lieben", "geben"],
+            nouns=["baum", "pferd", "hund", "katze", "apfel"],
+            propns=["johann", "maria", "susanne", "robert"],
+            adjs=["groß", "klein", "rot", "grün", "blau", "flauschig", "rund"],
+            det_def=["der"],
+            det_indef=["ein"],
+            comps=["dass"],
         )
 
 
@@ -191,44 +222,29 @@ class SyncGrammarParams:
     left: GrammarParams
     right: GrammarParams
 
-    def __post_init__(self):
-        """Ensure lexicon sizes are compatible between left and right grammars."""
-        self._align_lexicon_sizes()
-
     def _align_lexicon_sizes(self):
         """Align lexicon sizes between left and right grammars."""
-        # Take the maximum size for each lexicon type
         max_verbs: int = max(self.left.n_verbs, self.right.n_verbs)
         max_nouns: int = max(self.left.n_nouns, self.right.n_nouns)
         max_propns: int = max(self.left.n_propns, self.right.n_propns)
         max_adjs: int = max(self.left.n_adjs, self.right.n_adjs)
-        max_dets: int = max(self.left.n_dets, self.right.n_dets)
+        max_det_defs: int = max(self.left.n_det_defs, self.right.n_det_defs)
+        max_det_indefs: int = max(self.left.n_det_indefs, self.right.n_det_indefs)
         max_comps: int = max(self.left.n_comps, self.right.n_comps)
-        max_wh: int = max(self.left.n_wh, self.right.n_wh)
 
-        # Update both grammars to have matching sizes
-        self.left.n_verbs = self.right.n_verbs = max_verbs
-        self.left.n_nouns = self.right.n_nouns = max_nouns
-        self.left.n_propns = self.right.n_propns = max_propns
-        self.left.n_adjs = self.right.n_adjs = max_adjs
-        self.left.n_dets = self.right.n_dets = max_dets
-        self.left.n_comps = self.right.n_comps = max_comps
-        self.left.n_wh = self.right.n_wh = max_wh
-
-        # Extend lexicons if needed
-        self._extend_lexicon("verb_lex", max_verbs, "verb")
-        self._extend_lexicon("noun_lex", max_nouns, "noun")
-        self._extend_lexicon("propn_lex", max_propns, "name")
-        self._extend_lexicon("adj_lex", max_adjs, "adj")
-        self._extend_lexicon("det_lex", max_dets, "det")
-        self._extend_lexicon("comp_lex", max_comps, "c")
-        self._extend_lexicon("wh_lex", max_wh, "wh")
+        self._extend_lexicon("verbs", max_verbs, "verb")
+        self._extend_lexicon("nouns", max_nouns, "noun")
+        self._extend_lexicon("propns", max_propns, "name")
+        self._extend_lexicon("adjs", max_adjs, "adj")
+        self._extend_lexicon("det_defs", max_det_defs, "det")
+        self._extend_lexicon("det_indefs", max_det_indefs, "det")
+        self._extend_lexicon("comps", max_comps, "c")
 
     def _extend_lexicon(self, attr_name: str, target_size: int, prefix: str):
         """Extend a lexicon to target size if needed."""
         for grammar in [self.left, self.right]:
             lex = getattr(grammar, attr_name)
-            if lex is not None and len(lex) < target_size:
+            if len(lex) < target_size:
                 # Extend with generic items
                 for i in range(len(lex), target_size):
                     lex.append(f"{prefix}{i}")
@@ -273,11 +289,14 @@ def generate_cfg(p: GrammarParams) -> str:
     )
     rules.append("T_HEAD -> T")
 
-    # NP_SUBJ is either pro or a full DP
-    np_subj_rule: Literal["NP_SUBJ -> PRO | DP", "NP_SUBJ -> DP"] = (
-        "NP_SUBJ -> PRO | DP" if p.pro_drop else "NP_SUBJ -> DP"
-    )
-    rules.append(np_subj_rule)
+    # NP_SUBJ: subjects
+    #  if pro-drop, allow PRO too
+    #  if proper_with_det=False, also allow bare proper nouns
+    if p.pro_drop:
+        rules.append("NP_SUBJ -> PRO")
+    if not p.proper_with_det:
+        rules.append("NP_SUBJ -> PROPN")
+    rules.append("NP_SUBJ -> DP")
 
     # ----- VP shell -----
     rules.append("VP -> V_HEAD OBJ_PHRASE")
@@ -285,12 +304,17 @@ def generate_cfg(p: GrammarParams) -> str:
     # objects are full DPs
     rules.append("OBJ_PHRASE -> DP")
 
-    # ----- DP & NP shells -----
-    # DP → DET NP
-    rules.append("DP -> DET NP")
+    # ----- DP shell -----
+    rules.append("DP -> DP_def | DP_indef")
+    rules.append("DP_def -> DET_def NP")
+    rules.append("DP_indef -> DET_indef NP")
+    if p.proper_with_det:
+        rules.append("DP_def -> DET_def PROPN")
+    else:
+        rules.append("DP_def -> PROPN")
 
-    # NP → N_HEAD      (bare N‐bar)
-    #    → AdjP NP     (adjoin adjectives)
+    # NP → N_HEAD          (bare N‐bar; includes PROPN or N)
+    #    → AdjP NP         (adjoin adjectives)
     rules.append("NP -> N_HEAD")
     rules.append("NP -> AdjP NP")
 
@@ -303,14 +327,19 @@ def generate_cfg(p: GrammarParams) -> str:
     # AdjP projection
     rules.append("AdjP -> ADJ")
 
+    # NP_COMMON (no PROPN) for indefinite DPs
+    rules.append("NP_COMMON -> N")
+    rules.append("NP_COMMON -> AdjP NP_COMMON")
+
     # ----- Lexicon (no WH, no complementizer) -----
-    rules += _lex("DET", p.det_lex)
+    rules += _lex("DET_def", list(p.det_def_lex))
+    rules += _lex("DET_indef", list(p.det_indef_lex))
     rules += _lex("T", [f"t_{x}" for x in p.tense_lex])
     rules += _lex("ASP", [f"asp_{x}" for x in p.asp_lex])
-    rules += _lex("V", p.verb_lex)
-    rules += _lex("N", p.noun_lex)
-    rules += _lex("PROPN", p.propn_lex)
-    rules += _lex("ADJ", p.adj_lex or ["dummy_adj"])
+    rules += _lex("V", list(p.verb_lex))
+    rules += _lex("N", list(p.noun_lex))
+    rules += _lex("PROPN", list(p.propn_lex))
+    rules += _lex("ADJ", list(p.adj_lex) if p.adj_lex else ["dummy_adj"])
 
     if p.pro_drop:
         rules += _lex("PRO", ["pro"])
@@ -448,7 +477,7 @@ def generate_scfg(sp: SyncGrammarParams) -> str:
     ]
 
     # ----- Synchronized Lexicon -----
-    rules += _sync_lex("DET", sp.left.det_lex, sp.right.det_lex)
+    rules += _sync_lex("DET", sp.left.det_def, sp.right.det_def)
     rules += _sync_lex(
         "T",
         [f"t_{x}" for x in sp.left.tense_lex],
@@ -459,15 +488,15 @@ def generate_scfg(sp: SyncGrammarParams) -> str:
         [f"asp_{x}" for x in sp.left.asp_lex],
         [f"asp_{x}" for x in sp.right.asp_lex],
     )
-    rules += _sync_lex("C", sp.left.comp_lex, sp.right.comp_lex)
+    rules += _sync_lex("C", sp.left.comp, sp.right.comp)
     rules += _sync_lex("CNULL", ["∅_C"], ["∅_C"])
     rules += _sync_lex("WH", sp.left.wh_lex, sp.right.wh_lex)
-    rules += _sync_lex("V", sp.left.verb_lex, sp.right.verb_lex)
-    rules += _sync_lex("N", sp.left.noun_lex, sp.right.noun_lex)
-    rules += _sync_lex("PROPN", sp.left.propn_lex, sp.right.propn_lex)
+    rules += _sync_lex("V", sp.left.verb, sp.right.verb)
+    rules += _sync_lex("N", sp.left.noun, sp.right.noun)
+    rules += _sync_lex("PROPN", sp.left.propn, sp.right.propn)
 
-    left_adj = sp.left.adj_lex if sp.left.adj_lex else ["dummy_adj"]
-    right_adj = sp.right.adj_lex if sp.right.adj_lex else ["dummy_adj"]
+    left_adj = sp.left.adj if sp.left.adj else ["dummy_adj"]
+    right_adj = sp.right.adj if sp.right.adj else ["dummy_adj"]
     rules += _sync_lex("ADJ", left_adj, right_adj)
 
     if sp.left.rich_agreement or sp.right.rich_agreement:
