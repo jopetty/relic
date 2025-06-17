@@ -15,8 +15,8 @@ def _shell_rules(
     head: str,
     comp: str,
     *,
-    head_initial: bool = True,
-    spec_first: bool = True,
+    head_initial,
+    spec_first,
 ):
     """Return the two CNF rules for a Larson shell.
 
@@ -81,12 +81,10 @@ class GrammarParams:
     # syntactic switches
     head_initial: bool = True
     spec_first: bool = True
-    comp_initial: bool = True
-    wh_movement: bool = True
     pro_drop: bool = False
-    verb_raise: bool = False
-    object_shift: bool = False
-    rich_agreement: bool = False
+    # verb_raise: bool = False
+    # object_shift: bool = False
+    # rich_agreement: bool = False
     proper_with_det: bool = False
 
     # lexical items
@@ -96,7 +94,6 @@ class GrammarParams:
     adj_lex: Optional[List[str]] = None
     det_lex: Optional[List[str]] = None
     comp_lex: Optional[List[str]] = None
-    wh_lex: Optional[List[str]] = None
     tense_lex: List[str] = field(default_factory=lambda: ["∅_T_past", "∅_T_pres"])
     asp_lex: List[str] = field(default_factory=lambda: ["∅_Asp_prog", "∅_Asp_perf"])
     agrs_lex: List[str] = field(
@@ -113,7 +110,6 @@ class GrammarParams:
     n_adjs: int = 2
     n_dets: int = 2
     n_comps: int = 2
-    n_wh: int = 2
 
     def __post_init__(self):
         # auto‑fill lexicons if missing
@@ -147,31 +143,23 @@ class GrammarParams:
         else:
             self.n_comps = len(self.comp_lex)
 
-        if self.wh_lex is None:
-            self.wh_lex = [f"wh{i}" for i in range(self.n_wh)]
-        else:
-            self.n_wh = len(self.wh_lex)
-
     # english preset
     @classmethod
     def english(cls) -> "GrammarParams":
         return cls(
             head_initial=True,
             spec_first=True,
-            comp_initial=True,
-            wh_movement=True,
             pro_drop=False,
-            verb_raise=False,
-            object_shift=False,
-            rich_agreement=False,
+            # verb_raise=False,
+            # object_shift=False,
+            # rich_agreement=False,
             proper_with_det=False,
-            verb_lex=["eat", "see", "love", "give"],
+            verb_lex=["eats", "sees", "loves", "hears"],
             noun_lex=["tree", "horse", "dog", "cat", "apple"],
             propn_lex=["john", "mary", "sue", "bob"],
             adj_lex=["big", "small", "red", "green", "blue", "fuzzy", "round"],
             det_lex=["the", "a"],
             comp_lex=["that"],
-            wh_lex=["who", "what", "where", "when", "why"],
         )
 
     @classmethod
@@ -271,88 +259,59 @@ def _sync_lex(pos: str, left_words: List[str], right_words: List[str]) -> List[s
 def generate_cfg(p: GrammarParams) -> str:
     rules: List[str] = []
 
-    # ----- CP / S layer -----
-    rules.append("S -> CP")
-
-    # WH‑root question rule
-    if p.wh_movement:
-        rules += _shell_rules(
-            "CP", "WH", "CNULL", "TP", head_initial=p.comp_initial, spec_first=True
-        )
-
-    # Declarative CP with overt C
-    rules.append("CP -> C TP" if p.comp_initial else "CP -> TP C")
-
-    # Declarative CP with null C (new rule)
-    rules.append("CP -> CNULL TP" if p.comp_initial else "CP -> TP CNULL")
+    # ----- S layer: direct matrix clause, no complementizer or WH
+    rules.append("S -> TP")
 
     # ----- TP shell -----
     rules += _shell_rules(
-        "TP", "NP_SUBJ", "T_HEAD", "VP", head_initial=p.verb_raise, spec_first=True
+        phrase="TP",
+        spec="NP_SUBJ",
+        head="T_HEAD",
+        comp="VP",
+        head_initial=p.head_initial,
+        spec_first=p.spec_first,
     )
-    if p.rich_agreement:
-        t_head_rule: Literal["T_HEAD -> T AGR_S", "T_HEAD -> AGR_S T"] = (
-            "T_HEAD -> T AGR_S" if p.verb_raise else "T_HEAD -> AGR_S T"
-        )
-        rules.append(t_head_rule)
-    else:
-        rules.append("T_HEAD -> T")
+    rules.append("T_HEAD -> T")
 
-    np_subj_rule: Literal["NP_SUBJ -> PRO | NP", "NP_SUBJ -> NP"] = (
-        "NP_SUBJ -> PRO | NP" if p.pro_drop else "NP_SUBJ -> NP"
+    # NP_SUBJ is either pro or a full DP
+    np_subj_rule: Literal["NP_SUBJ -> PRO | DP", "NP_SUBJ -> DP"] = (
+        "NP_SUBJ -> PRO | DP" if p.pro_drop else "NP_SUBJ -> DP"
     )
     rules.append(np_subj_rule)
 
     # ----- VP shell -----
-    rules += _shell_rules(
-        "VP",
-        "ASP",
-        "V_HEAD",
-        "OBJ_PHRASE",
-        head_initial=p.head_initial,
-        spec_first=True,
-    )
+    rules.append("VP -> V_HEAD OBJ_PHRASE")
+    rules.append("V_HEAD -> V")
+    # objects are full DPs
+    rules.append("OBJ_PHRASE -> DP")
 
-    if p.rich_agreement:
-        rules.append("V_HEAD -> V AGR_O")
-    else:
-        rules.append("V_HEAD -> V")
+    # ----- DP & NP shells -----
+    # DP → DET NP
+    rules.append("DP -> DET NP")
 
-    if p.object_shift:
-        rules.append("OBJ_PHRASE -> EPS_OBJ")
-        rules.append("EPS_OBJ -> '∅'")
-    else:
-        rules.append("OBJ_PHRASE -> NP")
+    # NP → N_HEAD      (bare N‐bar)
+    #    → AdjP NP     (adjoin adjectives)
+    rules.append("NP -> N_HEAD")
+    rules.append("NP -> AdjP NP")
 
-    # ----- NP shell -----
-    rules += _shell_rules(
-        "NP", "DET", "N_HEAD", "ADJLIST", head_initial=False, spec_first=True
-    )
+    # N_HEAD → N | PROPN
     if p.proper_with_det:
         rules.append("N_HEAD -> PROPN")
     else:
         rules.append("N_HEAD -> N | PROPN")
 
-    rules += [
-        "ADJLIST -> ADJ",
-        "ADJLIST -> ADJ ADJLIST",
-    ]
+    # AdjP projection
+    rules.append("AdjP -> ADJ")
 
-    # ----- Lexicon -----
+    # ----- Lexicon (no WH, no complementizer) -----
     rules += _lex("DET", p.det_lex)
     rules += _lex("T", [f"t_{x}" for x in p.tense_lex])
     rules += _lex("ASP", [f"asp_{x}" for x in p.asp_lex])
-    rules += _lex("C", p.comp_lex)
-    rules += _lex("CNULL", ["∅_C"])
-    rules += _lex("WH", p.wh_lex)
     rules += _lex("V", p.verb_lex)
     rules += _lex("N", p.noun_lex)
     rules += _lex("PROPN", p.propn_lex)
-    rules += _lex("ADJ", p.adj_lex if p.adj_lex else ["dummy_adj"])
+    rules += _lex("ADJ", p.adj_lex or ["dummy_adj"])
 
-    if p.rich_agreement:
-        rules += _lex("AGR_S", p.agrs_lex)
-        rules += _lex("AGR_O", p.agro_lex)
     if p.pro_drop:
         rules += _lex("PRO", ["pro"])
 
@@ -366,22 +325,22 @@ def generate_scfg(sp: SyncGrammarParams) -> str:
     # ----- CP / S layer -----
     rules.append("S -> <CP, CP>")
 
-    # WH‑root question rule
+    # WH‑root question rule (uses head_initial now)
     if sp.left.wh_movement or sp.right.wh_movement:
         rules += _sync_shell_rules(
             "CP",
             "WH",
             "CNULL",
             "TP",
-            head_initial_l=sp.left.comp_initial,
+            head_initial_l=sp.left.head_initial,
             spec_first_l=True,
-            head_initial_r=sp.right.comp_initial,
+            head_initial_r=sp.right.head_initial,
             spec_first_r=True,
         )
 
     # Declarative CP with overt C
-    left_cp: Literal["C TP", "TP C"] = "C TP" if sp.left.comp_initial else "TP C"
-    right_cp: Literal["C TP", "TP C"] = "C TP" if sp.right.comp_initial else "TP C"
+    left_cp: Literal["C TP", "TP C"] = "C TP" if sp.left.head_initial else "TP C"
+    right_cp: Literal["C TP", "TP C"] = "C TP" if sp.right.head_initial else "TP C"
     rules.append(f"CP -> <{left_cp}, {right_cp}>")
 
     # Declarative CP with null C
@@ -422,10 +381,12 @@ def generate_scfg(sp: SyncGrammarParams) -> str:
     )
     rules.append(f"T_HEAD -> <{left_t}, {right_t}>")
 
-    # Subject rules
-    left_subj: Literal["PRO | NP", "NP"] = "PRO | NP" if sp.left.pro_drop else "NP"
-    right_subj: Literal["PRO | NP", "NP"] = "PRO | NP" if sp.right.pro_drop else "NP"
-    rules.append(f"NP_SUBJ -> <{left_subj}, {right_subj}>")
+    # Subject rules: expand any PRO | NP alternation into separate synchronous productions
+    left_alts = ("PRO", "NP") if sp.left.pro_drop else ("NP",)
+    right_alts = ("PRO", "NP") if sp.right.pro_drop else ("NP",)
+    for ls in left_alts:
+        for rs in right_alts:
+            rules.append(f"NP_SUBJ -> <{ls}, {rs}>")
 
     # ----- VP shell -----
     rules += _sync_shell_rules(
@@ -468,17 +429,18 @@ def generate_scfg(sp: SyncGrammarParams) -> str:
         spec_first_r=True,
     )
 
-    # N_HEAD rules
-    if sp.left.proper_with_det or sp.right.proper_with_det:
-        left_n: Literal["PROPN", "N | PROPN"] = (
-            "PROPN" if sp.left.proper_with_det else "N | PROPN"
-        )
-        right_n: Literal["PROPN", "N | PROPN"] = (
-            "PROPN" if sp.right.proper_with_det else "N | PROPN"
-        )
-        rules.append(f"N_HEAD -> <{left_n}, {right_n}>")
+    # N_HEAD rules: align only identical categories when neither side forces PROPN,
+    # otherwise cross‐product the allowed categories
+    if not sp.left.proper_with_det and not sp.right.proper_with_det:
+        # both sides allow N or PROPN but only align same category
+        for cat in ("N", "PROPN"):
+            rules.append(f"N_HEAD -> <{cat}, {cat}>")
     else:
-        rules.append("N_HEAD -> <N | PROPN, N | PROPN>")
+        left_alts = ("PROPN",) if sp.left.proper_with_det else ("N", "PROPN")
+        right_alts = ("PROPN",) if sp.right.proper_with_det else ("N", "PROPN")
+        for ls in left_alts:
+            for rs in right_alts:
+                rules.append(f"N_HEAD -> <{ls}, {rs}>")
 
     rules += [
         "ADJLIST -> <ADJ, ADJ>",
