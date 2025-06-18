@@ -74,9 +74,11 @@ class SCFG:
         if rng is None:
             rng = random.Random()
 
+        print(rng.random())
+
         # The recursive helper now returns four strings
         left_full, left_phon, right_full, right_phon = self._sample_recursive(
-            self.start_symbol, rng, 0, max_depth
+            self.start_symbol, rng, current_depth=0, max_depth=max_depth
         )
 
         # Clean up whitespace in all generated strings before returning
@@ -128,9 +130,12 @@ class SCFG:
 
         # This dictionary will store the full (4-part) derivations for sub-trees.
         sub_derivations: Dict[str, Tuple[str, str, str, str]] = {}
-        unique_non_terminals = {
-            s for s in chosen_left_prod + chosen_right_prod if s in self.rules
-        }
+        unique_non_terminals: list[str] = []
+        seen: set[str] = set()
+        for s in chosen_left_prod + chosen_right_prod:  # keeps lhs/rhs order
+            if s in self.rules and s not in seen:
+                unique_non_terminals.append(s)
+                seen.add(s)
 
         for s in unique_non_terminals:
             new_depth = current_depth + (1 if s in self.recursive_symbols else 0)
@@ -178,9 +183,8 @@ if __name__ == "__main__":
     scfg = SCFG(eng_ger_params)
 
     # Sample with a fixed seed for reproducibility.
-    print("--- Deterministic Sampling (max_depth=4, seed=101) ---")
-    seeded_rng = random.Random(101)
-    sample = scfg.sample(max_depth=4, rng=seeded_rng)
+    print("--- Deterministic Sampling (max_depth=4) ---")
+    sample = scfg.sample(max_depth=4)
 
     print(f"Left (Full):      {sample['left']}")
     print(f"Left (Phonetic):  {sample['left_phonetic']}")

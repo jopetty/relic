@@ -26,6 +26,7 @@ import formal_gym.grammar as fg_grammar
 import formal_gym.metagrammar as fg_metagrammar
 import formal_gym.metaxbargrammar as fg_mxg
 import formal_gym.prompt as fg_prompt
+import formal_gym.scfg as fg_scfg
 import formal_gym.utils.utils as fg_utils
 
 GType = fg_grammar.Grammar.Type
@@ -748,10 +749,24 @@ def xbar(
         print(s["phonetic_string"])
 
 
-def scfg():
+def scfg(
+    n_samples: int = 2,
+    seed: int = 42,
+    max_depth: int = 2,
+):
     en_de_params = fg_mxg.SyncGrammarParams.english_german()
-    scfg_str = fg_mxg.generate_scfg(en_de_params)
-    print(scfg_str)
+    en_dr_grammar = fg_scfg.SCFG(en_de_params)
+
+    fg_utils.set_all_seeds(seed)
+    rng = random.Random(seed)
+
+    for _ in range(n_samples):
+        production = en_dr_grammar.sample(
+            max_depth=max_depth,
+            rng=rng,
+        )
+        print(f"Left (EN): {production['left_phonetic']}")
+        print(f"Right (DE): {production['right_phonetic']}\n")
 
 
 if __name__ == "__main__":
