@@ -22,9 +22,10 @@ class SCFG:
         Args:
             sync_params: An object containing the synchronized grammar info.
         """
-        self.rules: Dict[str, List[Rule]] = self._parse_rules(
-            fg_mxg.generate_scfg(sync_params)
-        )
+        # In a real scenario, you would use your library's function:
+        grammar_str = fg_mxg.generate_scfg(sync_params)
+
+        self.rules: Dict[str, List[Rule]] = self._parse_rules(grammar_str)
         self.start_symbol: str = "S"
         # Define symbols that increase recursion depth (e.g., clausal complements)
         self.recursive_symbols: Set[str] = {"CP_matrix", "CP_embed"}
@@ -64,35 +65,33 @@ class SCFG:
         Samples a synchronized pair of strings from the grammar.
 
         Args:
-            max_depth: The maximum nesting depth for recursive rules. A depth of
-                       1 allows one level of embedding (e.g., a main clause with
-                       an embedded clause), but not nested embeddings.
+            max_depth: The maximum nesting depth for recursive rules.
             rng: An optional random number generator for deterministic sampling.
 
         Returns:
-            A dictionary with "left" and "right" keys holding the derived strings.
+            A dictionary with full and phonetic (null-filtered) derivations.
         """
         if rng is None:
             rng = random.Random()
 
-        left_derivation, right_derivation = self._sample_recursive(
+        # The recursive helper now returns four strings
+        left_full, left_phon, right_full, right_phon = self._sample_recursive(
             self.start_symbol, rng, 0, max_depth
         )
 
-        # Clean up output: remove extra whitespace and leading/trailing spaces.
-        left_clean = re.sub(r"\s+", " ", left_derivation).strip()
-        right_clean = re.sub(r"\s+", " ", right_derivation).strip()
-
-        return {"left": left_clean, "right": right_clean}
+        # Clean up whitespace in all generated strings before returning
+        return {
+            "left": re.sub(r"\s+", " ", left_full).strip(),
+            "left_phonetic": re.sub(r"\s+", " ", left_phon).strip(),
+            "right": re.sub(r"\s+", " ", right_full).strip(),
+            "right_phonetic": re.sub(r"\s+", " ", right_phon).strip(),
+        }
 
     def _sample_recursive(
         self, symbol: str, rng: random.Random, current_depth: int, max_depth: int
-    ) -> Tuple[str, str]:
+    ) -> Tuple[str, str, str, str]:
         """
-        Recursively expands a symbol to generate synchronized strings.
-
-        This corrected version first generates all necessary child derivations
-        and then assembles the final strings, correctly handling reordering.
+        Recursively expands a symbol, returning full and phonetic derivations.
 
         Args:
             symbol: The non-terminal symbol to expand.
@@ -101,38 +100,34 @@ class SCFG:
             max_depth: The maximum allowed recursion depth.
 
         Returns:
-            A tuple containing the (left_string, right_string) for the derivation.
+            A tuple of four strings: (left_full, left_phonetic,
+                                      right_full, right_phonetic).
         """
-        # Base case: The symbol is a terminal (i.e., not a non-terminal).
+        # Base case: The symbol is a terminal.
         if symbol not in self.rules:
             clean_symbol = symbol.strip("'")
-            # Return empty strings for null elements to remove them from output.
-            # return ("", "") if clean_symbol.startswith('∅') else (clean_symbol, clean_symbol)
-            return (clean_symbol, clean_symbol)
+            full_string = clean_symbol
+            # Phonetic string is empty if it's a null symbol.
+            phonetic_string = "" if clean_symbol.startswith("∅") else full_string
+            # For a terminal, left and right derivations are identical.
+            return (full_string, phonetic_string, full_string, phonetic_string)
 
-        # --- Recursive Step ---
+        # Recursive step: The symbol is a non-terminal.
         possible_rules = self.rules[symbol]
 
-        # If we are at max depth, filter out rules that would continue recursion.
         if current_depth >= max_depth:
             possible_rules = [
                 rule
                 for rule in possible_rules
                 if not any(s in self.recursive_symbols for s in rule[0])
             ]
-            # If no non-recursive rules are available, we cannot expand further.
             if not possible_rules:
-                return ("", "")
+                return ("", "", "", "")  # Cannot expand further
 
-        # Choose one production rule synchronously for both sides.
         chosen_left_prod, chosen_right_prod = rng.choice(possible_rules)
 
-        # Create synchronized derivations for all unique non-terminals in the rule.
-        # This ensures that if 'NP' appears twice, we generate one 'NP' pair
-        # and reuse it, but more importantly, it correctly generates pairs for
-        # different non-terminals like 'T' and 'VP'.
-        sub_derivations: Dict[str, Tuple[str, str]] = {}
-        # We only need to find unique non-terminals to avoid redundant recursion.
+        # This dictionary will store the full (4-part) derivations for sub-trees.
+        sub_derivations: Dict[str, Tuple[str, str, str, str]] = {}
         unique_non_terminals = {
             s for s in chosen_left_prod + chosen_right_prod if s in self.rules
         }
@@ -141,52 +136,53 @@ class SCFG:
             new_depth = current_depth + (1 if s in self.recursive_symbols else 0)
             sub_derivations[s] = self._sample_recursive(s, rng, new_depth, max_depth)
 
-        # Assemble the final strings by substituting the generated derivations.
-        left_parts, right_parts = [], []
+        # Assemble the four component strings.
+        left_full, left_phon = [], []
+        right_full, right_phon = [], []
 
+        # Assemble left-side strings.
         for s_left in chosen_left_prod:
-            # If it's a non-terminal, look up its generated left part.
-            if s_left in sub_derivations:
-                left_parts.append(sub_derivations[s_left][0])
-            # Otherwise, it's a terminal.
-            else:
+            if s_left in sub_derivations:  # Non-terminal
+                l_full, l_phon, _, _ = sub_derivations[s_left]
+                left_full.append(l_full)
+                left_phon.append(l_phon)
+            else:  # Terminal
                 clean_symbol = s_left.strip("'")
+                left_full.append(clean_symbol)
                 if not clean_symbol.startswith("∅"):
-                    left_parts.append(clean_symbol)
+                    left_phon.append(clean_symbol)
 
+        # Assemble right-side strings.
         for s_right in chosen_right_prod:
-            # Look up the corresponding right part of the derivation.
-            if s_right in sub_derivations:
-                right_parts.append(sub_derivations[s_right][1])
-            else:
+            if s_right in sub_derivations:  # Non-terminal
+                _, _, r_full, r_phon = sub_derivations[s_right]
+                right_full.append(r_full)
+                right_phon.append(r_phon)
+            else:  # Terminal
                 clean_symbol = s_right.strip("'")
+                right_full.append(clean_symbol)
                 if not clean_symbol.startswith("∅"):
-                    right_parts.append(clean_symbol)
+                    right_phon.append(clean_symbol)
 
-        return " ".join(left_parts), " ".join(right_parts)
+        return (
+            " ".join(left_full),
+            " ".join(left_phon),
+            " ".join(right_full),
+            " ".join(right_phon),
+        )
 
 
 if __name__ == "__main__":
-    # 1. Initialize the grammar parameters and the SCFG object.
+    # Initialize the grammar and SCFG object.
     eng_ger_params = SyncGrammarParams.english_german()
     scfg = SCFG(eng_ger_params)
 
-    # 2. Sample with a fixed seed for a reproducible simple sentence.
-    print("--- Deterministic Sampling (max_depth=1, seed=42) ---")
-    seeded_rng = random.Random(42)
-    sample1 = scfg.sample(max_depth=1, rng=seeded_rng)
-    print(f"Left (EN): {sample1['left']}")
-    print(f"Right (DE): {sample1['right']}\n")
+    # Sample with a fixed seed for reproducibility.
+    print("--- Deterministic Sampling (max_depth=4, seed=101) ---")
+    seeded_rng = random.Random(101)
+    sample = scfg.sample(max_depth=4, rng=seeded_rng)
 
-    # 3. Sample a more complex sentence with recursion, also seeded.
-    print("--- Deterministic Sampling (max_depth=2, seed=101) ---")
-    seeded_rng_2 = random.Random(101)
-    sample2 = scfg.sample(max_depth=2, rng=seeded_rng_2)
-    print(f"Left (EN): {sample2['left']}")
-    print(f"Right (DE): {sample2['right']}\n")
-
-    # 4. Show a fully random sample.
-    print("--- Random Sampling (max_depth=3) ---")
-    sample3 = scfg.sample(max_depth=3)
-    print(f"Left (EN): {sample3['left']}")
-    print(f"Right (DE): {sample3['right']}")
+    print(f"Left (Full):      {sample['left']}")
+    print(f"Left (Phonetic):  {sample['left_phonetic']}")
+    print(f"Right (Full):     {sample['right']}")
+    print(f"Right (Phonetic): {sample['right_phonetic']}")
