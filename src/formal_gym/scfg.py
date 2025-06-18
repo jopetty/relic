@@ -207,9 +207,11 @@ if __name__ == "__main__":
     eng_ger_params = SyncGrammarParams.english_german()
     scfg = SCFG(eng_ger_params)
 
+    rng = random.Random(42)
+
     # Sample with a fixed seed for reproducibility.
     print("--- Deterministic Sampling (max_depth=4) ---")
-    sample = scfg.sample(max_depth=4)
+    sample = scfg.sample(max_depth=4, rng=rng)
 
     print(f"Left (Full):      {sample['left']}")
     print(f"Left (Phonetic):  {sample['left_phonetic']}")
