@@ -751,8 +751,8 @@ def xbar(
 
 def scfg(
     n_samples: int = 2,
+    max_depth: int = 5,
     seed: int = 42,
-    max_depth: int = 2,
 ):
     en_de_params = fg_mxg.SyncGrammarParams.english_german()
     en_dr_grammar = fg_scfg.SCFG(en_de_params)
@@ -765,8 +765,8 @@ def scfg(
             max_depth=max_depth,
             rng=rng,
         )
-        print(f"Left (EN): {production['left_phonetic']}")
-        print(f"Right (DE): {production['right_phonetic']}\n")
+        print(f"Left: {production['left_phonetic']}")
+        print(f"Right: {production['right_phonetic']}\n")
 
 
 if __name__ == "__main__":
