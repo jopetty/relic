@@ -22,9 +22,7 @@ class SCFG:
         Args:
             sync_params: An object containing the synchronized grammar info.
         """
-        # In a real scenario, you would use your library's function:
         grammar_str = fg_mxg.generate_scfg(sync_params)
-
         self.rules: Dict[str, List[Rule]] = self._parse_rules(grammar_str)
         self.start_symbol: str = "S"
         # Define symbols that increase recursion depth (e.g., clausal complements)
