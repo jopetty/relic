@@ -15,14 +15,24 @@ class SCFG:
     string pairs, with control over recursion depth.
     """
 
-    def __init__(self, sync_params: SyncGrammarParams):
+    def __init__(
+        self, sync_params: SyncGrammarParams | None = None, sync_str: str | None = None
+    ):
         """
         Initializes the SCFG by parsing the grammar rules from SyncGrammarParams.
 
         Args:
             sync_params: An object containing the synchronized grammar info.
+            sync_str: A string containing the synchronized grammar info.
         """
-        grammar_str = fg_mxg.generate_scfg(sync_params)
+
+        if sync_str is None and sync_params is None:
+            raise ValueError("Either sync_params or sync_str must be provided")
+
+        if sync_params is not None:
+            grammar_str = sync_params.as_cfg_str()
+        else:
+            grammar_str = sync_str
         self.rules: Dict[str, List[Rule]] = self._parse_rules(grammar_str)
         self.start_symbol: str = "S"
         # Define symbols that increase recursion depth (e.g., clausal complements)

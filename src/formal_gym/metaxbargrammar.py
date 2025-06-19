@@ -1,79 +1,53 @@
 # metaxbargrammar.py
 
 from dataclasses import dataclass, field
-from typing import Any, List, Literal, Optional
-
-import nltk
+from typing import Any, Optional
 
 import formal_gym.grammar as fg_grammar
 
 GType = fg_grammar.Grammar.Type
 
 
-def _shell_rules(
-    phrase: str,
-    spec: str,
-    head: str,
-    comp: str,
+def shell_rules(
     *,
-    head_initial: bool,
-    spec_first: bool,
-    null_spec: bool = False,
-):
-    """Return the two CNF rules for a Larson shell.
-
-    XP -> SPEC XBAR   /  XBAR SPEC
-    XBAR -> X⁰ COMP   /  COMP X⁰
-    """
-    xbar: str = f"{head.upper()}BAR"  # unique bar label
-    rules: list[str] = []
-
-    # specifier placement
-    if spec_first:
-        rules.append(f"{phrase} -> {spec} {xbar}")
-    else:
-        rules.append(f"{phrase} -> {xbar} {spec}")
-
-    # head direction
-    if head_initial:
-        rules.append(f"{xbar} -> {head} {comp}")
-    else:
-        rules.append(f"{xbar} -> {comp} {head}")
-
-    if null_spec:
-        rules.append(f"{spec} -> '∅'")
-
-    return rules
-
-
-def _sync_shell_rules(
-    phrase: str,
-    spec: str,
     head: str,
+    spec: str,
     comp: str,
-    *,
-    head_initial_l: bool = True,
-    spec_first_l: bool = True,
-    head_initial_r: bool = True,
-    spec_first_r: bool = True,
+    head_initial: bool = True,
+    spec_first: bool = True,
+    head_initial_r: bool | None = None,
+    spec_first_r: bool | None = None,
 ):
-    """Return the two synchronized CNF rules for a Larson shell.
-
-    XP -> <SPEC XBAR, SPEC XBAR>   /  <XBAR SPEC, XBAR SPEC>
-    XBAR -> <X⁰ COMP, X⁰ COMP>    /  <COMP X⁰, COMP X⁰>
     """
+    Generate CNF rules for a Larson shell, monolingual or synchronous.
+    If head_initial_r/spec_first_r are provided (not None), emit synchronous rules.
+    Otherwise, emit monolingual rules.
+    The phrase label is derived as f"{head}P".
+    """
+    phrase: str = f"{head}P"
     xbar: str = f"{head.upper()}BAR"
     rules: list[str] = []
 
-    # specifier placement
-    left_spec: str = f"{spec} {xbar}" if spec_first_l else f"{xbar} {spec}"
-    right_spec: str = f"{spec} {xbar}" if spec_first_r else f"{xbar} {spec}"
-    rules.append(f"{phrase} -> <{left_spec}, {right_spec}>")
+    if head_initial_r is not None and spec_first_r is not None:
+        # Synchronous rules
+        left_spec = f"{spec} {xbar}" if spec_first else f"{xbar} {spec}"
+        right_spec = f"{spec} {xbar}" if spec_first_r else f"{xbar} {spec}"
+        rules.append(f"{phrase} -> <{left_spec}, {right_spec}>")
 
-    # head direction
-    left_head: str = f"{head} {comp}" if head_initial_l else f"{comp} {head}"
-    right_head: str = f"{head} {comp}" if head_initial_r else f"{comp} {head}"
-    rules.append(f"{xbar} -> <{left_head}, {right_head}>")
+        left_head = f"{head} {comp}" if head_initial else f"{comp} {head}"
+        right_head = f"{head} {comp}" if head_initial_r else f"{comp} {head}"
+        rules.append(f"{xbar} -> <{left_head}, {right_head}>")
+    else:
+        # Monolingual rules
+        if spec_first:
+            rules.append(f"{phrase} -> {spec} {xbar}")
+        else:
+            rules.append(f"{phrase} -> {xbar} {spec}")
+
+        if head_initial:
+            rules.append(f"{xbar} -> {head} {comp}")
+        else:
+            rules.append(f"{xbar} -> {comp} {head}")
 
     return rules
 
@@ -157,8 +131,8 @@ class GrammarParams:
     det_def: list[str] | int = 2
     det_indef: list[str] | int = 2
     comps: list[str] | int = 2
-    tenses: List[str] = field(default_factory=lambda: ["∅_T_pres"])
-    asps: List[str] = field(default_factory=lambda: ["∅_Asp_prog"])
+    tenses: list[str] = field(default_factory=lambda: ["∅_T_pres"])
+    asps: list[str] = field(default_factory=lambda: ["∅_Asp_prog"])
 
     def __post_init__(self):
         """Instantiates the grammar lexicon.
@@ -186,82 +160,11 @@ class GrammarParams:
         self.asp_lex = resolve(self.asps, "asp")
 
     def as_cfg_str(self) -> str:
-        """Generate a CFG string from the grammar parameters."""
-        rules: List[str] = []
-
-        # ----- S layer: matrix clause with null complementizer -----
-        rules.append("S -> CP_matrix")
-        rules.append("CP_matrix -> CNULL TP")
-
-        # ----- Embedded CP for object clauses (with overt complementizer) -----
-        rules.append("CP_embed -> C TP")
-
-        # ----- TP shell -----
-        rules += _shell_rules(
-            phrase="TP",
-            spec="NP_SUBJ",
-            head="T",
-            comp="VP",
-            head_initial=self.head_initial,
-            spec_first=self.spec_first,
-        )
-
-        # NP_SUBJ: subjects
-        #  if pro_drop, allow PRO too
-        #  if proper_with_det=False, also allow bare proper nouns
-        if self.pro_drop:
-            rules.append("NP_SUBJ -> PRO")
-        rules.append("NP_SUBJ -> PRON")
-        if not self.proper_with_det:
-            rules.append("NP_SUBJ -> PROPN")
-        rules.append("NP_SUBJ -> DP")
-
-        # ----- VP shell -----
-        rules.append("VP -> V_HEAD OBJ_PHRASE")
-        rules.append("V_HEAD -> V")
-        # objects can be full DPs or embedded CPs
-        rules.append("OBJ_PHRASE -> DP")
-        rules.append("OBJ_PHRASE -> CP_embed")
-
-        # ----- DP shell -----
-        rules.append("DP -> <DP_def, DP_def>")
-        rules.append("DP -> <DP_indef, DP_indef>")
-        rules.append("DP_def -> <DET_def NP, DET_def NP>")
-        rules.append("DP_indef -> <DET_indef NP, DET_indef NP>")
-        if self.proper_with_det:
-            rules.append("DP_def -> <DET_def PROPN, DET_def PROPN>")
-        else:
-            rules.append("DP_def -> <PROPN, PROPN>")
-
-        # NP rules
-        rules.append("NP -> <N_HEAD, N_HEAD>")
-        rules.append("NP -> <AdjP NP, AdjP NP>")
-        rules.append("NP_COMMON -> <N, N>")
-        rules.append("NP_COMMON -> <AdjP NP_COMMON, AdjP NP_COMMON>")
-        rules.append("AdjP -> <ADJ, ADJ>")
-
-        # N_HEAD rules
-        if self.proper_with_det:
-            rules.append("N_HEAD -> PROPN")
-        else:
-            rules.append("N_HEAD -> N | PROPN")
-
-        # ----- Lexicon (including complementizers) -----
-        rules += _lex("DET_def", list(self.det_def_lex))
-        rules += _lex("DET_indef", list(self.det_indef_lex))
-        rules += _lex("T", [f"{x}" for x in self.tense_lex])
-        rules += _lex("ASP", [f"{x}" for x in self.asp_lex])
-        rules += _lex("V", list(self.verb_lex))
-        rules += _lex("N", list(self.noun_lex))
-        rules += _lex("PROPN", list(self.propn_lex))
-        rules += _lex("PRON", list(self.pron_lex))
-        rules += _lex("ADJ", list(self.adj_lex) if self.adj_lex else ["dummy_adj"])
-        rules += _lex("C", list(self.comp_lex))
-        rules.append("CNULL -> '∅'")
-        if self.pro_drop:
-            rules.append("PRO -> '∅'")
-
-        return "\n".join(rules)
+        """Generate a CFG string from the grammar parameters using GrammarRuleBuilder."""
+        builder = GrammarRuleBuilder(self)
+        rules = builder.build_rules()
+        lexicon = builder.build_lexicon()
+        return "\n".join(rules + lexicon)
 
     @classmethod
     def english(cls) -> "GrammarParams":
@@ -335,134 +238,6 @@ class XBarGrammar(fg_grammar.Grammar):
         gen_dict["phonetic_string"] = phonetic_string
         return gen_dict
 
-    def generate_with_path(
-        self, max_depth: int = 50
-    ) -> Optional[tuple[dict[str, Any], list[tuple[str, str]]]]:
-        """Generate a tree and its derivation path.
-
-        Returns:
-            A tuple of (generation_dict, derivation_path) where:
-            - generation_dict contains the same fields as generate_tree()
-            - derivation_path is a list of (lhs, rhs) tuples showing the derivation
-            Returns None if generation fails
-        """
-        derivation_path: list[tuple[str, str]] = []
-
-        def _sample_recursive(
-            symbol: nltk.Nonterminal, depth: int
-        ) -> Optional[list[str]]:
-            if depth > max_depth:
-                return None
-
-            # Choose a production
-            prod = self._choose_production(symbol, depth, max_depth)
-            if prod is None:
-                return None
-
-            # Record the derivation step
-            derivation_path.append(
-                (str(prod.lhs()), " ".join(str(s) for s in prod.rhs()))
-            )
-
-            # If lexical, return the terminal
-            if prod.is_lexical():
-                return [str(prod.rhs()[0])]
-
-            # Otherwise, recursively generate from the RHS
-            result: list[str] = []
-            for rhs_sym in prod.rhs():
-                if isinstance(rhs_sym, nltk.Nonterminal):
-                    sub_result = _sample_recursive(rhs_sym, depth + 1)
-                    if sub_result is None:
-                        return None
-                    result.extend(sub_result)
-                else:
-                    result.append(str(rhs_sym))
-            return result
-
-        try:
-            # Generate the string
-            result = _sample_recursive(self.as_cfg.start(), 0)
-            if result is None:
-                return None
-
-            # Create the generation dict
-            gen_dict = {
-                "string": " ".join(result),
-                "phonetic_string": " ".join(
-                    [w for w in result if not w.startswith("∅")]
-                ),
-                "tree": None,  # We don't track the tree in this version
-            }
-
-            return gen_dict, derivation_path
-        except RecursionError:
-            return None
-
-    def generate_from_path(
-        self, derivation_path: list[tuple[str, str]], max_depth: int = 50
-    ) -> Optional[dict[str, Any]]:
-        """Generate a string following a given derivation path.
-
-        Args:
-            derivation_path: List of (lhs, rhs) tuples showing the derivation
-            max_depth: Maximum depth for generation
-
-        Returns:
-            A dictionary with the same fields as generate_tree(), or None if generation fails
-        """
-
-        def _sample_from_path(
-            symbol: nltk.Nonterminal, depth: int, path_idx: int
-        ) -> Optional[list[str]]:
-            if depth > max_depth or path_idx >= len(derivation_path):
-                return None
-
-            # Get the expected derivation step
-            expected_lhs, expected_rhs = derivation_path[path_idx]
-            if str(symbol) != expected_lhs:
-                return None
-
-            # Find a matching production
-            for prod in self.productions_by_lhs[symbol]:
-                if " ".join(str(s) for s in prod.rhs()) == expected_rhs:
-                    # If lexical, return the terminal
-                    if prod.is_lexical():
-                        return [str(prod.rhs()[0])]
-
-                    # Otherwise, recursively generate from the RHS
-                    result: list[str] = []
-                    for rhs_sym in prod.rhs():
-                        if isinstance(rhs_sym, nltk.Nonterminal):
-                            sub_result = _sample_from_path(
-                                rhs_sym, depth + 1, path_idx + 1
-                            )
-                            if sub_result is None:
-                                return None
-                            result.extend(sub_result)
-                        else:
-                            result.append(str(rhs_sym))
-                    return result
-
-            return None
-
-        try:
-            # Generate the string
-            result = _sample_from_path(self.as_cfg.start(), 0, 0)
-            if result is None:
-                return None
-
-            # Create the generation dict
-            return {
-                "string": " ".join(result),
-                "phonetic_string": " ".join(
-                    [w for w in result if not w.startswith("∅")]
-                ),
-                "tree": None,  # We don't track the tree in this version
-            }
-        except RecursionError:
-            return None
-
 
 @dataclass
 class SyncGrammarParams:
@@ -501,6 +276,13 @@ class SyncGrammarParams:
                     lex.append(f"{prefix}{i}")
                 setattr(grammar, f"{attr_name}_lex", lex)
 
+    def as_cfg_str(self) -> str:
+        """Generate Synchronous Context-Free Grammar rules using GrammarRuleBuilder."""
+        builder = GrammarRuleBuilder(None, sync_params=self)
+        rules = builder.build_rules()
+        lexicon = builder.build_lexicon()
+        return "\n".join(rules + lexicon)
+
     @classmethod
     def english_german(cls):
         """Example: English-German synchronous grammar."""
@@ -508,12 +290,19 @@ class SyncGrammarParams:
         german: GrammarParams = GrammarParams.german()
         return cls(left=english, right=german)
 
+    @classmethod
+    def english_spanish(cls):
+        """Example: English-Spanish synchronous grammar."""
+        english: GrammarParams = GrammarParams.english()
+        spanish: GrammarParams = GrammarParams.spanish()
+        return cls(left=english, right=spanish)
 
-def _lex(pos: str, words: List[str]) -> List[str]:
+
+def _lex(pos: str, words: list[str]) -> list[str]:
     return [f"{pos} -> '{w}'" for w in words]
 
 
-def _sync_lex(pos: str, left_words: List[str], right_words: List[str]) -> List[str]:
+def _sync_lex(pos: str, left_words: list[str], right_words: list[str]) -> list[str]:
     """Generate synchronized lexical rules."""
     if len(left_words) != len(right_words):
         raise ValueError(
@@ -523,92 +312,225 @@ def _sync_lex(pos: str, left_words: List[str], right_words: List[str]) -> List[s
     return [f"{pos} -> <'{lw}', '{rw}'>" for lw, rw in zip(left_words, right_words)]
 
 
-def generate_scfg(sp: SyncGrammarParams) -> str:
-    """Generate Synchronous Context-Free Grammar rules."""
-    rules: List[str] = []
+class GrammarRuleBuilder:
+    """Builds grammar rules for both monolingual and synchronous grammars."""
 
-    # ----- S layer: matrix clause with null complementizer -----
-    rules.append("S -> <CP_matrix, CP_matrix>")
-    rules.append("CP_matrix -> <CNULL TP, CNULL TP>")
+    def __init__(self, params, sync_params=None):
+        self.params = params
+        self.sync_params = sync_params  # None for monolingual
+        if sync_params:
+            self.left = sync_params.left
+            self.right = sync_params.right
+        else:
+            self.left = self.right = None
 
-    # ----- Embedded CP for object clauses (with overt complementizer) -----
-    rules.append("CP_embed -> <C TP, C TP>")
+    def emit(self, lhs, rhs_l, rhs_r=None):
+        if self.sync_params is not None:
+            return f"{lhs} -> <{rhs_l}, {rhs_r}>"
+        else:
+            return f"{lhs} -> {rhs_l}"
 
-    # ----- TP shell -----
-    rules += _sync_shell_rules(
-        "TP",
-        "NP_SUBJ",
-        "T",
-        "VP",
-        head_initial_l=sp.left.head_initial,
-        spec_first_l=sp.left.spec_first,
-        head_initial_r=sp.right.head_initial,
-        spec_first_r=sp.right.spec_first,
-    )
+    def build_rules(self):
+        rules = []
+        # Defensive: check left/right for sync mode
+        if self.sync_params:
+            if self.left is None or self.right is None:
+                raise ValueError(
+                    "SyncGrammarParams must have both left and right GrammarParams."
+                )
 
-    # Subject rules - match standalone CFG structure
-    if sp.left.pro_drop:
-        rules.append("NP_SUBJ -> <PRO, PRO>")
-    rules.append("NP_SUBJ -> <PRON, PRON>")
-    if not sp.left.proper_with_det:
-        rules.append("NP_SUBJ -> <PROPN, PROPN>")
-    rules.append("NP_SUBJ -> <DP, DP>")
+        # S layer: matrix clause with null complementizer
+        if self.sync_params:
+            rules.append(self.emit("S", "CP_matrix", "CP_matrix"))
+            rules.append(self.emit("CP_matrix", "CNULL TP", "CNULL TP"))
+            rules.append(self.emit("CP_embed", "C TP", "C TP"))
+        else:
+            rules.append(self.emit("S", "CP_matrix"))
+            rules.append(self.emit("CP_matrix", "CNULL TP"))
+            rules.append(self.emit("CP_embed", "C TP"))
 
-    # ----- VP shell -----
-    rules.append("VP -> <V_HEAD OBJ_PHRASE, V_HEAD OBJ_PHRASE>")
-    rules.append("V_HEAD -> <V, V>")
-    # objects can be full DPs or embedded CPs
-    rules.append("OBJ_PHRASE -> <DP, DP>")
-    rules.append("OBJ_PHRASE -> <CP_embed, CP_embed>")
+        # TP shell
+        if self.sync_params:
+            rules += shell_rules(
+                head="T",
+                spec="NP_SUBJ",
+                comp="VP",
+                head_initial=getattr(self.left, "head_initial", True),
+                spec_first=getattr(self.left, "spec_first", True),
+                head_initial_r=getattr(self.right, "head_initial", True),
+                spec_first_r=getattr(self.right, "spec_first", True),
+            )
+        else:
+            rules += shell_rules(
+                head="T",
+                spec="NP_SUBJ",
+                comp="VP",
+                head_initial=getattr(self.params, "head_initial", True),
+                spec_first=getattr(self.params, "spec_first", True),
+            )
 
-    # ----- DP shell -----
-    rules.append("DP -> <DP_def, DP_def>")
-    rules.append("DP -> <DP_indef, DP_indef>")
-    rules.append("DP_def -> <DET_def NP, DET_def NP>")
-    rules.append("DP_indef -> <DET_indef NP, DET_indef NP>")
-    if sp.left.proper_with_det and sp.right.proper_with_det:
-        rules.append("DP_def -> <DET_def PROPN, DET_def PROPN>")
-    elif not sp.left.proper_with_det and not sp.right.proper_with_det:
-        rules.append("DP_def -> <PROPN, PROPN>")
+        # Subject rules
+        if self.sync_params:
+            if getattr(self.left, "pro_drop", False):
+                rules.append(self.emit("NP_SUBJ", "PRO", "PRO"))
+            rules.append(self.emit("NP_SUBJ", "PRON", "PRON"))
+            if not getattr(self.left, "proper_with_det", False):
+                rules.append(self.emit("NP_SUBJ", "PROPN", "PROPN"))
+            rules.append(self.emit("NP_SUBJ", "DP", "DP"))
+        else:
+            if getattr(self.params, "pro_drop", False):
+                rules.append(self.emit("NP_SUBJ", "PRO"))
+            rules.append(self.emit("NP_SUBJ", "PRON"))
+            if not getattr(self.params, "proper_with_det", False):
+                rules.append(self.emit("NP_SUBJ", "PROPN"))
+            rules.append(self.emit("NP_SUBJ", "DP"))
 
-    # NP rules
-    rules.append("NP -> <N_HEAD, N_HEAD>")
-    rules.append("NP -> <AdjP NP, AdjP NP>")
-    rules.append("NP_COMMON -> <N, N>")
-    rules.append("NP_COMMON -> <AdjP NP_COMMON, AdjP NP_COMMON>")
-    rules.append("AdjP -> <ADJ, ADJ>")
+        # VP shell
+        if self.sync_params:
+            rules.append(self.emit("VP", "V_HEAD OBJ_PHRASE", "V_HEAD OBJ_PHRASE"))
+            rules.append(self.emit("V_HEAD", "V", "V"))
+            rules.append(self.emit("OBJ_PHRASE", "DP", "DP"))
+            rules.append(self.emit("OBJ_PHRASE", "CP_embed", "CP_embed"))
+        else:
+            rules.append(self.emit("VP", "V_HEAD OBJ_PHRASE"))
+            rules.append(self.emit("V_HEAD", "V"))
+            rules.append(self.emit("OBJ_PHRASE", "DP"))
+            rules.append(self.emit("OBJ_PHRASE", "CP_embed"))
 
-    # N_HEAD rules
-    if not sp.left.proper_with_det and not sp.right.proper_with_det:
-        # both sides allow N or PROPN but only align same category
-        for cat in ("N", "PROPN"):
-            rules.append(f"N_HEAD -> <{cat}, {cat}>")
-    else:
-        left_alts = ("PROPN",) if sp.left.proper_with_det else ("N", "PROPN")
-        right_alts = ("PROPN",) if sp.right.proper_with_det else ("N", "PROPN")
-        for ls in left_alts:
-            for rs in right_alts:
-                rules.append(f"N_HEAD -> <{ls}, {rs}>")
+        # DP shell
+        if self.sync_params:
+            rules.append(self.emit("DP", "DP_def", "DP_def"))
+            rules.append(self.emit("DP", "DP_indef", "DP_indef"))
+            rules.append(self.emit("DP_def", "DET_def NP", "DET_def NP"))
+            rules.append(self.emit("DP_indef", "DET_indef NP", "DET_indef NP"))
+            left_pwd = getattr(self.left, "proper_with_det", False)
+            right_pwd = getattr(self.right, "proper_with_det", False)
+            if left_pwd and right_pwd:
+                rules.append(self.emit("DP_def", "DET_def PROPN", "DET_def PROPN"))
+            elif not left_pwd and not right_pwd:
+                rules.append(self.emit("DP_def", "PROPN", "PROPN"))
+        else:
+            rules.append(self.emit("DP", "DP_def"))
+            rules.append(self.emit("DP", "DP_indef"))
+            rules.append(self.emit("DP_def", "DET_def NP"))
+            rules.append(self.emit("DP_indef", "DET_indef NP"))
+            if getattr(self.params, "proper_with_det", False):
+                rules.append(self.emit("DP_def", "DET_def PROPN"))
+            else:
+                rules.append(self.emit("DP_def", "PROPN"))
 
-    rules += [
-        "ADJLIST -> <ADJ, ADJ>",
-        "ADJLIST -> <ADJ ADJLIST, ADJ ADJLIST>",
-    ]
+        # NP rules
+        if self.sync_params:
+            rules.append(self.emit("NP", "N_HEAD", "N_HEAD"))
+            rules.append(self.emit("NP", "AdjP NP", "AdjP NP"))
+            rules.append(self.emit("NP_COMMON", "N", "N"))
+            rules.append(self.emit("NP_COMMON", "AdjP NP_COMMON", "AdjP NP_COMMON"))
+            rules.append(self.emit("AdjP", "ADJ", "ADJ"))
+        else:
+            rules.append(self.emit("NP", "N_HEAD"))
+            rules.append(self.emit("NP", "AdjP NP"))
+            rules.append(self.emit("NP_COMMON", "N"))
+            rules.append(self.emit("NP_COMMON", "AdjP NP_COMMON"))
+            rules.append(self.emit("AdjP", "ADJ"))
 
-    # ----- Synchronized Lexicon -----
-    rules += _sync_lex("DET_def", sp.left.det_def_lex, sp.right.det_def_lex)
-    rules += _sync_lex("DET_indef", sp.left.det_indef_lex, sp.right.det_indef_lex)
-    rules += _sync_lex("T", sp.left.tense_lex, sp.right.tense_lex)
-    rules += _sync_lex("ASP", sp.left.asp_lex, sp.right.asp_lex)
-    rules += _sync_lex("V", sp.left.verb_lex, sp.right.verb_lex)
-    rules += _sync_lex("N", sp.left.noun_lex, sp.right.noun_lex)
-    rules += _sync_lex("PROPN", sp.left.propn_lex, sp.right.propn_lex)
-    rules += _sync_lex("PRON", sp.left.pron_lex, sp.right.pron_lex)
-    rules += _sync_lex("ADJ", sp.left.adj_lex, sp.right.adj_lex)
-    rules += _sync_lex("C", sp.left.comp_lex, sp.right.comp_lex)
-    rules.append("CNULL -> <'∅', '∅'>")
+        # N_HEAD rules
+        if self.sync_params:
+            left_pwd = getattr(self.left, "proper_with_det", False)
+            right_pwd = getattr(self.right, "proper_with_det", False)
+            if not left_pwd and not right_pwd:
+                for cat in ("N", "PROPN"):
+                    rules.append(self.emit("N_HEAD", cat, cat))
+            else:
+                left_alts = ("PROPN",) if left_pwd else ("N", "PROPN")
+                right_alts = ("PROPN",) if right_pwd else ("N", "PROPN")
+                for ls in left_alts:
+                    for rs in right_alts:
+                        rules.append(self.emit("N_HEAD", ls, rs))
+        else:
+            if getattr(self.params, "proper_with_det", False):
+                rules.append(self.emit("N_HEAD", "PROPN"))
+            else:
+                rules.append(self.emit("N_HEAD", "N | PROPN"))
 
-    if sp.left.pro_drop or sp.right.pro_drop:
-        rules.append("PRO -> <'∅', '∅'>")
+        return rules
 
-    return "\n".join(rules)
+    def build_lexicon(self):
+        rules = []
+        if self.sync_params:
+            if self.left is None or self.right is None:
+                raise ValueError(
+                    "SyncGrammarParams must have both left and right GrammarParams."
+                )
+            # Synchronized lexicon
+            rules += _sync_lex(
+                "DET_def",
+                getattr(self.left, "det_def_lex", []),
+                getattr(self.right, "det_def_lex", []),
+            )
+            rules += _sync_lex(
+                "DET_indef",
+                getattr(self.left, "det_indef_lex", []),
+                getattr(self.right, "det_indef_lex", []),
+            )
+            rules += _sync_lex(
+                "T",
+                getattr(self.left, "tense_lex", []),
+                getattr(self.right, "tense_lex", []),
+            )
+            rules += _sync_lex(
+                "ASP",
+                getattr(self.left, "asp_lex", []),
+                getattr(self.right, "asp_lex", []),
+            )
+            rules += _sync_lex(
+                "V",
+                getattr(self.left, "verb_lex", []),
+                getattr(self.right, "verb_lex", []),
+            )
+            rules += _sync_lex(
+                "N",
+                getattr(self.left, "noun_lex", []),
+                getattr(self.right, "noun_lex", []),
+            )
+            rules += _sync_lex(
+                "PROPN",
+                getattr(self.left, "propn_lex", []),
+                getattr(self.right, "propn_lex", []),
+            )
+            rules += _sync_lex(
+                "PRON",
+                getattr(self.left, "pron_lex", []),
+                getattr(self.right, "pron_lex", []),
+            )
+            rules += _sync_lex(
+                "ADJ",
+                getattr(self.left, "adj_lex", []),
+                getattr(self.right, "adj_lex", []),
+            )
+            rules += _sync_lex(
+                "C",
+                getattr(self.left, "comp_lex", []),
+                getattr(self.right, "comp_lex", []),
+            )
+            rules.append("CNULL -> <'∅', '∅'>")
+            if getattr(self.left, "pro_drop", False) or getattr(
+                self.right, "pro_drop", False
+            ):
+                rules.append("PRO -> <'∅', '∅'>")
+        else:
+            # Monolingual lexicon
+            rules += _lex("DET_def", list(getattr(self.params, "det_def_lex", [])))
+            rules += _lex("DET_indef", list(getattr(self.params, "det_indef_lex", [])))
+            rules += _lex("T", [f"{x}" for x in getattr(self.params, "tense_lex", [])])
+            rules += _lex("ASP", [f"{x}" for x in getattr(self.params, "asp_lex", [])])
+            rules += _lex("V", list(getattr(self.params, "verb_lex", [])))
+            rules += _lex("N", list(getattr(self.params, "noun_lex", [])))
+            rules += _lex("PROPN", list(getattr(self.params, "propn_lex", [])))
+            rules += _lex("PRON", list(getattr(self.params, "pron_lex", [])))
+            adj_lex = list(getattr(self.params, "adj_lex", []))
+            rules += _lex("ADJ", adj_lex if adj_lex else ["dummy_adj"])
+            rules += _lex("C", list(getattr(self.params, "comp_lex", [])))
+            rules.append("CNULL -> '∅'")
+            if getattr(self.params, "pro_drop", False):
+                rules.append("PRO -> '∅'")
+        return rules

@@ -1,40 +1,18 @@
 import random
 import unittest
-from unittest.mock import patch
 
 from formal_gym.scfg import SCFG
 
 
-# Patch SyncGrammarParams before defining the mock class
-def mock_generate_scfg(sync_params):
-    # Simple grammar: S -> <'a', 'b'> | <A, B>; A -> <'x', 'y'>; B -> <'z', 'w'>
-    return """
-    S -> <'a', 'b'>
-    S -> <A B, B A>
-    A -> <'x', 'y'>
-    B -> <'z', 'w'>
-    """
-
-
 class TestSCFG(unittest.TestCase):
     def setUp(self):
-        # Patch both generate_scfg and SyncGrammarParams for the duration of each test
-        patcher1 = patch("formal_gym.scfg.fg_mxg.generate_scfg", mock_generate_scfg)
-        patcher2 = patch(
-            "formal_gym.scfg.fg_mxg.SyncGrammarParams",
-            type("PatchedSyncGrammarParams", (), {}),
-        )
-        self.addCleanup(patcher1.stop)
-        self.addCleanup(patcher2.stop)
-        self.mock_generate = patcher1.start()
-        PatchedSyncGrammarParams = patcher2.start()
-
-        # Define a mock class that inherits from the patched SyncGrammarParams
-        class MockSyncGrammarParams(PatchedSyncGrammarParams):
-            pass
-
-        self.MockSyncGrammarParams = MockSyncGrammarParams
-        self.scfg = SCFG(MockSyncGrammarParams())  # type: ignore
+        sample_str = """
+        S -> <'a', 'b'>
+        S -> <A B, B A>
+        A -> <'x', 'y'>
+        B -> <'z', 'w'>
+        """
+        self.scfg = SCFG(sync_str=sample_str)  # type: ignore
         self.rng = random.Random(123)
 
     def test_parse_rules(self):
@@ -60,7 +38,7 @@ class TestSCFG(unittest.TestCase):
         null_scfg_str = """
         S -> <'∅null', '∅null'>
         """
-        self.scfg.rules = self.scfg._parse_rules(null_scfg_str)
+        self.scfg = SCFG(sync_str=null_scfg_str)
         self.rng.seed(1)
         sample: dict[str, str] = self.scfg.sample(max_depth=1, rng=self.rng)
 
