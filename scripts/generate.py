@@ -754,14 +754,14 @@ def scfg(
     max_depth: int = 5,
     seed: int = 42,
 ):
-    en_de_params = fg_mxg.SyncGrammarParams.english_german()
-    en_dr_grammar = fg_scfg.SCFG(en_de_params)
+    grammar_params = fg_mxg.SyncGrammarParams.english_english_sf()
+    grammar = fg_scfg.SCFG(grammar_params)
 
     fg_utils.set_all_seeds(seed)
     rng = random.Random(seed)
 
     for _ in range(n_samples):
-        production = en_dr_grammar.sample(
+        production: dict[str, str] = grammar.sample(
             max_depth=max_depth,
             rng=rng,
         )

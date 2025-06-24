@@ -2,7 +2,7 @@ from formal_gym.metaxbargrammar import GrammarParams
 
 new_language: GrammarParams = GrammarParams(
     head_initial=True,
-    spec_first=True,
+    spec_initial=True,
     pro_drop=False,
     proper_with_det=True,
     syllable_struct="CV",

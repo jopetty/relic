@@ -27,9 +27,9 @@ def shell_rules(
     spec: str,
     comp: str,
     head_initial: bool = True,
-    spec_first: bool = True,
+    spec_initial: bool = True,
     head_initial_r: bool | None = None,
-    spec_first_r: bool | None = None,
+    spec_initial_r: bool | None = None,
 ):
     """
     Generate CNF rules for a Larson shell, monolingual or synchronous.
@@ -41,10 +41,10 @@ def shell_rules(
     xbar: str = f"{head.upper()}BAR"
     rules: list[str] = []
 
-    if head_initial_r is not None and spec_first_r is not None:
+    if head_initial_r is not None and spec_initial_r is not None:
         # Synchronous rules
-        left_spec = f"{spec} {xbar}" if spec_first else f"{xbar} {spec}"
-        right_spec = f"{spec} {xbar}" if spec_first_r else f"{xbar} {spec}"
+        left_spec = f"{spec} {xbar}" if spec_initial else f"{xbar} {spec}"
+        right_spec = f"{spec} {xbar}" if spec_initial_r else f"{xbar} {spec}"
         rules.append(f"{phrase} -> <{left_spec}, {right_spec}>")
 
         left_head = f"{head} {comp}" if head_initial else f"{comp} {head}"
@@ -52,7 +52,7 @@ def shell_rules(
         rules.append(f"{xbar} -> <{left_head}, {right_head}>")
     else:
         # Monolingual rules
-        if spec_first:
+        if spec_initial:
             rules.append(f"{phrase} -> {spec} {xbar}")
         else:
             rules.append(f"{phrase} -> {xbar} {spec}")
@@ -240,7 +240,7 @@ class GrammarParams:
     # Parameters
     # ---------
     head_initial: bool = True
-    spec_first: bool = True
+    spec_initial: bool = True
     pro_drop: bool = False
     proper_with_det: bool = False
     syllable_struct: str = ""
@@ -313,7 +313,43 @@ class GrammarParams:
         """English grammar parameters."""
         return cls(
             head_initial=True,
-            spec_first=True,
+            spec_initial=True,
+            pro_drop=False,
+            proper_with_det=False,
+            verbs=["eats", "sees", "loves", "hears"],
+            nouns=["tree", "horse", "dog", "cat", "apple"],
+            propns=["john", "mary", "sue", "bob"],
+            prons=["he", "she", "they", "it"],
+            adjs=["big", "small", "red", "green", "blue", "fuzzy", "round"],
+            det_def=["the"],
+            det_indef=["a"],
+            comps=["that"],
+        )
+
+    @classmethod
+    def english_hf(cls) -> "GrammarParams":
+        """English grammar parameters with head-finality."""
+        return cls(
+            head_initial=False,
+            spec_initial=True,
+            pro_drop=False,
+            proper_with_det=False,
+            verbs=["eats", "sees", "loves", "hears"],
+            nouns=["tree", "horse", "dog", "cat", "apple"],
+            propns=["john", "mary", "sue", "bob"],
+            prons=["he", "she", "they", "it"],
+            adjs=["big", "small", "red", "green", "blue", "fuzzy", "round"],
+            det_def=["the"],
+            det_indef=["a"],
+            comps=["that"],
+        )
+
+    @classmethod
+    def english_sf(cls) -> "GrammarParams":
+        """English grammar parameters with specifier-finality."""
+        return cls(
+            head_initial=True,
+            spec_initial=False,
             pro_drop=False,
             proper_with_det=False,
             verbs=["eats", "sees", "loves", "hears"],
@@ -331,7 +367,7 @@ class GrammarParams:
         """German grammar parameters."""
         return cls(
             head_initial=False,  # German is head-final in VP
-            spec_first=True,
+            spec_initial=True,
             pro_drop=False,  # Set to False for now; can be changed if needed
             proper_with_det=False,
             verbs=["essen", "sehen", "lieben", "geben"],
@@ -349,7 +385,7 @@ class GrammarParams:
         """Spanish grammar parameters."""
         return cls(
             head_initial=True,
-            spec_first=True,
+            spec_initial=True,
             pro_drop=True,
             proper_with_det=False,
             verbs=["come", "ve", "ama", "escucha"],
@@ -439,6 +475,20 @@ class SyncGrammarParams:
         spanish: GrammarParams = GrammarParams.spanish()
         return cls(left=english, right=spanish)
 
+    @classmethod
+    def english_english_hf(cls):
+        """Example: English-English (head-final) synchronous grammar."""
+        english: GrammarParams = GrammarParams.english()
+        english_hf: GrammarParams = GrammarParams.english_hf()
+        return cls(left=english, right=english_hf)
+
+    @classmethod
+    def english_english_sf(cls):
+        """Example: English-English (specifier-final) synchronous grammar."""
+        english: GrammarParams = GrammarParams.english()
+        english_sf: GrammarParams = GrammarParams.english_sf()
+        return cls(left=english, right=english_sf)
+
 
 def _lex(pos: str, words: list[str]) -> list[str]:
     return [f"{pos} -> '{w}'" for w in words]
@@ -497,50 +547,74 @@ class GrammarRuleBuilder:
                 head="T",
                 spec="NP_SUBJ",
                 comp="VP",
-                head_initial=getattr(self.left, "head_initial", True),
-                spec_first=getattr(self.left, "spec_first", True),
-                head_initial_r=getattr(self.right, "head_initial", True),
-                spec_first_r=getattr(self.right, "spec_first", True),
+                head_initial=self.left.head_initial,
+                spec_initial=self.left.spec_initial,
+                head_initial_r=self.right.head_initial,
+                spec_initial_r=self.right.spec_initial,
             )
         else:
             rules += shell_rules(
                 head="T",
                 spec="NP_SUBJ",
                 comp="VP",
-                head_initial=getattr(self.params, "head_initial", True),
-                spec_first=getattr(self.params, "spec_first", True),
+                head_initial=self.params.head_initial,
+                spec_initial=self.params.spec_initial,
             )
 
         # Subject rules
         if self.sync_params:
-            if getattr(self.left, "pro_drop", False):
+            if self.left.pro_drop:
                 rules.append(self.emit("NP_SUBJ", "PRO", "PRO"))
             rules.append(self.emit("NP_SUBJ", "PRON", "PRON"))
-            if not getattr(self.left, "proper_with_det", False):
+            if not self.left.proper_with_det:
                 rules.append(self.emit("NP_SUBJ", "PROPN", "PROPN"))
             rules.append(self.emit("NP_SUBJ", "DP", "DP"))
         else:
-            if getattr(self.params, "pro_drop", False):
+            if self.params.pro_drop:
                 rules.append(self.emit("NP_SUBJ", "PRO"))
             rules.append(self.emit("NP_SUBJ", "PRON"))
-            if not getattr(self.params, "proper_with_det", False):
+            if not self.params.proper_with_det:
                 rules.append(self.emit("NP_SUBJ", "PROPN"))
             rules.append(self.emit("NP_SUBJ", "DP"))
 
         # VP shell
         if self.sync_params:
-            rules.append(self.emit("VP", "V_HEAD OBJ_PHRASE", "V_HEAD OBJ_PHRASE"))
-            rules.append(self.emit("V_HEAD", "V", "V"))
+            # Use shell_rules for VP shell
+            rules += shell_rules(
+                head="V",
+                spec="",  # No specifier in VP shell
+                comp="OBJ_PHRASE",
+                head_initial=self.left.head_initial,
+                spec_initial=self.left.spec_initial,
+                head_initial_r=self.right.head_initial,
+                spec_initial_r=self.right.spec_initial,
+            )
+            # OBJ_PHRASE alternatives
             rules.append(self.emit("OBJ_PHRASE", "DP", "DP"))
             rules.append(self.emit("OBJ_PHRASE", "CP_embed", "CP_embed"))
         else:
-            rules.append(self.emit("VP", "V_HEAD OBJ_PHRASE"))
-            rules.append(self.emit("V_HEAD", "V"))
+            rules += shell_rules(
+                head="V",
+                spec="",  # No specifier in VP shell
+                comp="OBJ_PHRASE",
+                head_initial=self.params.head_initial,
+                spec_initial=self.params.spec_initial,
+            )
             rules.append(self.emit("OBJ_PHRASE", "DP"))
             rules.append(self.emit("OBJ_PHRASE", "CP_embed"))
 
         # DP shell
         if self.sync_params:
+            # Definite DP
+            rules += shell_rules(
+                head="DET",
+                spec="",  # No specifier in DP shell
+                comp="NP",
+                head_initial=self.left.head_initial,
+                spec_initial=self.left.spec_initial,
+                head_initial_r=self.right.head_initial,
+                spec_initial_r=self.right.spec_initial,
+            )
             rules.append(self.emit("DP", "DP_def", "DP_def"))
             rules.append(self.emit("DP", "DP_indef", "DP_indef"))
             rules.append(self.emit("DP_def", "DET_def NP", "DET_def NP"))
@@ -552,6 +626,13 @@ class GrammarRuleBuilder:
             elif not left_pwd and not right_pwd:
                 rules.append(self.emit("DP_def", "PROPN", "PROPN"))
         else:
+            rules += shell_rules(
+                head="DET",
+                spec="",  # No specifier in DP shell
+                comp="NP",
+                head_initial=self.params.head_initial,
+                spec_initial=self.params.spec_initial,
+            )
             rules.append(self.emit("DP", "DP_def"))
             rules.append(self.emit("DP", "DP_indef"))
             rules.append(self.emit("DP_def", "DET_def NP"))
