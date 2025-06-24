@@ -749,6 +749,45 @@ def xbar(
         print(s["phonetic_string"])
 
 
+def xbar_lex(
+    avg_syllables: int = 2,
+    max_consonants: int = 3,
+    syllable_struct: str | None = None,
+    n_samples: int = 2,
+    verbose: bool = False,
+    seed: int = 42,
+):
+    fg_utils.set_all_seeds(seed)
+    rng = random.Random(seed)
+
+    g_params: GrammarParams = fg_mxg.GrammarParams(
+        avg_syllables=avg_syllables,
+        max_consonants=max_consonants,
+        syllable_struct=syllable_struct,
+        rng=rng,
+    )
+
+    if verbose:
+        print("The syllable structure of our new language is", g_params.syllable_struct)
+        print("Here are words in our new language!")
+        print("Verbs:", g_params.verb_lex)
+        print("Nouns:", g_params.noun_lex)
+        print("Proper Nouns:", g_params.propn_lex)
+        print("Pronouns:", g_params.pron_lex)
+        print("Adjectives:", g_params.adj_lex)
+        print("Determiner (definite):", g_params.det_def_lex)
+        print("Determiner (indefinite):", g_params.det_indef_lex)
+        print("Complementizers:", g_params.comp_lex)
+
+    grammar: fg_mxg.XBarGrammar = fg_mxg.XBarGrammar.from_params(g_params)
+    if verbose:
+        print(grammar.as_cfg)
+
+    for _ in range(n_samples):
+        s: dict[str, Any] = grammar.generate_tree()
+        print(s["phonetic_string"])
+
+
 def scfg(
     n_samples: int = 2,
     max_depth: int = 5,
@@ -762,6 +801,57 @@ def scfg(
 
     for _ in range(n_samples):
         production: dict[str, str] = grammar.sample(
+            max_depth=max_depth,
+            rng=rng,
+        )
+        print(f"Left: {production['left_phonetic']}")
+        print(f"Right: {production['right_phonetic']}\n")
+
+
+def scfg_lex(
+    avg_syllables_a: int = 2,
+    max_consonants_a: int = 3,
+    syllable_struct_a: str | None = None,
+    head_initial_a: bool = True,
+    spec_initial_a: bool = True,
+    avg_syllables_b: int = 1,
+    max_consonants_b: int = 3,
+    syllable_struct_b: str | None = None,
+    head_initial_b: bool = False,
+    spec_initial_b: bool = False,
+    n_samples: int = 2,
+    max_depth: int = 5,
+    seed: int = 42,
+):
+    fg_utils.set_all_seeds(seed)
+    rng = random.Random(seed)
+
+    grammar_a_params = fg_mxg.GrammarParams(
+        avg_syllables=avg_syllables_a,
+        max_consonants=max_consonants_a,
+        syllable_struct=syllable_struct_a,
+        head_initial=head_initial_a,
+        spec_initial=spec_initial_a,
+        rng=rng,
+    )
+
+    grammar_b_params = fg_mxg.GrammarParams(
+        avg_syllables=avg_syllables_b,
+        max_consonants=max_consonants_b,
+        syllable_struct=syllable_struct_b,
+        head_initial=head_initial_b,
+        spec_initial=spec_initial_b,
+        rng=rng,
+    )
+    sync_grammar_params = fg_mxg.SyncGrammarParams(
+        left=grammar_a_params,
+        right=grammar_b_params,
+    )
+
+    sync_grammar = fg_scfg.SCFG(sync_grammar_params)
+
+    for _ in range(n_samples):
+        production: dict[str, str] = sync_grammar.sample(
             max_depth=max_depth,
             rng=rng,
         )

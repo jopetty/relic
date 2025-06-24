@@ -193,7 +193,6 @@ def run(
 
     results = []
     for i in tqdm(range(0, len(dataset), batch_size), desc="Generating responses"):
-
         inputs = {
             "input_ids": tokenized_inputs["input_ids"][i : i + batch_size],
             "attention_mask": tokenized_inputs["attention_mask"][i : i + batch_size],
@@ -250,4 +249,3 @@ def run(
 
 if __name__ == "__main__":
     fire.Fire(run)
-

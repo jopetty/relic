@@ -1,11 +1,40 @@
 # metaxbargrammar.py
 
+import pathlib
+import random
+import re
 from dataclasses import dataclass, field
 from typing import Any
+
+import numpy as np
+import pyrootutils
 
 import formal_gym.grammar as fg_grammar
 
 GType = fg_grammar.Grammar.Type
+
+PROJECT_ROOT: pathlib.Path = pyrootutils.find_root(
+    search_from=__file__, indicator=".project-root"
+)
+
+CONSONANTS: list[str] = list("bcdfghjklmnpqrstvwxyz")
+VOWELS: list[str] = list("aeiou")
+SYLLABLE_STRUCTS: list[str] = [
+    "CVC",
+    "CV*C",
+    "CVC?",
+    "C*VC",
+    "CVC*",
+    "C*VC*",
+    "C*V*C*",
+    "C?VC",
+    "C?VC*",
+    "CV*C*",
+    "CV",
+    "C?V",
+    "CV*",
+    "C*V",
+]
 
 
 def shell_rules(
@@ -53,6 +82,119 @@ def shell_rules(
 
 
 # ------------------------------------------------------------------
+#  HELPER FUNCTIONS
+# ------------------------------------------------------------------
+def parse_syllable_format(template: str):
+    """Parses the syllable structure template into a list of tokens
+
+    Args:
+        template: str, regex that describes the syllable structure of the language
+
+    Returns:
+        list of tokens
+    """
+    tokens = re.findall(r"C\*|V\*|C\?|V\?|C|V", template)
+    return tokens
+
+
+def generate_cluster(cluster_size: int, rng: random.Random) -> str:
+    """Generates a consonant cluster
+
+    Args:
+    int cluster_size: number of chars in the cluster
+    """
+
+    sonority_hierarchy: dict[str, float] = {
+        "l": 0.15,
+        "m": 0.3,
+        "n": 0.3,
+        "v": 0.45,
+        "z": 0.45,
+        "f": 0.6,
+        "s": 0.6,
+        "b": 0.75,
+        "d": 0.75,
+        "g": 0.75,
+        "p": 0.9,
+        "t": 0.9,
+        "k": 0.9,
+    }
+
+    chars: list[str] = list(sonority_hierarchy.keys())
+    weights: list[float] = [sonority_hierarchy[c] for c in chars]
+    cluster: str = ""
+
+    for _ in range(cluster_size):
+        c: str = rng.choices(chars, weights=weights, k=1)[0]
+        cluster = cluster + c
+
+    return cluster
+
+
+def generate_syllable(tokens: list[str], max_cons: int, rng: random.Random):
+    """Generates a random syllable that conforms to the syllable structure
+
+    Args:
+        tokens: list of tokens
+        max_cons: maximum number of consonants allowed in a cluster
+    """
+
+    result: list[str] = []
+    count: int
+    for token in tokens:
+        if token == "C":
+            result.append(rng.choice(CONSONANTS))
+        elif token == "V":
+            result.append(rng.choice(VOWELS))
+        elif token == "C*":
+            count = rng.randint(1, max_cons)
+            result.extend(generate_cluster(count, rng))
+        elif token == "V*":
+            count = rng.randint(1, 2)
+            result.extend(rng.choices(VOWELS, k=count))
+        elif token == "C?":
+            if rng.random() < 0.5:
+                result.append(rng.choice(CONSONANTS))
+        elif token == "V?":
+            if rng.random() < 0.5:
+                result.append(rng.choice(VOWELS))
+    return "".join(result)
+
+
+def sample_string(
+    syllable_structure: list[str], avg_syllables: int, max_cons: int, rng: random.Random
+):
+    """Generates a random string that conforms to the syllable structure
+
+    Args:
+        syllable_structure: str, regex describing the syllable structure of the language
+        avg_syllables: int, the average number of syllables in a word
+        max_cons: int, the maximum number of consonants that is permitted in a
+            consonant cluster (assuming the language has C*)
+
+    Returns:
+        string
+    """
+    string: str = ""
+
+    def _zero_truncated_poisson(rate: float) -> int:
+        """Sample from a zero-truncated Poisson distribution."""
+        u: float = np.random.uniform(np.exp(-rate), 1)
+        t: float = -np.log(u)
+        return 1 + np.random.poisson(rate - t)
+
+    # Sample number of syllables from a Normal distribution
+    lambda_poisson: float = avg_syllables
+    num_syllables: int = _zero_truncated_poisson(lambda_poisson)
+    for _ in range(num_syllables + 1):
+        string = string + generate_syllable(
+            syllable_structure, max_cons=max_cons, rng=rng
+        )
+
+    return string
+
+
+# ------------------------------------------------------------------
 #  PARAMETER BUNDLE
 # ------------------------------------------------------------------
 @dataclass
@@ -64,6 +206,9 @@ class GrammarParams:
         spec_first: Whether the specifier is first in the shell.
         pro_drop: Whether to allow pro-drop (null pronominal subject).
         proper_with_det: Whether proper nouns take determiners.
+        syllable_struct: Syllable structure of the grammar (e.g. CV?, CVC* etc.)
+        avg_syllables: Average number of syllables in a word in this language
+        max_consonants: Maximum number of consonants allowed in a cluster
         verb: List of verbs or number of verbs to generate.
         noun: List of nouns or number of nouns to generate.
         propn: List of proper nouns or number of proper nouns to generate.
@@ -120,6 +265,10 @@ class GrammarParams:
     spec_initial: bool = True
     pro_drop: bool = False
     proper_with_det: bool = False
+    syllable_struct: str | None = None
+    avg_syllables: int = 2
+    max_consonants: int = 2
+    rng: random.Random = random.Random(42)
 
     # Lexicon
     # -------
@@ -142,25 +291,37 @@ class GrammarParams:
         items for that parameter.
         """
 
+        if self.syllable_struct is None:
+            self.syllable_struct = self.rng.choice(SYLLABLE_STRUCTS)
+        syllable_struct_tokens: list[str] = parse_syllable_format(self.syllable_struct)
+
         # Helper to resolve int or list to list
-        def resolve(val, prefix):
+        def resolve(val, prefix, rng: random.Random):
             if isinstance(val, int):
-                return [f"{prefix}{i}" for i in range(val)]
+                return [
+                    sample_string(
+                        syllable_struct_tokens,
+                        avg_syllables=self.avg_syllables,
+                        max_cons=self.max_consonants,
+                        rng=rng,
+                    )
+                    for _ in range(val)
+                ]
             return list(val)
 
-        self.verb_lex = resolve(self.verbs, "verb")
-        self.noun_lex = resolve(self.nouns, "noun")
-        self.propn_lex = resolve(self.propns, "name")
-        self.pron_lex = resolve(self.prons, "pron")
-        self.adj_lex = resolve(self.adjs, "adj")
-        self.det_def_lex = resolve(self.det_def, "det_def")
-        self.det_indef_lex = resolve(self.det_indef, "det_indef")
-        self.comp_lex = resolve(self.comps, "c")
-        self.tense_lex = resolve(self.tenses, "tense")
-        self.asp_lex = resolve(self.asps, "asp")
+        self.verb_lex = resolve(self.verbs, "verb", self.rng)
+        self.noun_lex = resolve(self.nouns, "noun", self.rng)
+        self.propn_lex = resolve(self.propns, "name", self.rng)
+        self.pron_lex = resolve(self.prons, "pron", self.rng)
+        self.adj_lex = resolve(self.adjs, "adj", self.rng)
+        self.det_def_lex = resolve(self.det_def, "det_def", self.rng)
+        self.det_indef_lex = resolve(self.det_indef, "det_indef", self.rng)
+        self.comp_lex = resolve(self.comps, "c", self.rng)
+        self.tense_lex = resolve(self.tenses, "tense", self.rng)
+        self.asp_lex = resolve(self.asps, "asp", self.rng)
 
     def as_cfg_str(self) -> str:
-        """Generate a CFG string from the grammar parameters using GrammarRuleBuilder."""
+        """Generate a CFG string for the grammar parameters."""
         builder = GrammarRuleBuilder(self)
         rules = builder.build_rules()
         lexicon = builder.build_lexicon()
@@ -484,17 +645,24 @@ class GrammarRuleBuilder:
             elif not left_pwd and not right_pwd:
                 rules.append(self.emit("DP_def", "PROPN", "PROPN"))
         else:
+            rules.append(self.emit("DP", "DET_defP"))
+            rules.append(self.emit("DP", "DET_indefP"))
             rules += shell_rules(
-                head="DET",
+                head="DET_def",
                 spec="",  # No specifier in DP shell
                 comp="NP",
                 head_initial=self.params.head_initial,
                 spec_initial=self.params.spec_initial,
             )
-            rules.append(self.emit("DP", "DP_def"))
-            rules.append(self.emit("DP", "DP_indef"))
-            rules.append(self.emit("DP_def", "DET_def NP"))
-            rules.append(self.emit("DP_indef", "DET_indef NP"))
+            rules += shell_rules(
+                head="DET_indef",
+                spec="",  # No specifier in DP shell
+                comp="NP",
+                head_initial=self.params.head_initial,
+                spec_initial=self.params.spec_initial,
+            )
+            # rules.append(self.emit("DP_def", "DET_def NP"))
+            # rules.append(self.emit("DP_indef", "DET_indef NP"))
             if getattr(self.params, "proper_with_det", False):
                 rules.append(self.emit("DP_def", "DET_def PROPN"))
             else:
