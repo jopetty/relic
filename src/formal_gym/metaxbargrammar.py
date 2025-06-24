@@ -95,7 +95,7 @@ def generate_cluster(cluster_size: int) -> str:
     }
 
     chars = list(sonority_hierarchy.keys())
-    weights = [1 - sonority_hierarchy[c] for c in chars]  # inverse of sonority = more likely
+    weights = [sonority_hierarchy[c] for c in chars] 
     cluster = ''
 
     for _ in range(cluster_size):
@@ -120,7 +120,7 @@ def generate_syllable(tokens: list[str], max_cons: int):
             result.append(random.choice(VOWELS))
         elif token == 'C*':
             count = random.randint(1, max_cons)
-            result.extend(random.choices(CONSONANTS, k=count))
+            result.extend(generate_cluster(count))
         elif token == 'V*':
             count = random.randint(1, 2)
             result.extend(random.choices(VOWELS, k=count))
