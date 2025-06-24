@@ -1,12 +1,17 @@
 # metaxbargrammar.py
 
+import re
+import random
+import numpy as np
 from dataclasses import dataclass, field
 from typing import Any, Optional
 
-import formal_gym.grammar as fg_grammar
+import grammar as fg_grammar
 
 GType = fg_grammar.Grammar.Type
 
+CONSONANTS = list("bcdfghjklmnpqrstvwxyz")
+VOWELS = list("aeiou")
 
 def shell_rules(
     *,
@@ -51,6 +56,102 @@ def shell_rules(
 
     return rules
 
+# ------------------------------------------------------------------
+#  HELPER FUNCTIONS
+# ------------------------------------------------------------------
+def parse_syllable_format(template: str):
+    """Parses the syllable structure template into a list of tokens
+
+    Args:
+        template: str, regex that describes the syllable structure of the language
+
+    Returns:
+        list of tokens
+    """
+    tokens = re.findall(r'C\*|V\*|C\?|V\?|C|V', template)
+    return tokens
+
+def generate_cluster(cluster_size: int) -> str:
+    """Generates a consonant cluster
+
+    Args:
+    int cluster_size: number of chars in the cluster
+    """
+
+    sonority_hierarchy = {
+        'l': 0.15,
+        'm': 0.3,
+        'n': 0.3,
+        'v': 0.45,
+        'z': 0.45,
+        'f': 0.6,
+        's': 0.6,
+        'b': 0.75,
+        'd': 0.75,
+        'g': 0.75,
+        'p': 0.9,
+        't': 0.9,
+        'k': 0.9,
+    }
+
+    chars = list(sonority_hierarchy.keys())
+    weights = [1 - sonority_hierarchy[c] for c in chars]  # inverse of sonority = more likely
+    cluster = ''
+
+    for _ in range(cluster_size):
+        c = random.choices(chars, weights=weights, k=1)[0]
+        cluster = cluster + c
+
+    return cluster
+
+def generate_syllable(tokens: list[str], max_cons: int):
+    """Generates a random syllable that conforms to the syllable structure
+
+    Args:
+        tokens: list of tokens
+        max_cons: maximum number of consonants allowed in a cluster
+    """
+    
+    result = []
+    for token in tokens:
+        if token == 'C':
+            result.append(random.choice(CONSONANTS))
+        elif token == 'V':
+            result.append(random.choice(VOWELS))
+        elif token == 'C*':
+            count = random.randint(1, max_cons)
+            result.extend(random.choices(CONSONANTS, k=count))
+        elif token == 'V*':
+            count = random.randint(1, 2)
+            result.extend(random.choices(VOWELS, k=count))
+        elif token == 'C?':
+            if random.random() < 0.5:
+                result.append(random.choice(CONSONANTS))
+        elif token == 'V?':
+            if random.random() < 0.5:
+                result.append(random.choice(VOWELS))
+    return ''.join(result)
+
+def sample_string(syllable_structure: list[str], avg_syllables: int, max_cons: int):
+    """Generates a random string that conforms to the syllable structure
+
+    Args:
+        syllable_structure: str, regex that describes the syllable structure of the language
+        avg_syllables: int, the number of syllables will be sampled from a Gaussian with this value as the mean
+        max_cons: int, the maximum number of consonants that is permitted in a consonant cluster (assuming the language has C*)
+
+    Returns:
+        string
+    """
+    string = ''
+
+    # Sample number of syllables from a Normal distribution
+    num_syllables = int(np.round(np.random.normal(loc=avg_syllables, scale=avg_syllables/2)))
+    for _ in range(num_syllables + 1):
+        string = string + generate_syllable(syllable_structure, max_cons=max_cons)
+
+    return string
+
 
 # ------------------------------------------------------------------
 #  PARAMETER BUNDLE
@@ -64,6 +165,9 @@ class GrammarParams:
         spec_first: Whether the specifier is first in the shell.
         pro_drop: Whether to allow pro-drop (null pronominal subject).
         proper_with_det: Whether proper nouns take determiners.
+        syllable_struct: Syllable structure of the grammar (e.g. CV?, CVC* etc.)
+        avg_syllables: Average number of syllables in a word in this language
+        max_consonants: Maximum number of consonants allowed in a cluster
         verb: List of verbs or number of verbs to generate.
         noun: List of nouns or number of nouns to generate.
         propn: List of proper nouns or number of proper nouns to generate.
@@ -120,6 +224,9 @@ class GrammarParams:
     spec_first: bool = True
     pro_drop: bool = False
     proper_with_det: bool = False
+    syllable_struct: str = ''
+    avg_syllables: int = 2
+    max_consonants: int = 2
 
     # Lexicon
     # -------
@@ -142,10 +249,16 @@ class GrammarParams:
         items for that parameter.
         """
 
+        # Load syllable structures file
+        syllables = open('resources/syllables.txt', 'r').read().splitlines()
+        if self.syllable_struct == None:
+            self.syllable_struct = random.choice(syllables)
+        syllable_struct_tokens = parse_syllable_format(self.syllable_struct)
+
         # Helper to resolve int or list to list
         def resolve(val, prefix):
             if isinstance(val, int):
-                return [f"{prefix}{i}" for i in range(val)]
+                return [sample_string(syllable_struct_tokens, avg_syllables=self.avg_syllables, max_cons=self.max_consonants) for _ in range(val)]
             return list(val)
 
         self.verb_lex = resolve(self.verbs, "verb")
