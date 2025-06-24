@@ -808,5 +808,56 @@ def scfg(
         print(f"Right: {production['right_phonetic']}\n")
 
 
+def scfg_lex(
+    avg_syllables_a: int = 2,
+    max_consonants_a: int = 3,
+    syllable_struct_a: str | None = None,
+    head_initial_a: bool = True,
+    spec_initial_a: bool = True,
+    avg_syllables_b: int = 1,
+    max_consonants_b: int = 3,
+    syllable_struct_b: str | None = None,
+    head_initial_b: bool = False,
+    spec_initial_b: bool = False,
+    n_samples: int = 2,
+    max_depth: int = 5,
+    seed: int = 42,
+):
+    fg_utils.set_all_seeds(seed)
+    rng = random.Random(seed)
+
+    grammar_a_params = fg_mxg.GrammarParams(
+        avg_syllables=avg_syllables_a,
+        max_consonants=max_consonants_a,
+        syllable_struct=syllable_struct_a,
+        head_initial=head_initial_a,
+        spec_initial=spec_initial_a,
+        rng=rng,
+    )
+
+    grammar_b_params = fg_mxg.GrammarParams(
+        avg_syllables=avg_syllables_b,
+        max_consonants=max_consonants_b,
+        syllable_struct=syllable_struct_b,
+        head_initial=head_initial_b,
+        spec_initial=spec_initial_b,
+        rng=rng,
+    )
+    sync_grammar_params = fg_mxg.SyncGrammarParams(
+        left=grammar_a_params,
+        right=grammar_b_params,
+    )
+
+    sync_grammar = fg_scfg.SCFG(sync_grammar_params)
+
+    for _ in range(n_samples):
+        production: dict[str, str] = sync_grammar.sample(
+            max_depth=max_depth,
+            rng=rng,
+        )
+        print(f"Left: {production['left_phonetic']}")
+        print(f"Right: {production['right_phonetic']}\n")
+
+
 if __name__ == "__main__":
     fire.Fire()
