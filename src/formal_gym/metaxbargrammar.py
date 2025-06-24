@@ -155,12 +155,17 @@ def sample_string(syllable_structure: list[str], avg_syllables: int, max_cons: i
     Returns:
         string
     """
-    string = ""
+    string: str = ""
+
+    def _zero_truncated_poisson(rate: float) -> int:
+        """Sample from a zero-truncated Poisson distribution."""
+        u: float = np.random.uniform(np.exp(-rate), 1)
+        t: float = -np.log(u)
+        return 1 + np.random.poisson(rate - t)
 
     # Sample number of syllables from a Normal distribution
-    num_syllables = int(
-        np.round(np.random.normal(loc=avg_syllables, scale=avg_syllables / 2))
-    )
+    lambda_poisson: float = avg_syllables
+    num_syllables: int = _zero_truncated_poisson(lambda_poisson)
     for _ in range(num_syllables + 1):
         string = string + generate_syllable(syllable_structure, max_cons=max_cons)
 
