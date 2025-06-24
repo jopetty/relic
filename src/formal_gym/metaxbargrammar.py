@@ -17,8 +17,8 @@ PROJECT_ROOT: pathlib.Path = pyrootutils.find_root(
     search_from=__file__, indicator=".project-root"
 )
 
-CONSONANTS = list("bcdfghjklmnpqrstvwxyz")
-VOWELS = list("aeiou")
+CONSONANTS: list[str] = list("bcdfghjklmnpqrstvwxyz")
+VOWELS: list[str] = list("aeiou")
 
 
 def shell_rules(
