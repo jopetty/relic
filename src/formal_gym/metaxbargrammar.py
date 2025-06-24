@@ -19,6 +19,22 @@ PROJECT_ROOT: pathlib.Path = pyrootutils.find_root(
 
 CONSONANTS: list[str] = list("bcdfghjklmnpqrstvwxyz")
 VOWELS: list[str] = list("aeiou")
+SYLLABLE_STRUCTS: list[str] = [
+    "CVC",
+    "CV*C",
+    "CVC?",
+    "C*VC",
+    "CVC*",
+    "C*VC*",
+    "C*V*C*",
+    "C?VC",
+    "C?VC*",
+    "CV*C*",
+    "CV",
+    "C?V",
+    "CV*",
+    "C*V",
+]
 
 
 def shell_rules(
@@ -148,9 +164,10 @@ def sample_string(syllable_structure: list[str], avg_syllables: int, max_cons: i
     """Generates a random string that conforms to the syllable structure
 
     Args:
-        syllable_structure: str, regex that describes the syllable structure of the language
-        avg_syllables: int, the number of syllables will be sampled from a Gaussian with this value as the mean
-        max_cons: int, the maximum number of consonants that is permitted in a consonant cluster (assuming the language has C*)
+        syllable_structure: str, regex describing the syllable structure of the language
+        avg_syllables: int, the average number of syllables in a word
+        max_cons: int, the maximum number of consonants that is permitted in a
+            consonant cluster (assuming the language has C*)
 
     Returns:
         string
@@ -243,7 +260,7 @@ class GrammarParams:
     spec_initial: bool = True
     pro_drop: bool = False
     proper_with_det: bool = False
-    syllable_struct: str = ""
+    syllable_struct: str | None = None
     avg_syllables: int = 2
     max_consonants: int = 2
 
@@ -268,14 +285,9 @@ class GrammarParams:
         items for that parameter.
         """
 
-        # Load syllable structures file
-        syllables_file: pathlib.Path = (
-            PROJECT_ROOT / "src" / "formal_gym" / "resources" / "syllables.txt"
-        )
-        syllables = syllables_file.read_text().splitlines()
         if self.syllable_struct is None:
-            self.syllable_struct = random.choice(syllables)
-        syllable_struct_tokens = parse_syllable_format(self.syllable_struct)
+            self.syllable_struct = random.choice(SYLLABLE_STRUCTS)
+        syllable_struct_tokens: list[str] = parse_syllable_format(self.syllable_struct)
 
         # Helper to resolve int or list to list
         def resolve(val, prefix):
@@ -302,7 +314,7 @@ class GrammarParams:
         self.asp_lex = resolve(self.asps, "asp")
 
     def as_cfg_str(self) -> str:
-        """Generate a CFG string from the grammar parameters using GrammarRuleBuilder."""
+        """Generate a CFG string for the grammar parameters."""
         builder = GrammarRuleBuilder(self)
         rules = builder.build_rules()
         lexicon = builder.build_lexicon()
