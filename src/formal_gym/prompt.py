@@ -108,3 +108,57 @@ def grammar_free_baseline(
     question = f"""Here is the string you need to evaluate:\n\nString: `{sample}`.\n\nRemember, end your response with either 'Yes' or 'No'."""  # noqa: E501
 
     return prefix + few_shot + question
+
+
+def basic_prompt_generation_positive(
+    grammar_str: str, shots: dict[str, list[str]]
+) -> str:
+    """Creates a prompt for the LLM to generate a string from the grammar.
+
+    Args:
+        grammar_str: The grammar in string format.
+        shots: A dictionary containing positive and negative samples. There should be
+          exactly two keys, `positive` and `negative`.
+    """
+
+    prefix = f"""You will be presented with a context-free grammar in Chomsky normal form. Your job is to generate a string that is in the language defined by the given grammar. You can use any reasoning strategy you like, but you must end your response with 'Generated String: <your generated string here>'\n\nGrammar: ```{grammar_str}\n\n"""  # noqa: E501
+    if shots["positive"]:
+        few_shot = """Here are some examples of some positive and negative samples from the provided grammar. The order in which the samples are listed is irrelevant. Labeled samples:\n"""  # noqa: E501
+        for ds in shots["positive"]:
+            few_shot += f"- `{ds}` -> Yes\n"
+        for ds in shots["negative"]:
+            few_shot += f"- `{ds}` -> No\n"
+        few_shot += "You must generate a new string that is in the language defined by the grammar, but not one of the provided positive samples.\n\n"  # noqa: E501
+    else:
+        few_shot = ""
+
+    question = f"""Please generate a valid string that is in the language defined by the provided grammar.\n\nRemember, end your response with 'Generated String: <your generated string here>'."""  # noqa: E501
+
+    return prefix + few_shot + question
+
+
+def basic_prompt_generation_negative(
+    grammar_str: str, shots: dict[str, list[str]]
+) -> str:
+    """Creates a prompt for the LLM to generate a string that is not in the grammar.
+
+    Args:
+        grammar_str: The grammar in string format.
+        shots: A dictionary containing positive and negative samples. There should be
+          exactly two keys, `positive` and `negative`.
+    """
+
+    prefix = f"""You will be presented with a context-free grammar in Chomsky normal form. Your job is to generate a string that is NOT in the language defined by the given grammar. You can use any reasoning strategy you like, but you must end your response with 'Generated String: <your generated string here>'\n\nGrammar: ```{grammar_str}\n\n"""  # noqa: E501
+    if shots["positive"]:
+        few_shot = """Here are some examples of some positive and negative samples from the provided grammar. The order in which the samples are listed is irrelevant. Labeled samples:\n"""  # noqa: E501
+        for ds in shots["positive"]:
+            few_shot += f"- `{ds}` -> Yes\n"
+        for ds in shots["negative"]:
+            few_shot += f"- `{ds}` -> No\n"
+        few_shot += "You must generate a new string that is NOT in the language defined by the grammar, but not one of the provided negative samples.\n\n"  # noqa: E501
+    else:
+        few_shot = ""
+
+    question = f"""Please generate a valid string that is NOT in the language defined by the provided grammar.\n\nRemember, end your response with 'Generated String: <your generated string here>'."""  # noqa: E501
+
+    return prefix + few_shot + question

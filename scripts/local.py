@@ -36,6 +36,7 @@ def run(
     # Grammar parameters
     grammar_name: str,
     n_shots: int = 0,
+    evaluation: str = "",
     # Model parameters
     model: str = "google/gemma-3-1b-it",
     attn_implementation: str = "sdpa",
@@ -68,9 +69,9 @@ def run(
     grammar_path: Path = grammars_dir / f"{grammar_name}"
 
     model_pathsafe_name: str = model.replace("/", "_")
-    batch_jsonl_filename: str = (
-        f"{grammar_name}_{model_pathsafe_name}_batched_{2*n_shots}-shot.jsonl"
-    )
+    if evaluation:
+        evaluation = f"_{evaluation}"
+    batch_jsonl_filename: str = f"{grammar_name}_{model_pathsafe_name}_batched_{2 * n_shots}-shot{evaluation}.jsonl"
     batch_jsonl_path: Path = grammar_path / batch_jsonl_filename
 
     batch_id_hash: str = hashlib.md5(str(batch_jsonl_filename).encode()).hexdigest()

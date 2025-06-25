@@ -145,3 +145,6 @@ data/grammars/**/positive_samples.csv
 
 # Apple
 .DS_Store
+
+# PyCharm
+.idea/
