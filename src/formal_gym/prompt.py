@@ -108,3 +108,12 @@ def grammar_free_baseline(
     question = f"""Here is the string you need to evaluate:\n\nString: `{sample}`.\n\nRemember, end your response with either 'Yes' or 'No'."""  # noqa: E501
 
     return prefix + few_shot + question
+
+
+def scfg_prompt(
+    grammar_str: str,
+    lhs: str,
+):
+    prefix: str = f"""You will be presented with a synchronous context-free grammar for two languages. Each grammar starts with a special `S` symbol, which yields rules of the form `A -> <B C, D E>`, where `A` is a non-terminal symbol, `B` and `C` are non-terminal symbols in the first language, and `D` and `E` are non-terminal symbols in the second language; or `A -> <b, d>`, where `b` is a terminal symbol in  the first language and `d` is a terminal symbol in the second language. The grammar may also contain phonetically-null symbols, which always start with `∅`; these lexical items are presented in the parse trees of sentences but do not appear in the final strings. You will be presented with a sentence from one of the languages defined by the grammar. Your job is to use the grammar to translate the sentence from that language into the other. You will be graded the exact string accuracy of the provided translation. Do not include any phonetically-null symbols in your final answer, though it may be helpful to reason about where they would appear when working through the translation. You can reason about the translation as an intermediate step, but you must end your response with the phrase `Final Answer: <translation>`.\n\nHere is the synchronous context-free grammar:\n\n```{grammar_str}```\n\nHere is the sentence to translate: `{lhs}`\n\nRemember to end your response with the phrase `Final Answer: <translation>`."""
+
+    return prefix

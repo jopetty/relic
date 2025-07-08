@@ -493,7 +493,7 @@ def filtered_samples(
 
 def openai_batch(
     grammar_name: str,
-    model: str = "gpt-4o-mini",
+    model: str = "gpt-4.1-nano",
     n_shots: int = 0,
     subsample_n: int | None = None,
 ):
@@ -819,9 +819,17 @@ def scfg_lex(
     syllable_struct_b: str | None = None,
     head_initial_b: bool = False,
     spec_initial_b: bool = False,
-    n_samples: int = 2,
-    max_depth: int = 5,
+    n_samples: int = 100,
+    max_depth: int = 20,
+    verbs: int = 4,
+    nouns: int = 4,
+    propns: int = 4,
+    prons: int = 4,
+    adjs: int = 4,
+    det_def: int = 4,
+    det_indef: int = 4,
     seed: int = 42,
+    model: str = "gpt-4.1-nano",
 ):
     fg_utils.set_all_seeds(seed)
     rng = random.Random(seed)
@@ -833,6 +841,13 @@ def scfg_lex(
         head_initial=head_initial_a,
         spec_initial=spec_initial_a,
         rng=rng,
+        verbs=verbs,
+        nouns=nouns,
+        propns=propns,
+        prons=prons,
+        adjs=adjs,
+        det_def=det_def,
+        det_indef=det_indef,
     )
 
     grammar_b_params = fg_mxg.GrammarParams(
@@ -842,6 +857,13 @@ def scfg_lex(
         head_initial=head_initial_b,
         spec_initial=spec_initial_b,
         rng=rng,
+        verbs=verbs,
+        nouns=nouns,
+        propns=propns,
+        prons=prons,
+        adjs=adjs,
+        det_def=det_def,
+        det_indef=det_indef,
     )
     sync_grammar_params = fg_mxg.SyncGrammarParams(
         left=grammar_a_params,
@@ -850,13 +872,66 @@ def scfg_lex(
 
     sync_grammar = fg_scfg.SCFG(sync_grammar_params)
 
+    grammar_str = sync_grammar_params.as_cfg_str()
+    productions = []
+
+    # print(grammar_string)
+
     for _ in range(n_samples):
         production: dict[str, str] = sync_grammar.sample(
             max_depth=max_depth,
             rng=rng,
         )
-        print(f"Left: {production['left_phonetic']}")
-        print(f"Right: {production['right_phonetic']}\n")
+        # print(f"Left: {production['left_phonetic']}")
+        # print(f"Right: {production['right_phonetic']}\n")
+        productions.append(
+            {
+                "left": production["left_phonetic"],
+                "right": production["right_phonetic"],
+                "left_tree": production["left_tree"],
+                "right_tree": production["right_tree"],
+            }
+        )
+
+    samples_df = pd.DataFrame(productions)
+
+    print(samples_df.info())
+
+    samples_df["prompt"] = ""
+
+    for idx, row in tqdm.tqdm(samples_df.iterrows(), total=len(samples_df)):
+        lhs = row["left"]
+
+        samples_df.at[idx, "prompt"] = fg_prompt.scfg_prompt(
+            grammar_str=grammar_str,
+            lhs=lhs,
+        )
+
+    grammar_name = f"scfg_{seed}"
+
+    samples_df[f"{model}_batched_json"] = samples_df.apply(
+        lambda row: fg_prompt.ChatCompletionResponse(
+            user_prompt=row["prompt"],
+            metadata={
+                "lhs": row["left"],
+                "rhs": row["right"],
+                "left_tree": row["left_tree"],
+                "right_tree": row["right_tree"],
+                "grammar_file": grammar_name,
+                "model": model,
+            },
+        ).to_openai_batched_json(model=model, custom_id=f"request-{row.name}"),
+        axis=1,
+    )
+
+    model_pathsafe_name = model.replace("/", "_")
+    batch_jsonl_filename = f"{grammar_name}_{model_pathsafe_name}_batched.jsonl"
+    grammar_path = PROJECT_ROOT / "data" / "scfg_grammars"
+    batch_jsonl_path = grammar_path / batch_jsonl_filename
+    log.info(f"Writing batch job to {batch_jsonl_path}")
+    with open(batch_jsonl_path, "w") as f:
+        for j in samples_df[f"{model}_batched_json"]:
+            f.write(f"{j}\n")
 
 
 if __name__ == "__main__":

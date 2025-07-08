@@ -90,13 +90,19 @@ class SCFG:
         )
 
         # Clean up whitespace in all generated strings before returning
+        left_full = " ".join(left_full.split())
+        left_phon = " ".join(left_phon.split())
+        right_full = " ".join(right_full.split())
+        right_phon = " ".join(right_phon.split())
+        left_tree = " ".join(left_tree.split())
+        right_tree = " ".join(right_tree.split())
         return {
-            "left": re.sub(r"\\s+", " ", left_full).strip(),
-            "left_phonetic": re.sub(r"\\s+", " ", left_phon).strip(),
-            "right": re.sub(r"\\s+", " ", right_full).strip(),
-            "right_phonetic": re.sub(r"\\s+", " ", right_phon).strip(),
-            "left_tree": re.sub(r"\\s+", " ", left_tree).strip(),
-            "right_tree": re.sub(r"\\s+", " ", right_tree).strip(),
+            "left": left_full,
+            "left_phonetic": left_phon,
+            "right": right_full,
+            "right_phonetic": right_phon,
+            "left_tree": left_tree,
+            "right_tree": right_tree,
         }
 
     def _sample_recursive(
