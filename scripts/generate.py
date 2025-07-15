@@ -8,6 +8,7 @@
 #   - calculating statistics on grammars and their samples
 
 import gzip
+import hashlib
 import itertools
 import json
 import logging
@@ -872,66 +873,114 @@ def scfg_lex(
 
     sync_grammar = fg_scfg.SCFG(sync_grammar_params)
 
-    grammar_str = sync_grammar_params.as_cfg_str()
-    productions = []
+    gparams_dict: dict[str, Any] = {
+        "rng_seed": seed,
+        "is_synchronous": True,
+        "a_params": {
+            "avg_syllables": sync_grammar.params.left.avg_syllables,
+            "max_consonants": sync_grammar.params.left.max_consonants,
+            "syllable_struct": sync_grammar.params.left.syllable_struct,
+            "head_initial": sync_grammar.params.left.head_initial,
+            "spec_initial": sync_grammar.params.left.spec_initial,
+            "verbs": sync_grammar.params.left.verb_lex,
+            "nouns": sync_grammar.params.left.noun_lex,
+            "propns": sync_grammar.params.left.propn_lex,
+            "prons": sync_grammar.params.left.pron_lex,
+            "adjs": sync_grammar.params.left.adj_lex,
+            "det_def": sync_grammar.params.left.det_def_lex,
+            "det_indef": sync_grammar.params.left.det_indef_lex,
+        },
+        "b_params": {
+            "avg_syllables": sync_grammar.params.right.avg_syllables,
+            "max_consonants": sync_grammar.params.right.max_consonants,
+            "syllable_struct": sync_grammar.params.right.syllable_struct,
+            "head_initial": sync_grammar.params.right.head_initial,
+            "spec_initial": sync_grammar.params.right.spec_initial,
+            "verbs": sync_grammar.params.right.verb_lex,
+            "nouns": sync_grammar.params.right.noun_lex,
+            "propns": sync_grammar.params.right.propn_lex,
+            "prons": sync_grammar.params.right.pron_lex,
+            "adjs": sync_grammar.params.right.adj_lex,
+            "det_def": sync_grammar.params.right.det_def_lex,
+            "det_indef": sync_grammar.params.right.det_indef_lex,
+        },
+    }
 
-    # print(grammar_string)
+    data = json.dumps(gparams_dict, sort_keys=True).encode("utf-8")
+    h = hashlib.new("sha256")
+    h.update(data)
+    hash_string = h.hexdigest()
+    grammar_name = f"scfg_{hash_string}"
 
-    for _ in range(n_samples):
-        production: dict[str, str] = sync_grammar.sample(
-            max_depth=max_depth,
-            rng=rng,
-        )
-        # print(f"Left: {production['left_phonetic']}")
-        # print(f"Right: {production['right_phonetic']}\n")
-        productions.append(
-            {
-                "left": production["left_phonetic"],
-                "right": production["right_phonetic"],
-                "left_tree": production["left_tree"],
-                "right_tree": production["right_tree"],
-            }
-        )
+    grammar_path = PROJECT_ROOT / "data" / "scfg_grammars" / f"{grammar_name}.json"
+    log.info(f"Writing grammar params to {grammar_path}")
+    with open(grammar_path, "w") as f:
+        json.dump(gparams_dict, f, indent=4)
 
-    samples_df = pd.DataFrame(productions)
+    # productions = []
 
-    print(samples_df.info())
+    # for _ in range(n_samples):
+    #     production: dict[str, str] = sync_grammar.sample(
+    #         max_depth=max_depth,
+    #         rng=rng,
+    #     )
+    #     # print(f"Left: {production['left_phonetic']}")
+    #     # print(f"Right: {production['right_phonetic']}\n")
+    #     productions.append(
+    #         {
+    #             "left": production["left_phonetic"],
+    #             "right": production["right_phonetic"],
+    #             "left_tree": production["left_tree"],
+    #             "right_tree": production["right_tree"],
+    #         }
+    #     )
 
-    samples_df["prompt"] = ""
+    # samples_df = pd.DataFrame(productions)
 
-    for idx, row in tqdm.tqdm(samples_df.iterrows(), total=len(samples_df)):
-        lhs = row["left"]
+    # print(samples_df.info())
 
-        samples_df.at[idx, "prompt"] = fg_prompt.scfg_prompt(
-            grammar_str=grammar_str,
-            lhs=lhs,
-        )
+    # samples_df["prompt"] = ""
 
-    grammar_name = f"scfg_{seed}"
+    # for idx, row in tqdm.tqdm(samples_df.iterrows(), total=len(samples_df)):
+    #     lhs = row["left"]
 
-    samples_df[f"{model}_batched_json"] = samples_df.apply(
-        lambda row: fg_prompt.ChatCompletionResponse(
-            user_prompt=row["prompt"],
-            metadata={
-                "lhs": row["left"],
-                "rhs": row["right"],
-                "left_tree": row["left_tree"],
-                "right_tree": row["right_tree"],
-                "grammar_file": grammar_name,
-                "model": model,
-            },
-        ).to_openai_batched_json(model=model, custom_id=f"request-{row.name}"),
-        axis=1,
-    )
+    #     samples_df.at[idx, "prompt"] = fg_prompt.scfg_prompt(
+    #         grammar_str=grammar_str,
+    #         lhs=lhs,
+    #     )
 
-    model_pathsafe_name = model.replace("/", "_")
-    batch_jsonl_filename = f"{grammar_name}_{model_pathsafe_name}_batched.jsonl"
-    grammar_path = PROJECT_ROOT / "data" / "scfg_grammars"
-    batch_jsonl_path = grammar_path / batch_jsonl_filename
-    log.info(f"Writing batch job to {batch_jsonl_path}")
-    with open(batch_jsonl_path, "w") as f:
-        for j in samples_df[f"{model}_batched_json"]:
-            f.write(f"{j}\n")
+    # # calculate a random hash value based on hparam_dict
+
+    # data = json.dumps(hparam_dict, sort_keys=True).encode("utf-8")
+    # h = hashlib.new("sha256")
+    # h.update(data)
+    # hash_string = h.hexdigest()
+
+    # grammar_name = f"scfg_{seed}_{hash_string}"
+
+    # samples_df[f"{model}_batched_json"] = samples_df.apply(
+    #     lambda row: fg_prompt.ChatCompletionResponse(
+    #         user_prompt=row["prompt"],
+    #         metadata={
+    #             "lhs": row["left"],
+    #             "rhs": row["right"],
+    #             "left_tree": row["left_tree"],
+    #             "right_tree": row["right_tree"],
+    #             "grammar_file": grammar_name,
+    #             "model": model,
+    #         },
+    #     ).to_openai_batched_json(model=model, custom_id=f"request-{row.name}"),
+    #     axis=1,
+    # )
+
+    # model_pathsafe_name = model.replace("/", "_")
+    # batch_jsonl_filename = f"{grammar_name}_{model_pathsafe_name}_batched.jsonl"
+    # grammar_path = PROJECT_ROOT / "data" / "scfg_grammars"
+    # batch_jsonl_path = grammar_path / batch_jsonl_filename
+    # log.info(f"Writing batch job to {batch_jsonl_path}")
+    # with open(batch_jsonl_path, "w") as f:
+    #     for j in samples_df[f"{model}_batched_json"]:
+    #         f.write(f"{j}\n")
 
 
 if __name__ == "__main__":

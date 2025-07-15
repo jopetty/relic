@@ -15,6 +15,24 @@ class SCFG:
     string pairs, with control over recursion depth.
     """
 
+    @property
+    def n_rules(self) -> int:
+        """
+        Returns the total number of rules in the grammar.
+        """
+        return sum(len(rules) for rules in self.rules.values())
+
+    @property
+    def n_words(self) -> int:
+        """
+        Returns the total number of lexical items in the grammar.
+        """
+
+        prods: list[list[Tuple[Tuple[str]]]] = list(self.rules.values())
+        symbols = [s for sublist in prods for item in sublist for t in item for s in t]
+        words = [s for s in symbols if s.startswith("'")]
+        return len(words)
+
     def __init__(
         self, sync_params: SyncGrammarParams | None = None, sync_str: str | None = None
     ):
@@ -30,10 +48,12 @@ class SCFG:
             raise ValueError("Either sync_params or sync_str must be provided")
 
         if sync_params is not None:
-            grammar_str = sync_params.as_cfg_str()
+            self.params = sync_params
+            self.grammar_str = sync_params.as_cfg_str()
         else:
-            grammar_str = sync_str
-        self.rules: Dict[str, List[Rule]] = self._parse_rules(grammar_str)
+            self.grammar_str = sync_str
+
+        self.rules: Dict[str, List[Rule]] = self._parse_rules(self.grammar_str)
         self.start_symbol: str = "S"
         # Define symbols that increase recursion depth (e.g., clausal complements)
         self.recursive_symbols: Set[str] = {"CP_matrix", "CP_embed"}
@@ -220,6 +240,9 @@ if __name__ == "__main__":
     # Initialize the grammar and SCFG object.
     eng_ger_params = SyncGrammarParams.english_german()
     scfg = SCFG(eng_ger_params)
+
+    print(scfg.n_rules)
+    print(scfg.n_words)
 
     rng = random.Random(42)
 
