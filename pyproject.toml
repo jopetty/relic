@@ -33,6 +33,7 @@ dependencies = [
     "seaborn>=0.13.2",
     "sentencepiece>=0.2.0",
     "statsmodels>=0.14.4",
+    "strsimpy>=0.2.1",
     "tables>=3.10.2",
     "torch>=2.6.0",
     "transformers>=4.51.1",
