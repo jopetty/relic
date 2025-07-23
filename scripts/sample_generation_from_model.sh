@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Usage: ./sample_and_generate.sh -n 5 -s 3 -m deepseek-ai/DeepSeek-R1-Distill-Qwen-7B
+# Usage: ./sample_generation_from_model.sh -n 5 -s 3 -m gpt-4.1-nano
 
 set -e
 
@@ -26,7 +26,7 @@ while IFS= read -r line; do
 done < data/large_subset.txt
 
 # Subsample for testing
-grammar_names=("${grammar_names[@]:0:100}")
+grammar_names=("${grammar_names[@]:0:${N}}")
 echo "Read in ${#grammar_names[@]} grammars from data/large_subset.txt"
 
 # Check to see if the batch exists
