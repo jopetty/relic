@@ -27,11 +27,22 @@ PROJECT_ROOT = path = pyrootutils.find_root(
 dotenv.load_dotenv(PROJECT_ROOT / ".env")
 
 
-def openai_batch(grammar_name: str, model: str = "gpt-4o-mini", n_shots: int = 0):
+def openai_batch(
+    grammar_name: str,
+    model: str = "gpt-4o-mini",
+    n_shots: int = 0,
+    eval_task: str = "accept",
+):
     grammars_dir = PROJECT_ROOT / "data" / "grammars"
     grammar_path = grammars_dir / f"{grammar_name}"
 
-    batch_jsonl_filename = f"{grammar_name}_{model}_batched_{2*n_shots}-shot.jsonl"
+    if eval_task == "accept":
+        batch_jsonl_filename = f"{grammar_name}_{model}_batched_{2*n_shots}-shot_accept.jsonl"
+    elif eval_task == "generate":
+        batch_jsonl_filename = f"{grammar_name}_{model}_batched_{2*n_shots}-shot_generate.jsonl"
+    else:
+        raise ValueError(f"Invalid evaluation task: {eval_task}. Must be one of ['accept', 'generate'].")
+
     batch_jsonl_path = grammar_path / batch_jsonl_filename
 
     # check that batch_jsonl_path exists
