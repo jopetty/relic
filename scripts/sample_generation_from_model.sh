@@ -7,7 +7,7 @@ set -e
 # Defaults
 N=20
 N_SHOTS=0
-MODEL="gpt-4.1-nano"
+MODEL="gemini-2.5-flash"
 
 # Parse args using getopts
 while getopts "n:s:m:" opt; do
@@ -23,17 +23,18 @@ done
 grammar_names=()
 while IFS= read -r line; do
   grammar_names+=("$line")
-done < data/large_subset.txt
+done < data/small_subset.txt
 
 # Subsample for testing
-grammar_names=("${grammar_names[@]:0:${N}}")
-echo "Read in ${#grammar_names[@]} grammars from data/large_subset.txt"
+grammar_names=("${grammar_names[@]:0:1}")
+
+echo "Read in ${#grammar_names[@]} grammars from data/small_subset.txt"
 
 # Check to see if the batch exists
 for g_name in "${grammar_names[@]}"; do
   if [[ ! -f "data/grammars/$g_name/${g_name}_${MODEL}_batched_${N_SHOTS}-shot_generate.jsonl" ]]; then
     echo "→ Running on $g_name"
-    uv run scripts/generate.py openai_batch \
+    uv run scripts/generate.py google_batch \
       --grammar_name "$g_name" \
     --evaluation generate \
     --n_shots "$N_SHOTS" \
@@ -43,6 +44,6 @@ done
 
 for g_name in "${grammar_names[@]}"; do
   echo "Processing grammar: $g_name"
-  uv run scripts/upload.py openai_batch --grammar_name="$g_name" --model="$MODEL" --eval_task="generate"
+  uv run scripts/upload.py google_batch --grammar_name="$g_name" --model="$MODEL" --eval_task="generate"
 done
 

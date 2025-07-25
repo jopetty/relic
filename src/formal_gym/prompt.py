@@ -1,5 +1,6 @@
 import dataclasses
 import json
+from typing import Literal
 
 
 @dataclasses.dataclass(frozen=True)
@@ -9,6 +10,20 @@ class ChatCompletionResponse:
     # system_prompt: str = "You are a helpful assistant."
     max_new_tokens: int | None = None
 
+
+    def to_batched_json(
+        self,
+        model: str,
+        custom_id: str,
+        batch_format: Literal["openai", "google"] = "openai",
+    ) -> str:
+        if batch_format == "openai":
+            return self.to_openai_batched_json(model, custom_id)
+        elif batch_format == "google":
+            return self.to_google_batched_json(model, custom_id)
+        else:
+            raise ValueError(f"Invalid batch format: {batch_format}")
+        
     def to_openai_batched_json(self, model: str, custom_id: str) -> str:
         return json.dumps(
             {
@@ -25,6 +40,19 @@ class ChatCompletionResponse:
                     "metadata": self.metadata,
                     "store": True if self.metadata else False,
                 },
+            }
+        )
+
+    def to_google_batched_json(self, model: str, custom_id: str) -> str:
+        return json.dumps(
+            {
+                "key": custom_id,
+                "request": {"contents": [{"parts": [{"text": self.user_prompt}]}]},
+                "generation_config": {
+                    "maxOutputTokens": self.max_new_tokens,
+                },
+                "metadata": self.metadata,
+                "store": True if self.metadata else False
             }
         )
 

@@ -494,6 +494,47 @@ def openai_batch(
     evaluation: Literal["accept", "generate"] = "accept",
     seed: int = 42,
 ):
+    generate_batch(
+        grammar_name=grammar_name,
+        batch_format="openai",
+        model=model,
+        n_shots=n_shots,
+        subsample_n=subsample_n,
+        max_new_tokens=max_new_tokens,
+        evaluation=evaluation,
+        seed=seed,
+    )
+
+def google_batch(
+    grammar_name: str,
+    model: str = "gemini-2.5-flash",
+    n_shots: int = 0,
+    subsample_n: int | None = None,
+    max_new_tokens: int | None = None,
+    evaluation: Literal["accept", "generate"] = "accept",
+    seed: int = 42,
+):
+    generate_batch(
+        grammar_name=grammar_name,
+        batch_format="google",
+        model=model,
+        n_shots=n_shots,
+        subsample_n=subsample_n,
+        max_new_tokens=max_new_tokens,
+        evaluation=evaluation,
+        seed=seed,
+    )
+
+def generate_batch(
+    grammar_name: str,
+    batch_format: Literal["openai", "google"] = "openai",
+    model: str = "gpt-4o-mini",
+    n_shots: int = 0,
+    subsample_n: int | None = None,
+    max_new_tokens: int | None = None,
+    evaluation: Literal["accept", "generate"] = "accept",
+    seed: int = 42,
+):
     fg_utils.set_all_seeds(seed)
     assert n_shots >= 0
 
@@ -620,7 +661,7 @@ def openai_batch(
                 "model": model,
                 "n_shots": str(2 * n_shots),
             },
-        ).to_openai_batched_json(model=model, custom_id=f"request-{row.name}"),
+        ).to_batched_json(model=model, custom_id=f"request-{row.name}", batch_format=batch_format),
         axis=1,
     )
 
