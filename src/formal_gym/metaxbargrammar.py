@@ -9,7 +9,7 @@ from typing import Any
 import numpy as np
 import pyrootutils
 
-import formal_gym.grammar as fg_grammar
+import grammar as fg_grammar
 
 GType = fg_grammar.Grammar.Type
 
@@ -175,13 +175,14 @@ def sample_string(
     Returns:
         string
     """
+    numpy_rng = np.random.default_rng(rng.randint(0, 2**32-1))
     string: str = ""
 
     def _zero_truncated_poisson(rate: float) -> int:
         """Sample from a zero-truncated Poisson distribution."""
-        u: float = np.random.uniform(np.exp(-rate), 1)
+        u: float = numpy_rng.uniform(np.exp(-rate), 1)
         t: float = -np.log(u)
-        return 1 + np.random.poisson(rate - t)
+        return 1 + numpy_rng.poisson(rate - t)
 
     # Sample number of syllables from a Normal distribution
     lambda_poisson: float = avg_syllables
@@ -268,7 +269,7 @@ class GrammarParams:
     syllable_struct: str | None = None
     avg_syllables: int = 2
     max_consonants: int = 2
-    rng: random.Random = random.Random(42)
+    seed: int = 42
 
     # Lexicon
     # -------
@@ -291,13 +292,15 @@ class GrammarParams:
         items for that parameter.
         """
 
+        rng = random.Random(self.seed)
         if self.syllable_struct is None:
-            self.syllable_struct = self.rng.choice(SYLLABLE_STRUCTS)
+            self.syllable_struct = rng.choice(SYLLABLE_STRUCTS)
         syllable_struct_tokens: list[str] = parse_syllable_format(self.syllable_struct)
 
         # Helper to resolve int or list to list
-        def resolve(val, prefix, rng: random.Random):
+        def resolve(val, prefix):
             if isinstance(val, int):
+                #rng = random.Random(self.seed) # create a new rng for each call to resolve
                 return [
                     sample_string(
                         syllable_struct_tokens,
@@ -309,16 +312,16 @@ class GrammarParams:
                 ]
             return list(val)
 
-        self.verb_lex = resolve(self.verbs, "verb", self.rng)
-        self.noun_lex = resolve(self.nouns, "noun", self.rng)
-        self.propn_lex = resolve(self.propns, "name", self.rng)
-        self.pron_lex = resolve(self.prons, "pron", self.rng)
-        self.adj_lex = resolve(self.adjs, "adj", self.rng)
-        self.det_def_lex = resolve(self.det_def, "det_def", self.rng)
-        self.det_indef_lex = resolve(self.det_indef, "det_indef", self.rng)
-        self.comp_lex = resolve(self.comps, "c", self.rng)
-        self.tense_lex = resolve(self.tenses, "tense", self.rng)
-        self.asp_lex = resolve(self.asps, "asp", self.rng)
+        self.verb_lex = resolve(self.verbs, "verb")
+        self.noun_lex = resolve(self.nouns, "noun")
+        self.propn_lex = resolve(self.propns, "name")
+        self.pron_lex = resolve(self.prons, "pron")
+        self.adj_lex = resolve(self.adjs, "adj")
+        self.det_def_lex = resolve(self.det_def, "det_def")
+        self.det_indef_lex = resolve(self.det_indef, "det_indef")
+        self.comp_lex = resolve(self.comps, "c")
+        self.tense_lex = resolve(self.tenses, "tense")
+        self.asp_lex = resolve(self.asps, "asp")
 
     def as_cfg_str(self) -> str:
         """Generate a CFG string for the grammar parameters."""
