@@ -1,7 +1,6 @@
 """Context-free grammar.
 
 @TODO: Add support for generating regular expressions.
-@TODO: Make random seed configurable.
 """
 
 import pathlib
@@ -226,7 +225,7 @@ class Grammar:
         return can_terminate
 
     def _choose_production(
-        self, lhs: Nonterminal, depth: int, max_depth: int
+        self, lhs: Nonterminal, depth: int, max_depth: int, rng: random.Random
     ) -> Optional[Production]:
         productions = self.productions_by_lhs[lhs]
         probs = self.probs_by_lhs[lhs]
@@ -247,13 +246,13 @@ class Grammar:
 
             total_prob = sum(prob for _, prob in valid_prods)
             valid_prods = [(p, prob / total_prob) for p, prob in valid_prods]
-            return random.choices(
+            return rng.choices(
                 [p for p, _ in valid_prods], weights=[prob for _, prob in valid_prods]
             )[0]
 
-        return random.choices(productions, weights=probs)[0]
+        return rng.choices(productions, weights=probs)[0]
 
-    def generate(self, sep: str = " ", max_depth: int = 50) -> str:
+    def generate(self, sep: str = " ", max_depth: int = 50, seed: int = 42) -> str:
         """Generates a single sample from the grammar.
 
         Args:
@@ -263,6 +262,7 @@ class Grammar:
             A dictionary with the keys "sample" and "parse" representing the
             generated sample and its parse tree.
         """
+        rng = random.Random(seed)
 
         def _sample_recursive(symbol: Nonterminal, depth: int) -> Optional[List[str]]:
             if depth > max_depth:
@@ -271,7 +271,7 @@ class Grammar:
             if not isinstance(symbol, Nonterminal):
                 return [str(symbol)]
 
-            production = self._choose_production(symbol, depth, max_depth)
+            production = self._choose_production(symbol, depth, max_depth, rng)
             if production is None:
                 return None
 
@@ -288,11 +288,11 @@ class Grammar:
 
         result = _sample_recursive(self.as_cfg.start(), 0)
         if result is None:
-            return self.generate(sep=sep, max_depth=max_depth)
+            return self.generate(sep=sep, max_depth=max_depth, seed=seed)
         else:
             return sep.join(result)
 
-    def generate_tree(self, sep: str = " ", max_depth: int = 50) -> dict:
+    def generate_tree(self, sep: str = " ", max_depth: int = 50, seed: int = 42) -> dict:
         """Generates a single sample from the grammar and returns both the string and its parse tree.
 
         Args:
@@ -301,6 +301,7 @@ class Grammar:
         Returns:
             A dictionary with keys "string" and "parse" representing the sampled string and its parse tree.
         """
+        rng = random.Random(seed)
 
         def _sample_recursive(symbol: Nonterminal, depth: int):
             if depth > max_depth:
@@ -309,7 +310,7 @@ class Grammar:
             if not isinstance(symbol, Nonterminal):
                 return str(symbol), str(symbol)
 
-            production = self._choose_production(symbol, depth, max_depth)
+            production = self._choose_production(symbol, depth, max_depth, rng)
             if production is None:
                 return None
 
@@ -330,7 +331,7 @@ class Grammar:
         try:
             result = _sample_recursive(self.as_cfg.start(), 0)
             if result is None:
-                return self.generate_tree(sep=sep, max_depth=max_depth)
+                return self.generate_tree(sep=sep, max_depth=max_depth, seed=seed)
             else:
                 return {"string": result[0], "parse": result[1]}
         except RecursionError:
@@ -341,10 +342,12 @@ class Grammar:
         length: int,
         max_trials: int = 20,
         sep: str = " ",
+        seed: int = 42,
     ) -> Optional[str]:
+        rng = random.Random(seed)
         while max_trials > 0:
             max_trials -= 1
-            sample = sep.join(random.choices(list(self.terminals), k=length))
+            sample = sep.join(rng.choices(list(self.terminals), k=length))
             if not self.test_sample(sample):
                 return sample
         return None
@@ -354,12 +357,14 @@ class Grammar:
         max_trials: int = 20,
         max_length: int = 50,
         sep: str = " ",
+        seed: int = 42,
     ) -> Optional[str]:
+        rng = random.Random(seed)
         trials = 0
         while trials < max_trials:
             trials += 1
-            str_len = random.randint(1, max_length)
-            sample = sep.join(random.choices(list(self.terminals), k=str_len))
+            str_len = rng.randint(1, max_length)
+            sample = sep.join(rng.choices(list(self.terminals), k=str_len))
             if not self.test_sample(sample):
                 return sample
         return None

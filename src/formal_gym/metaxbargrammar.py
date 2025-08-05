@@ -300,7 +300,6 @@ class GrammarParams:
         # Helper to resolve int or list to list
         def resolve(val, prefix):
             if isinstance(val, int):
-                #rng = random.Random(self.seed) # create a new rng for each call to resolve
                 return [
                     sample_string(
                         syllable_struct_tokens,
