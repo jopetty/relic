@@ -9,7 +9,7 @@ from typing import Any
 import numpy as np
 import pyrootutils
 
-import grammar as fg_grammar
+import formal_gym.grammar as fg_grammar
 
 GType = fg_grammar.Grammar.Type
 
