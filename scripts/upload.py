@@ -4,9 +4,12 @@
 
 import datetime as dt
 import logging
+from pathlib import Path
 
 import dotenv
 import fire
+from google import genai
+from google.genai import types
 import openai
 import pyrootutils
 
@@ -25,19 +28,19 @@ PROJECT_ROOT = path = pyrootutils.find_root(
 )
 
 dotenv.load_dotenv(PROJECT_ROOT / ".env")
+grammars_dir = PROJECT_ROOT / "data" / "grammars"
 
 
-def openai_batch(
+def extract_batch_jsonl_path(
     grammar_name: str,
+    grammar_path: Path,
     model: str = "gpt-4o-mini",
     n_shots: int = 0,
     eval_task: str = "accept",
 ):
-    grammars_dir = PROJECT_ROOT / "data" / "grammars"
-    grammar_path = grammars_dir / f"{grammar_name}"
 
     if eval_task == "accept":
-        batch_jsonl_filename = f"{grammar_name}_{model}_batched_{2*n_shots}-shot_accept.jsonl"
+        batch_jsonl_filename = f"{grammar_name}_{model}_batched_{2*n_shots}-shot.jsonl"
     elif eval_task == "generate":
         batch_jsonl_filename = f"{grammar_name}_{model}_batched_{2*n_shots}-shot_generate.jsonl"
     else:
@@ -49,7 +52,25 @@ def openai_batch(
     if not batch_jsonl_path.exists():
         raise ValueError(f"Batch file {batch_jsonl_path} does not exist.")
 
-    log.info(f"Uploading batch job from {batch_jsonl_path}")
+    return batch_jsonl_path
+
+def openai_batch(
+    grammar_name: str,
+    model: str = "gpt-4o-mini",
+    n_shots: int = 0,
+    eval_task: str = "accept",
+):
+    grammar_path = grammars_dir / f"{grammar_name}"
+
+    batch_jsonl_path = extract_batch_jsonl_path(
+        grammar_name,
+        grammar_path,
+        model,
+        n_shots,
+        eval_task,
+    )
+
+    log.info(f"Uploading OpenAI batch job from {batch_jsonl_path}")
 
     client = openai.OpenAI()
     batch_input_file = client.files.create(
@@ -73,6 +94,57 @@ def openai_batch(
     with open(log_file_path, "w") as f:
         f.write(f"{batch_input_file}\n\n")
         f.write(f"{batch_obj}")
+
+
+def google_batch(
+    grammar_name: str,
+    model: str = "gemini-2.5-flash",
+    n_shots: int = 0,
+    eval_task: str = "accept",
+):
+    grammar_path = grammars_dir / f"{grammar_name}"
+
+    batch_jsonl_path = extract_batch_jsonl_path(
+        grammar_name,
+        grammar_path,
+        model,
+        n_shots,
+        eval_task,
+    )
+
+    log.info(f"Uploading Google batch job from {batch_jsonl_path}")
+
+    client = genai.Client()
+    batch_input_file = client.files.upload(
+        file=batch_jsonl_path,
+        config=types.UploadFileConfig(
+            display_name=f"{grammar_name}_{model}_batched_{2*n_shots}-shot_{eval_task}.jsonl",
+            mime_type="application/jsonl",
+        ),
+    )
+
+    log.info(f"Batch input file created: {batch_input_file}")
+
+    batch_obj = client.batches.create(
+        model="gemini-2.5-flash",
+        src=batch_input_file.name,
+        config={
+            'display_name': "Batch job for grammar evaluation.",
+        },
+    )
+
+    timestamp = dt.datetime.now().strftime("%Y%m%d%H%M%S")
+    batch_obj_pathsafe_name = batch_obj.name.replace("/", "_")
+
+    batch_input_file_path = grammar_path / f"{batch_obj_pathsafe_name}_inputs.jsonl"
+    with open(batch_jsonl_path, "rb") as src, open(batch_input_file_path, "wb") as dst:
+        dst.write(src.read())
+
+    log_file_path = grammar_path / f"{batch_obj_pathsafe_name}-{timestamp}.log"
+    with open(log_file_path, "w") as f:
+        f.write(f"{batch_input_file}\n\n")
+        f.write(f"{batch_obj}")
+
 
 
 if __name__ == "__main__":
