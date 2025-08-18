@@ -103,7 +103,7 @@ def google_batch(
             output_path = grammar_path / f"{batch_id}_results.jsonl"
 
             if not output_path.exists():
-                batch_results = client.batches.get(name=batch_id.replace("_", "/"))
+                batch_results = client.batches.get(name=batch_id.replace("batch_", "batches/"))
 
                 if batch_results.state.name == "JOB_STATE_SUCCEEDED":
                     log.info(batch_results)

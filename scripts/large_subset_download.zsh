@@ -14,5 +14,6 @@ echo "Read in ${#grammar_names[@]} grammars from data/large_subset.txt"
 
 for g_name in "${grammar_names[@]}"; do
   echo "Processing grammar: $g_name"
-  uv run scripts/download.py openai_batch --grammar_name="$g_name"
+  uv run scripts/download.py download_batch --grammar_name="$g_name" --batch_format="google"
+  uv run scripts/download.py download_batch --grammar_name="$g_name" --batch_format="openai"
 done

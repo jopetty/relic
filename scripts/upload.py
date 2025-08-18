@@ -134,7 +134,7 @@ def google_batch(
     )
 
     timestamp = dt.datetime.now().strftime("%Y%m%d%H%M%S")
-    batch_obj_pathsafe_name = batch_obj.name.replace("/", "_")
+    batch_obj_pathsafe_name = batch_obj.name.replace("batches/", "batch_")
 
     batch_input_file_path = grammar_path / f"{batch_obj_pathsafe_name}_inputs.jsonl"
     with open(batch_jsonl_path, "rb") as src, open(batch_input_file_path, "wb") as dst:
