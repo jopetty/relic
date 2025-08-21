@@ -47,9 +47,14 @@ class ChatCompletionResponse:
         return json.dumps(
             {
                 "key": custom_id,
-                "request": {"contents": [{"parts": [{"text": self.user_prompt}]}]},
-                "generation_config": {
-                    "maxOutputTokens": self.max_new_tokens,
+                "request": {
+                    "contents": [{"parts": [{"text": self.user_prompt}]}],
+                    "generationConfig": {
+                        "maxOutputTokens": self.max_new_tokens,
+                        "thinkingConfig": {
+                            "includeThoughts": True,
+                        },
+                    },
                 },
                 "metadata": self.metadata,
                 "store": True if self.metadata else False

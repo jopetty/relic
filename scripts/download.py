@@ -89,8 +89,8 @@ def google_batch(
 ):
     
     if batch_id is None:
-        batch_logs = list(grammar_path.glob("batches_*.log"))
-        batch_id_re = re.compile(r"(batches_[a-zA-Z0-9]+)")
+        batch_logs = list(grammar_path.glob("batch_*.log"))
+        batch_id_re = re.compile(r"(batch_[a-zA-Z0-9]+)")
         batch_ids = [batch_id_re.search(f.name).group(1) for f in batch_logs]
     else:
         batch_ids = [batch_id]
