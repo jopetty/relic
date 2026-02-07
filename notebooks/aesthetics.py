@@ -118,7 +118,8 @@ PALETTES = {
     "strategy": PALETTE_STRAGETY,
 }
 
-MODEL_COLOR = "#4CA970"
+# MODEL_COLOR = "#4CA970"
+MODEL_COLOR = PALETTE_MODEL["DSR1-7B"]
 
 # For marking at-chance baselines
 COLOR_AT_CHANCE = "#ff0000"  # Red
